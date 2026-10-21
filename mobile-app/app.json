@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Kerala Tuition Academy",
+    "slug": "kerala-tuition-academy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#1e1b4b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nifus.keralatuition"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1e1b4b"
+      },
+      "package": "com.nifus.keralatuition"
+    }
+  }
+}
