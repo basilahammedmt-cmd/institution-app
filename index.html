@@ -3,22 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>കേരള ട്യൂഷൻ അക്കാദമി (Classes 8, 9, 10) — Web & Mobile Preview</title>
+  <title>A PLUS ACCADEMY — Tuition Management Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Inter', 'Noto Sans Malayalam', system-ui, sans-serif;
-      background-color: #f8fafc;
+      font-family: 'Inter', 'Noto Sans Malayalam', sans-serif;
+      background-color: #ffffff;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+    }
+    .academy-title {
+      font-family: 'Montserrat', sans-serif;
+      color: #195685;
+      letter-spacing: 0.04em;
+    }
+    .icon-svg {
+      filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.28));
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .launcher-card:hover .icon-svg {
+      transform: translateY(-4px) scale(1.04);
+      filter: drop-shadow(3px 7px 5px rgba(21, 93, 56, 0.36));
+    }
+    .cyan-pill {
+      border: 1.6px solid #169bc2;
+      background: #ffffff;
+      color: #111827;
+      transition: all 0.18s ease;
+      box-shadow: 0 1px 2px rgba(22, 155, 194, 0.12);
+    }
+    .launcher-card:hover .cyan-pill,
+    .cyan-pill:hover,
+    .cyan-pill.active {
+      background: #f0f9ff;
+      border-color: #0e7490;
+      box-shadow: 0 3px 8px rgba(22, 155, 194, 0.24);
     }
     .phone-frame {
-      width: 390px;
-      height: 780px;
-      border: 12px solid #0f172a;
-      border-radius: 44px;
+      width: 392px;
+      height: 800px;
+      border: 12px solid #1e293b;
+      border-radius: 42px;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
       background: #ffffff;
@@ -33,12 +63,212 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
+    /* ==================== CUSTOM HAND-CRAFTED 3D GREEN SVGs MATCHING PDF ==================== */
+    const AcademyLogoSVG = () => (
+      <svg width="78" height="68" viewBox="0 0 90 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="icon-svg">
+        {/* Stylized Blue A */}
+        <path d="M42 10 L18 66 H29 L42 32 L54 62 H64 L42 10 Z" fill="#1e4b85" />
+        {/* Swooshes */}
+        <path d="M12 67 C32 54, 58 46, 80 42 C56 54, 34 62, 12 67 Z" fill="#1e4b85" />
+        <path d="M22 52 C40 44, 60 39, 76 36 C58 44, 38 49, 22 52 Z" fill="#2563eb" />
+        {/* Red Plus Star */}
+        <path d="M62 12 V28 M54 20 H70" stroke="#c81e1e" strokeWidth="3.8" strokeLinecap="round" />
+        <path d="M58 16 L66 24 M66 16 L58 24" stroke="#c81e1e" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+
+    const IconDashboard = () => (
+      <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="icon-svg">
+        <rect x="8" y="10" width="76" height="56" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2.5"/>
+        <rect x="13" y="21" width="66" height="40" fill="#ffffff" stroke="#143d22" strokeWidth="2"/>
+        <circle cx="62" cy="15.5" r="2" fill="#ffffff"/>
+        <circle cx="68" cy="15.5" r="2" fill="#ffffff"/>
+        <circle cx="74" cy="15.5" r="2" fill="#ffffff"/>
+      </svg>
+    );
+
+    const IconStudents = () => (
+      <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="icon-svg">
+        {[18, 38, 58, 78].map((cx, idx) => (
+          <g key={idx}>
+            <circle cx={cx} cy="20" r="6.5" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+            <path
+              d={`M${cx - 9} 33 C${cx - 9} 29, ${cx + 9} 29, ${cx + 9} 33 L${cx + 10} 50 H${cx + 5} L${cx + 4} 65 H${cx - 4} L${cx - 5} 50 H${cx - 10} Z`}
+              fill="#2d7a47"
+              stroke="#143d22"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+          </g>
+        ))}
+      </svg>
+    );
+
+    const IconAttendance = () => (
+      <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="icon-svg">
+        <rect x="14" y="15" width="60" height="50" rx="4" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2"/>
+        <rect x="24" y="8" width="8" height="13" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        <rect x="56" y="8" width="8" height="13" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        <line x1="14" y1="27" x2="74" y2="27" stroke="#143d22" strokeWidth="2.2"/>
+        {/* Grid cells */}
+        {[31, 41, 51].map((y, r) =>
+          [19, 36, 53].map((x, c) => (
+            <rect key={`${r}-${c}`} x={x} y={y} width="14" height="7" rx="1" fill="#ffffff" stroke="#143d22" strokeWidth="1.5"/>
+          ))
+        )}
+      </svg>
+    );
+
+    const IconFaculties = () => (
+      <svg width="102" height="76" viewBox="0 0 102 76" fill="none" className="icon-svg">
+        {/* Whiteboard */}
+        <rect x="34" y="10" width="52" height="34" rx="2" fill="#ffffff" stroke="#2d7a47" strokeWidth="4"/>
+        <rect x="34" y="10" width="52" height="34" rx="2" stroke="#143d22" strokeWidth="1.5"/>
+        {/* Teacher */}
+        <circle cx="24" cy="22" r="6.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8"/>
+        <path d="M14 35 C14 30, 34 30, 34 35 L39 46 L33 49 L29 41 V65 H19 V43 L15 51 L11 48 Z" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8" strokeLinejoin="round"/>
+        {/* Pointer stick */}
+        <line x1="36" y1="45" x2="56" y2="24" stroke="#143d22" strokeWidth="2.8" strokeLinecap="round"/>
+        {/* Audience students */}
+        {[48, 64, 80].map((cx, i) => (
+          <g key={i}>
+            <circle cx={cx} cy="53" r="4" fill="#2d7a47" stroke="#143d22" strokeWidth="1.5"/>
+            <path d={`M${cx - 6} 63 C${cx - 6} 58, ${cx + 6} 58, ${cx + 6} 63 Z`} fill="#2d7a47" stroke="#143d22" strokeWidth="1.5"/>
+          </g>
+        ))}
+        <line x1="40" y1="65" x2="88" y2="65" stroke="#2d7a47" strokeWidth="3"/>
+      </svg>
+    );
+
+    const IconExam = () => (
+      <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="icon-svg">
+        {/* Outer frame */}
+        <rect x="12" y="14" width="72" height="50" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        {/* Open Book Pages */}
+        <path d="M18 12 H46 V56 H18 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2.2"/>
+        <path d="M46 12 H74 V56 H46 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2.2"/>
+        <rect x="24" y="12" width="22" height="44" fill="#2d7a47" fillOpacity="0.85" stroke="#143d22" strokeWidth="1.8"/>
+        <line x1="53" y1="24" x2="67" y2="24" stroke="#2d7a47" strokeWidth="2.5"/>
+        <line x1="53" y1="31" x2="67" y2="31" stroke="#2d7a47" strokeWidth="2.5"/>
+        <line x1="53" y1="38" x2="63" y2="38" stroke="#2d7a47" strokeWidth="2.5"/>
+      </svg>
+    );
+
+    const IconExamReport = () => (
+      <svg width="100" height="76" viewBox="0 0 100 76" fill="none" className="icon-svg">
+        {/* 3 Students */}
+        {[24, 42, 60].map((cx, i) => (
+          <g key={i}>
+            <circle cx={cx} cy="18" r="5.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8"/>
+            <path d={`M${cx - 8} 30 C${cx - 8} 25, ${cx + 8} 25, ${cx + 8} 30 V48 H${cx - 8} Z`} fill="#2d7a47" stroke="#143d22" strokeWidth="1.8"/>
+          </g>
+        ))}
+        {/* Rising Trend Arrow */}
+        <path d="M18 64 L40 42 L54 55 L82 27" stroke="#2d7a47" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M18 64 L40 42 L54 55 L82 27" stroke="#143d22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M69 26 H83 V40" stroke="#2d7a47" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+
+    const IconLiveClasses = () => (
+      <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="icon-svg">
+        {/* Top bar */}
+        <rect x="14" y="10" width="64" height="5" rx="2" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8"/>
+        <line x1="46" y1="5" x2="46" y2="10" stroke="#143d22" strokeWidth="3"/>
+        {/* Screen */}
+        <rect x="18" y="15" width="56" height="38" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        <rect x="24" y="20" width="44" height="28" fill="#ffffff" stroke="#143d22" strokeWidth="1.6"/>
+        {/* Play Button Triangle */}
+        <polygon points="41,27 41,41 54,34" fill="#2d7a47" stroke="#143d22" strokeWidth="1.5"/>
+        {/* Tripod Stand */}
+        <line x1="46" y1="53" x2="46" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round"/>
+        <line x1="46" y1="56" x2="28" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round"/>
+        <line x1="46" y1="56" x2="64" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round"/>
+      </svg>
+    );
+
+    const IconStudentFee = () => (
+      <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="icon-svg">
+        {/* Student Avatar with Graduation Cap / Hair */}
+        <circle cx="44" cy="24" r="11" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        <path d="M35 16 L44 10 L53 16" stroke="#143d22" strokeWidth="2.5" strokeLinecap="round"/>
+        {/* Body & Collar */}
+        <path d="M24 64 C24 46, 64 46, 64 64 Z" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2"/>
+        {/* Book / Fee Passbook held in front */}
+        <path d="M32 50 L44 54 L56 50 V63 L44 67 L32 63 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2"/>
+        <line x1="44" y1="54" x2="44" y2="67" stroke="#143d22" strokeWidth="2"/>
+      </svg>
+    );
+
+    const IconFeeReport = () => (
+      <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="icon-svg">
+        {/* Axes */}
+        <polyline points="18,12 18,64 74,64" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Bars */}
+        <rect x="26" y="42" width="8" height="20" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6"/>
+        <rect x="39" y="28" width="8" height="34" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6"/>
+        <rect x="52" y="18" width="8" height="44" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6"/>
+        <rect x="64" y="34" width="8" height="28" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6"/>
+      </svg>
+    );
+
+    const IconCommunication = () => (
+      <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="icon-svg">
+        {/* Paper Plane matching PDF */}
+        <polygon points="14,38 76,14 54,64 42,46" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2" strokeLinejoin="round"/>
+        <polygon points="42,46 76,14 34,42" fill="#ffffff" stroke="#143d22" strokeWidth="1.8" strokeLinejoin="round"/>
+        <polygon points="34,42 42,46 38,58" fill="#1b5230" stroke="#143d22" strokeWidth="1.8" strokeLinejoin="round"/>
+      </svg>
+    );
+
+    const IconQuestionBank = () => (
+      <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="icon-svg">
+        {/* Stack of 3 3D Books */}
+        {[44, 31, 18].map((y, idx) => (
+          <g key={idx}>
+            <polygon
+              points={`20,${y} 52,${y - 10} 76,${y} 44,${y + 10}`}
+              fill="#2d7a47"
+              stroke="#143d22"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+            <polygon
+              points={`20,${y} 44,${y + 10} 76,${y} 76,${y + 8} 44,${y + 18} 20,${y + 8}`}
+              fill="#ffffff"
+              stroke="#143d22"
+              strokeWidth="2"
+              strokeLinejoin="round"
+            />
+            <line x1="44" y1={y + 10} x2="44" y2={y + 18} stroke="#143d22" strokeWidth="2"/>
+          </g>
+        ))}
+      </svg>
+    );
+
+    const IconAccounts = () => (
+      <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="icon-svg">
+        {/* Fan of banknotes on top */}
+        <path d="M22 28 L64 12 L70 28 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2"/>
+        <path d="M26 28 L72 18 L74 28 Z" fill="#2d7a47" stroke="#143d22" strokeWidth="2"/>
+        {/* Main Currency Note */}
+        <rect x="14" y="28" width="68" height="36" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2"/>
+        <rect x="19" y="33" width="58" height="26" rx="2" fill="#ffffff" stroke="#143d22" strokeWidth="1.8"/>
+        <circle cx="48" cy="46" r="7.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8"/>
+        <circle cx="28" cy="46" r="3" fill="#2d7a47"/>
+        <circle cx="68" cy="46" r="3" fill="#2d7a47"/>
+      </svg>
+    );
+
+    /* ==================== INITIAL DATA ==================== */
     const INITIAL_BATCHES = [
       {
         id: "B10-A",
         name: "SSLC (Class 10) - Batch A (Morning)",
         grade: "10",
         timing: "06:30 AM - 08:30 AM",
+        hoursPerWeek: "12 Hours / Week",
+        courseTitle: "SSLC Sure A+ Regular Tuition Course",
         classTeacher: "അനിൽ കുമാർ മാസ്റ്റർ (Maths)",
         whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-a-kerala",
       },
@@ -47,6 +277,8 @@
         name: "SSLC (Class 10) - Batch B (Evening)",
         grade: "10",
         timing: "04:30 PM - 06:30 PM",
+        hoursPerWeek: "12 Hours / Week",
+        courseTitle: "SSLC Evening Intensive Batch",
         classTeacher: "ദീപ ടീച്ചർ (Physics)",
         whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-b-kerala",
       },
@@ -55,6 +287,8 @@
         name: "Class 9 - State Batch A",
         grade: "9",
         timing: "04:30 PM - 06:30 PM",
+        hoursPerWeek: "10 Hours / Week",
+        courseTitle: "Standard 9 SCERT State Syllabus Tuition",
         classTeacher: "ഷാജി മാസ്റ്റർ (Chemistry)",
         whatsappGroupLink: "https://chat.whatsapp.com/class9-batch-a-kerala",
       },
@@ -63,6 +297,8 @@
         name: "Class 8 - Foundation Batch A",
         grade: "8",
         timing: "05:00 PM - 06:45 PM",
+        hoursPerWeek: "9 Hours / Week",
+        courseTitle: "Standard 8 High School Foundation Course",
         classTeacher: "രമ്യ ടീച്ചർ (Biology)",
         whatsappGroupLink: "https://chat.whatsapp.com/class8-batch-a-kerala",
       },
@@ -314,40 +550,6 @@
           },
         ],
       },
-      {
-        id: "EX-102",
-        title: "SSLC ഫിസിക്സ് - വൈദ്യുതപ്രവാഹത്തിന്റെ ഫലങ്ങൾ (Unit Test)",
-        subject: "ഊർജ്ജതന്ത്രം (Physics)",
-        grade: "10",
-        durationMinutes: 10,
-        totalMarks: 15,
-        questions: [
-          {
-            id: "QP1",
-            question: "വൈദ്യുത പവറിന്റെ (Electric Power) SI യൂണിറ്റ് എന്താണ്?",
-            options: ["ജൂൾ (Joule)", "വാട്ട് (Watt)", "വോൾട്ട് (Volt)", "ആമ്പിയർ (Ampere)"],
-            correctAnswerIndex: 1,
-            marks: 5,
-            explanation: "വൈദ്യുത പവറിന്റെ യൂണിറ്റ് വാട്ട് (W) ആണ്.",
-          },
-          {
-            id: "QP2",
-            question: "ജൂൾ നിയമപ്രകാരം താപം (H) കണ്ടുപിടിക്കാനുള്ള സമവാക്യം ഏതാണ്?",
-            options: ["H = IRt", "H = I²Rt", "H = VIt²", "H = I/Rt"],
-            correctAnswerIndex: 1,
-            marks: 5,
-            explanation: "Joule's Law: H = I²Rt.",
-          },
-          {
-            id: "QP3",
-            question: "സുരക്ഷാ ഫ്യൂസ് വയർ നിർമ്മിക്കാൻ ഉപയോഗിക്കുന്ന ലോഹസങ്കരം (Alloy) ഏതാണ്?",
-            options: ["നിക്രോം (Nichrome)", "ടങ്സ്റ്റൺ (Tungsten)", "ടിൻ-ലെഡ് (Tin-Lead)", "ചെമ്പ് (Copper)"],
-            correctAnswerIndex: 2,
-            marks: 5,
-            explanation: "കുറഞ്ഞ ദ്രവണാങ്കമുള്ള ടിൻ-ലെഡ് സങ്കരമാണ് ഫ്യൂസ് വയറിന് ഉപയോഗിക്കുന്നത്.",
-          },
-        ],
-      },
     ];
 
     const INITIAL_ATTEMPTS = [
@@ -394,17 +596,6 @@
         score: 19,
         totalMarks: 20,
         percentage: 95,
-      },
-      {
-        id: "AT-5",
-        examTitle: "SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (Chapter 1)",
-        subject: "ഗണിതം (Mathematics)",
-        studentId: "STU-102",
-        studentName: "ഫാത്തിമ സഹ്‌റ",
-        date: "2026-10-05",
-        score: 15,
-        totalMarks: 20,
-        percentage: 75,
       },
     ];
 
@@ -477,22 +668,29 @@
       },
     ];
 
+    const INITIAL_ACCOUNTS = [
+      { id: "ACC-1", date: "2026-10-05", title: "SSLC & Class 9 Tuition Fee Collection", type: "Income", amount: 37500, category: "Student Fees" },
+      { id: "ACC-2", date: "2026-10-10", title: "Faculty Honorarium (Maths & Science)", type: "Expense", amount: 14000, category: "Salary" },
+      { id: "ACC-3", date: "2026-10-15", title: "Printed Study Notes & Question Papers", type: "Expense", amount: 2200, category: "Materials" },
+      { id: "ACC-4", date: "2026-10-18", title: "Building Rent & Electricity Bill", type: "Expense", amount: 4500, category: "Maintenance" },
+    ];
+
     function App() {
-      const [viewMode, setViewMode] = useState("web"); // "web" | "mobile"
-      const [role, setRole] = useState("admin");
-      const [activeTab, setActiveTab] = useState("dashboard");
-      const [selectedGradeFilter, setSelectedGradeFilter] = useState("ALL");
+      // activeView === "home" shows the exact PDF Landing Page!
+      const [activeView, setActiveView] = useState("home");
+      const [deviceMode, setDeviceMode] = useState("web"); // "web" | "mobile"
 
       const [batches, setBatches] = useState(INITIAL_BATCHES);
       const [students, setStudents] = useState(INITIAL_STUDENTS);
       const [attendanceList, setAttendanceList] = useState(INITIAL_ATTENDANCE);
       const [facultyChapters, setFacultyChapters] = useState(INITIAL_FACULTY_CHAPTERS);
-      const [exams, setExams] = useState(INITIAL_EXAMS);
+      const [exams] = useState(INITIAL_EXAMS);
       const [attempts, setAttempts] = useState(INITIAL_ATTEMPTS);
       const [liveClasses, setLiveClasses] = useState(INITIAL_LIVE_CLASSES);
       const [questionBank, setQuestionBank] = useState(INITIAL_QUESTION_BANK);
+      const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
 
-      // Forms
+      // Forms State
       const [newStudent, setNewStudent] = useState({
         name: "",
         rollNo: "",
@@ -510,15 +708,17 @@
       const [attMarkedBy, setAttMarkedBy] = useState("അനിൽ കുമാർ മാസ്റ്റർ");
       const [draftAttendance, setDraftAttendance] = useState({});
 
-      const [activeExamId, setActiveExamId] = useState("EX-101");
       const [selectedStudentForExam, setSelectedStudentForExam] = useState("STU-101");
       const [examAnswers, setExamAnswers] = useState({});
       const [submittedAttempt, setSubmittedAttempt] = useState(null);
 
       const [reportStudentId, setReportStudentId] = useState("STU-101");
-      const [activeLiveClass, setActiveLiveClass] = useState(INITIAL_LIVE_CLASSES[0]);
       const [selectedFeeStudentId, setSelectedFeeStudentId] = useState("STU-102");
       const [feePaymentAmount, setFeePaymentAmount] = useState(2000);
+
+      const [newExpenseTitle, setNewExpenseTitle] = useState("");
+      const [newExpenseAmount, setNewExpenseAmount] = useState(1000);
+      const [newExpenseType, setNewExpenseType] = useState("Expense");
 
       const metrics = useMemo(() => {
         const totalStudents = students.length;
@@ -529,9 +729,6 @@
         const totalFeeCollected = students.reduce((acc, s) => acc + s.paidFee, 0);
         const totalFeePending = totalFeeExpected - totalFeeCollected;
         const fullyPaidStudents = students.filter((s) => s.totalFee - s.discount - s.paidFee <= 0);
-        const partiallyPaidStudents = students.filter(
-          (s) => s.paidFee > 0 && s.totalFee - s.discount - s.paidFee > 0
-        );
         const studentsWithBalance = students.filter((s) => s.totalFee - s.discount - s.paidFee > 0);
         return {
           totalStudents,
@@ -542,24 +739,35 @@
           totalFeeCollected,
           totalFeePending,
           fullyPaidStudents,
-          partiallyPaidStudents,
           studentsWithBalance,
-          avgAttendance: 93,
+          avgAttendance: 94,
         };
       }, [students]);
 
-      const navItems = [
-        { id: "dashboard", label: "1. ഡാഷ്‌ബോർഡ് (Dashboard)", short: "Dashboard", icon: "📊" },
-        { id: "students", label: "2. സ്റ്റുഡന്റ്സ് & ബാച്ച് (Students)", short: "Students", icon: "👨‍🎓" },
-        { id: "attendance", label: "3. അറ്റൻഡൻസ് (Batch Attendance)", short: "Attendance", icon: "✅" },
-        { id: "faculties", label: "4. ഫാക്കൽറ്റീസ് & ചാപ്റ്റർ (Syllabus)", short: "Chapters", icon: "👩‍🏫" },
-        { id: "exam", label: "5. എക്സാം (Online MCQ Exam)", short: "Exam", icon: "📝" },
-        { id: "exam_report", label: "6. എക്സാം റിപ്പോർട്ട് (AI Graph Report)", short: "AI Report", icon: "🤖" },
-        { id: "live_class", label: "7. ലൈവ് ക്ലാസ് (YouTube Live)", short: "Live Class", icon: "🎥" },
-        { id: "student_fee", label: "8. സ്റ്റുഡന്റ് ഫീ (Student Fee)", short: "Student Fee", icon: "💳" },
-        { id: "fee_report", label: "9. ഫീ റിപ്പോർട്ട് (Fee Report)", short: "Fee Report", icon: "📈" },
-        { id: "communication", label: "10. കമ്മ്യൂണിക്കേഷൻ (WhatsApp)", short: "WhatsApp", icon: "💬" },
-        { id: "question_bank", label: "11. ക്വസ്റ്റ്യൻ ബാങ്ക് (Question Bank)", short: "Q-Bank", icon: "📚" },
+      const topRowIcons = [
+        { id: "dashboard", label: "DASH BOARD", Component: IconDashboard },
+        { id: "students", label: "STUDENTS", Component: IconStudents },
+        { id: "attendance", label: "ATTENDENCE", Component: IconAttendance },
+        { id: "faculties", label: "FACULTIES&CHAPTER", Component: IconFaculties },
+        { id: "exam", label: "EXAM", Component: IconExam },
+        { id: "exam_report", label: "EXAMINATION\nREPORT", Component: IconExamReport },
+        { id: "live_class", label: "LIVE CLASSES", Component: IconLiveClasses },
+      ];
+
+      const bottomRowIcons = [
+        { id: "student_fee", label: "STUDENT FEE", Component: IconStudentFee },
+        { id: "fee_report", label: "FEE REPORT", Component: IconFeeReport },
+        { id: "communication", label: "COMMUNICATION", Component: IconCommunication },
+        { id: "question_bank", label: "NOTES & QUESTION\nBANK", Component: IconQuestionBank },
+        { id: "accounts", label: "ACCOUNTS", Component: IconAccounts },
+      ];
+
+      const leftSideButtons = [
+        { id: "courses", label: "COURSES", rounded: "rounded-md" },
+        { id: "schedule", label: "SCHEDULE", rounded: "rounded-md" },
+        { id: "classes", label: "CLASSES", rounded: "rounded-full" },
+        { id: "hours", label: "HOURS", rounded: "rounded-full", spacerBefore: true },
+        { id: "materials", label: "MATERIALS", rounded: "rounded-none" },
       ];
 
       const handleAddStudent = (e) => {
@@ -581,9 +789,10 @@
           totalFee: Number(newStudent.totalFee),
           paidFee: Number(newStudent.paidFee),
           discount: 0,
-          feeHistory: Number(newStudent.paidFee) > 0
-            ? [{ id: `FH-${Date.now()}`, date: "2026-10-21", amount: Number(newStudent.paidFee), mode: "UPI", receiptNo: "RCP-1105" }]
-            : [],
+          feeHistory:
+            Number(newStudent.paidFee) > 0
+              ? [{ id: `FH-${Date.now()}`, date: "2026-10-21", amount: Number(newStudent.paidFee), mode: "UPI", receiptNo: "RCP-1105" }]
+              : [],
         };
         setStudents([created, ...students]);
         setNewStudent({ ...newStudent, name: "", rollNo: "", parentName: "" });
@@ -658,819 +867,942 @@
         );
       };
 
+      const handleAddAccountEntry = (e) => {
+        e.preventDefault();
+        if (!newExpenseTitle.trim()) return;
+        setAccounts([
+          {
+            id: `ACC-${Date.now()}`,
+            date: "2026-10-21",
+            title: newExpenseTitle,
+            type: newExpenseType,
+            amount: Number(newExpenseAmount),
+            category: "General",
+          },
+          ...accounts,
+        ]);
+        setNewExpenseTitle("");
+      };
+
       const selectedReportStudent = students.find((s) => s.id === reportStudentId) || students[0];
       const studentAttempts = attempts.filter((a) => a.studentId === selectedReportStudent?.id);
       const overallAvgPercentage =
         studentAttempts.length > 0
           ? Math.round(studentAttempts.reduce((acc, a) => acc + a.percentage, 0) / studentAttempts.length)
-          : 85;
+          : 88;
 
-      return (
-        <div className="min-h-screen flex flex-col">
-          {/* Top Switcher Bar: Web App vs Native Mobile App Simulator */}
-          <div className="bg-slate-900 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-700">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-amber-400 text-slate-950 rounded font-extrabold text-xs">
-                KERALA TUITION ERP
-              </span>
-              <span className="text-xs text-slate-300">
-                ഗവൺമെന്റ് സ്കൂൾ 8, 9, 10 ക്ലാസുകളിലെ ട്യൂഷൻ മാനേജ്‌മെന്റ് ആപ്പ്
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode("web")}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                  viewMode === "web" ? "bg-indigo-600 text-white shadow" : "bg-slate-800 text-slate-300"
-                }`}
-              >
-                💻 Web Application View
-              </button>
-              <button
-                onClick={() => setViewMode("mobile")}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-                  viewMode === "mobile" ? "bg-emerald-600 text-white shadow" : "bg-slate-800 text-slate-300"
-                }`}
-              >
-                📱 Android & iOS Mobile App View
-              </button>
-            </div>
-          </div>
-
-          {viewMode === "mobile" ? (
-            /* ==================== MOBILE NATIVE APP SIMULATOR VIEW ==================== */
-            <div className="flex-1 bg-slate-800 py-8 px-4 flex flex-col items-center justify-center">
-              <div className="mb-4 text-center text-white">
-                <h2 className="font-bold text-lg">📱 Android & iOS Native Mobile App Preview</h2>
-                <p className="text-xs text-slate-300">
-                  React Native (Expo) വഴി Android, iOS ഫോണുകളിൽ പ്രവർത്തിക്കുന്ന മൊബൈൽ ആപ്പ് രൂപം
-                </p>
+      /* ==================== MODULE DETAIL RENDERER ==================== */
+      const renderModuleContent = () => {
+        if (activeView === "dashboard") {
+          return (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
+                  <p className="text-xs font-bold text-slate-500">ആകെ കുട്ടികൾ (TOTAL STUDENTS)</p>
+                  <h3 className="text-3xl font-extrabold text-[#195685] mt-1">{metrics.totalStudents}</h3>
+                  <p className="text-xs text-slate-600 mt-2">
+                    SSLC (10th): {metrics.class10Count} | 9th: {metrics.class9Count} | 8th: {metrics.class8Count}
+                  </p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
+                  <p className="text-xs font-bold text-slate-500">ശരാശരി ഹാജർ (ATTENDANCE)</p>
+                  <h3 className="text-3xl font-extrabold text-[#2d7a47] mt-1">{metrics.avgAttendance}%</h3>
+                  <p className="text-xs text-slate-600 mt-2">ആകെ {batches.length} ബാച്ചുകൾ</p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
+                  <p className="text-xs font-bold text-slate-500">ലഭിച്ച ഫീസ് (COLLECTED FEE)</p>
+                  <h3 className="text-3xl font-extrabold text-[#195685] mt-1">
+                    ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2">
+                    ആകെ ഫീസ്: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}
+                  </p>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
+                  <p className="text-xs font-bold text-slate-500">ബാക്കി ഫീസ് (PENDING FEE)</p>
+                  <h3 className="text-3xl font-extrabold text-rose-600 mt-1">
+                    ₹{metrics.totalFeePending.toLocaleString("en-IN")}
+                  </h3>
+                  <p className="text-xs text-rose-700 font-semibold mt-2">
+                    {metrics.studentsWithBalance.length} കുട്ടികൾ ഫീസ് തരാനുണ്ട്
+                  </p>
+                </div>
               </div>
-              <div className="phone-frame">
-                {/* Mobile Status Bar & Header */}
-                <div className="bg-indigo-950 text-white p-4">
-                  <div className="flex justify-between items-center text-[10px] text-indigo-300 mb-2">
-                    <span>9:41 AM</span>
-                    <span>5G • 100% 🔋</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-bold text-sm">🎓 കേരള ട്യൂഷൻ ആപ്പ്</h3>
-                      <p className="text-[11px] text-indigo-200">Classes 8, 9 & 10 • {role.toUpperCase()}</p>
-                    </div>
-                    <select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value)}
-                      className="bg-amber-400 text-indigo-950 text-xs font-bold px-2 py-1 rounded-lg"
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="teacher">Teacher</option>
-                      <option value="student">Student</option>
-                    </select>
-                  </div>
-                </div>
 
-                {/* Horizontal Module Pills */}
-                <div className="bg-indigo-900 px-3 py-2 flex gap-1.5 overflow-x-auto text-white border-b border-indigo-800">
-                  {navItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${
-                        activeTab === item.id ? "bg-amber-400 text-indigo-950" : "bg-indigo-800/70 text-indigo-100"
-                      }`}
-                    >
-                      {item.icon} {item.short}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Mobile Screen Body */}
-                <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-slate-50 text-xs">
-                  <div className="font-bold text-slate-800 text-sm border-b pb-1.5">
-                    {navItems.find((n) => n.id === activeTab)?.label}
-                  </div>
-
-                  {activeTab === "dashboard" && (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div className="bg-white p-3 rounded-xl border shadow-sm">
-                          <span className="text-[10px] text-slate-500">ആകെ കുട്ടികൾ</span>
-                          <p className="text-xl font-extrabold text-indigo-700">{metrics.totalStudents}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border shadow-sm">
-                          <span className="text-[10px] text-slate-500">ഇന്നത്തെ ഹാജർ</span>
-                          <p className="text-xl font-extrabold text-emerald-600">{metrics.avgAttendance}%</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border shadow-sm">
-                          <span className="text-[10px] text-slate-500">പിരിഞ്ഞ ഫീസ്</span>
-                          <p className="text-lg font-extrabold text-slate-900">₹{metrics.totalFeeCollected}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border shadow-sm">
-                          <span className="text-[10px] text-slate-500">ബാക്കി ഫീസ്</span>
-                          <p className="text-lg font-extrabold text-rose-600">₹{metrics.totalFeePending}</p>
-                        </div>
-                      </div>
-                      <div className="bg-white p-3 rounded-xl border space-y-2">
-                        <p className="font-bold text-slate-800">എല്ലാ ഫീച്ചറുകളും (Quick Access)</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {navItems.slice(1).map((n) => (
-                            <button
-                              key={n.id}
-                              onClick={() => setActiveTab(n.id)}
-                              className="p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border text-center flex flex-col items-center gap-1"
-                            >
-                              <span className="text-lg">{n.icon}</span>
-                              <span className="text-[10px] font-bold text-slate-700">{n.short}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeTab !== "dashboard" && (
-                    <div className="bg-white p-3.5 rounded-xl border space-y-2">
-                      <p className="text-slate-600">
-                        മൊബൈൽ ആപ്പിലും വെബ് ആപ്പിലെ എല്ലാ സൗകര്യങ്ങളും ഒരേ ഡാറ്റാബേസിൽ പ്രവർത്തിക്കുന്നു. പൂർണ്ണ സ്ക്രീൻ അനുഭവത്തിനായി മുകളിലെ <b>Web Application View</b> അല്ലെങ്കിൽ ചുവടെയുള്ള വിവരങ്ങൾ ഉപയോഗിക്കുക:
-                      </p>
-                      {students.slice(0, 4).map((s) => (
-                        <div key={s.id} className="p-2.5 rounded-lg bg-slate-50 border flex justify-between items-center">
-                          <div>
-                            <p className="font-bold text-slate-900">{s.name}</p>
-                            <p className="text-[10px] text-slate-500">{s.batchName} • Added by: {s.addedBy}</p>
-                          </div>
-                          <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded font-bold text-[10px]">
-                            Class {s.grade}
-                          </span>
-                        </div>
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 className="font-bold text-[#195685] mb-4">ബാച്ചുകളും ക്ലാസുകളും (A PLUS ACCADEMY BATCHES)</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50 text-xs uppercase text-slate-600 border-b">
+                      <tr>
+                        <th className="p-3">ബാച്ച് (Batch)</th>
+                        <th className="p-3">ക്ലാസ്</th>
+                        <th className="p-3">സമയം</th>
+                        <th className="p-3">ചുമതലയുള്ള അധ്യാപകൻ</th>
+                        <th className="p-3">കുട്ടികൾ</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {batches.map((b) => (
+                        <tr key={b.id} className="hover:bg-slate-50">
+                          <td className="p-3 font-bold">{b.name}</td>
+                          <td className="p-3">Class {b.grade}</td>
+                          <td className="p-3 text-xs">{b.timing}</td>
+                          <td className="p-3">{b.classTeacher}</td>
+                          <td className="p-3 font-bold text-[#2d7a47]">
+                            {students.filter((s) => s.batchId === b.id).length} പേർ
+                          </td>
+                        </tr>
                       ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Mobile Bottom Navigation */}
-                <div className="bg-white border-t border-slate-200 px-2 py-2 grid grid-cols-5 gap-1 text-[10px] font-bold text-slate-600">
-                  <button onClick={() => setActiveTab("dashboard")} className="flex flex-col items-center">
-                    <span>📊</span>Home
-                  </button>
-                  <button onClick={() => setActiveTab("attendance")} className="flex flex-col items-center">
-                    <span>✅</span>Attend
-                  </button>
-                  <button onClick={() => setActiveTab("exam")} className="flex flex-col items-center">
-                    <span>📝</span>Exam
-                  </button>
-                  <button onClick={() => setActiveTab("live_class")} className="flex flex-col items-center">
-                    <span>🎥</span>Live
-                  </button>
-                  <button onClick={() => setActiveTab("fee_report")} className="flex flex-col items-center">
-                    <span>💳</span>Fees
-                  </button>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
-          ) : (
-            /* ==================== FULL WEB APPLICATION VIEW ==================== */
-            <div className="flex-1 flex flex-col lg:flex-row">
-              {/* Sidebar */}
-              <aside className="w-full lg:w-72 bg-indigo-950 text-white flex-shrink-0 flex flex-col justify-between">
+          );
+        }
+
+        if (activeView === "students") {
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                <h3 className="font-bold text-[#195685]">➕ പുതിയ കുട്ടിയെ ചേർക്കുക (ADD STUDENT)</h3>
+                <input
+                  type="text"
+                  required
+                  placeholder="കുട്ടിയുടെ പേര് (Student Name) *"
+                  value={newStudent.name}
+                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
                 <div>
-                  <div className="p-5 border-b border-indigo-800/80">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center text-2xl font-bold text-indigo-950">
-                        🎓
-                      </div>
-                      <div>
-                        <h1 className="font-bold text-lg leading-tight">കേരള ട്യൂഷൻ ഹബ്ബ്</h1>
-                        <p className="text-xs text-indigo-300">Govt. School Classes 8, 9 & 10</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 bg-indigo-900 p-1 rounded-lg grid grid-cols-3 gap-1 text-xs">
-                      {["admin", "teacher", "student"].map((r) => (
-                        <button
-                          key={r}
-                          onClick={() => setRole(r)}
-                          className={`py-1.5 rounded-md font-bold capitalize ${
-                            role === r ? "bg-amber-400 text-indigo-950" : "text-indigo-200"
-                          }`}
-                        >
-                          {r}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <nav className="p-3 space-y-1">
-                    {navItems.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left text-sm font-medium transition ${
-                          activeTab === item.id
-                            ? "bg-indigo-600 text-white shadow"
-                            : "text-indigo-100 hover:bg-indigo-900"
-                        }`}
-                      >
-                        <span>{item.icon}</span>
-                        <span className="truncate">{item.label}</span>
-                      </button>
+                  <label className="text-xs font-bold text-slate-600">ഏത് ബാച്ചിലേക്കാണ് ചേരുന്നത്?</label>
+                  <select
+                    value={newStudent.batchId}
+                    onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm mt-1"
+                  >
+                    {batches.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
                     ))}
-                  </nav>
+                  </select>
                 </div>
-              </aside>
-
-              {/* Main Area */}
-              <main className="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
-                {/* Header */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-wrap justify-between items-center gap-4 shadow-sm">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-800">
-                      {navItems.find((n) => n.id === activeTab)?.label}
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      കേരള ഗവൺമെന്റ് സ്കൂൾ സിലബസ് (8, 9, 10 ക്ലാസുകൾ) • ലോഗിൻ റോൾ:{" "}
-                      <b className="uppercase text-indigo-600">{role}</b>
-                    </p>
-                  </div>
-                  <div className="flex bg-slate-100 p-1 rounded-xl text-xs font-bold">
-                    {["ALL", "8", "9", "10"].map((g) => (
-                      <button
-                        key={g}
-                        onClick={() => setSelectedGradeFilter(g)}
-                        className={`px-3 py-1.5 rounded-lg ${
-                          selectedGradeFilter === g ? "bg-indigo-600 text-white" : "text-slate-600"
-                        }`}
-                      >
-                        {g === "ALL" ? "എല്ലാ ക്ലാസും" : `Class ${g}`}
-                      </button>
-                    ))}
-                  </div>
+                <input
+                  type="text"
+                  placeholder="പഠിക്കുന്ന ഗവൺമെന്റ് സ്കൂൾ"
+                  value={newStudent.schoolName}
+                  onChange={(e) => setNewStudent({ ...newStudent, schoolName: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  required
+                  placeholder="രക്ഷിതാവിന്റെ പേര് *"
+                  value={newStudent.parentName}
+                  onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  required
+                  placeholder="വാട്സാപ്പ് നമ്പർ (919847...)"
+                  value={newStudent.parentPhone}
+                  onChange={(e) => setNewStudent({ ...newStudent, parentPhone: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <div>
+                  <label className="text-xs font-bold text-slate-600">ആരാണ് ചേർത്തത്? (Added By)</label>
+                  <input
+                    type="text"
+                    required
+                    value={newStudent.addedBy}
+                    onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-emerald-50/50 mt-1"
+                  />
                 </div>
+                <button
+                  type="submit"
+                  className="w-full bg-[#2d7a47] hover:bg-[#236038] text-white font-bold py-2.5 rounded-lg text-sm"
+                >
+                  കുട്ടിയെ ബാച്ചിലേക്ക് ചേർക്കുക
+                </button>
+              </form>
 
-                {/* 1. DASHBOARD */}
-                {activeTab === "dashboard" && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <p className="text-xs font-bold text-slate-500">ആകെ കുട്ടികൾ (Total Students)</p>
-                        <h3 className="text-3xl font-extrabold text-slate-900 mt-1">{metrics.totalStudents}</h3>
-                        <p className="text-xs text-slate-500 mt-2">
-                          10th: {metrics.class10Count} | 9th: {metrics.class9Count} | 8th: {metrics.class8Count}
-                        </p>
-                      </div>
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <p className="text-xs font-bold text-slate-500">ശരാശരി ഹാജർ (Attendance)</p>
-                        <h3 className="text-3xl font-extrabold text-emerald-600 mt-1">{metrics.avgAttendance}%</h3>
-                        <p className="text-xs text-slate-500 mt-2">ആകെ {batches.length} ബാച്ചുകൾ</p>
-                      </div>
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <p className="text-xs font-bold text-slate-500">ലഭിച്ച ഫീസ് (Collected Fee)</p>
-                        <h3 className="text-3xl font-extrabold text-indigo-600 mt-1">
-                          ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-2">
-                          ആകെ ഫീസ്: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}
-                        </p>
-                      </div>
-                      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                        <p className="text-xs font-bold text-slate-500">ബാക്കി കിട്ടാനുള്ള ഫീസ് (Pending)</p>
-                        <h3 className="text-3xl font-extrabold text-rose-600 mt-1">
-                          ₹{metrics.totalFeePending.toLocaleString("en-IN")}
-                        </h3>
-                        <p className="text-xs text-rose-600 font-semibold mt-2">
-                          {metrics.studentsWithBalance.length} കുട്ടികൾ തരാനുണ്ട്
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                      <h3 className="font-bold text-slate-800 mb-4">📚 ബാച്ചുകളും ക്ലാസുകളും (Batch-wise Class Overview)</h3>
-                      <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 text-xs uppercase text-slate-600">
-                          <tr>
-                            <th className="p-3">ബാച്ച്</th>
-                            <th className="p-3">ക്ലാസ്</th>
-                            <th className="p-3">സമയം</th>
-                            <th className="p-3">അധ്യാപകൻ</th>
-                            <th className="p-3">കുട്ടികൾ</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {batches.map((b) => (
-                            <tr key={b.id}>
-                              <td className="p-3 font-bold">{b.name}</td>
-                              <td className="p-3">Class {b.grade}</td>
-                              <td className="p-3 text-xs">{b.timing}</td>
-                              <td className="p-3">{b.classTeacher}</td>
-                              <td className="p-3 font-bold">
-                                {students.filter((s) => s.batchId === b.id).length} പേർ
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. STUDENTS DATA */}
-                {activeTab === "students" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-2xl border space-y-3">
-                      <h3 className="font-bold text-slate-800">➕ പുതിയ കുട്ടിയെ ചേർക്കുക</h3>
-                      <input
-                        type="text"
-                        required
-                        placeholder="കുട്ടിയുടെ പേര് *"
-                        value={newStudent.name}
-                        onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                      <select
-                        value={newStudent.batchId}
-                        onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      >
-                        {batches.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            {b.name}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="ഗവൺമെന്റ് സ്കൂളിന്റെ പേര്"
-                        value={newStudent.schoolName}
-                        onChange={(e) => setNewStudent({ ...newStudent, schoolName: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="text"
-                        required
-                        placeholder="രക്ഷിതാവിന്റെ പേര് *"
-                        value={newStudent.parentName}
-                        onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                      <input
-                        type="text"
-                        required
-                        placeholder="വാട്സാപ്പ് നമ്പർ (919847...)"
-                        value={newStudent.parentPhone}
-                        onChange={(e) => setNewStudent({ ...newStudent, parentPhone: e.target.value })}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                      <div>
-                        <label className="text-xs font-bold text-slate-600">ആരാണ് ചേർത്തത്? (Added By)</label>
-                        <input
-                          type="text"
-                          required
-                          value={newStudent.addedBy}
-                          onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
-                          className="w-full border rounded-lg px-3 py-2 text-sm bg-amber-50/50"
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-sm"
-                      >
-                        കുട്ടിയെ ചേർക്കുക (Add Student)
-                      </button>
-                    </form>
-
-                    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border overflow-x-auto">
-                      <h3 className="font-bold text-slate-800 mb-3">കുട്ടികളുടെ പട്ടിക (Students List)</h3>
-                      <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 text-xs uppercase">
-                          <tr>
-                            <th className="p-3">പേര് & Roll</th>
-                            <th className="p-3">ബാച്ച് (Batch)</th>
-                            <th className="p-3">ആരാണ് ചേർത്തത് (Added By)</th>
-                            <th className="p-3">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {students.map((s) => (
-                            <tr key={s.id}>
-                              <td className="p-3">
-                                <div className="font-bold">{s.name}</div>
-                                <div className="text-xs text-slate-500">
-                                  {s.rollNo} • {s.schoolName}
-                                </div>
-                              </td>
-                              <td className="p-3 text-xs font-semibold">{s.batchName}</td>
-                              <td className="p-3">
-                                <span className="px-2 py-1 bg-amber-50 border border-amber-200 rounded text-xs font-bold">
-                                  👤 {s.addedBy}
-                                </span>
-                              </td>
-                              <td className="p-3">
-                                <button
-                                  onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
-                                  className="text-xs text-rose-600 font-bold hover:underline"
-                                >
-                                  Remove
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. ATTENDANCE */}
-                {activeTab === "attendance" && (
-                  <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-2xl border space-y-4">
-                      <div className="flex flex-wrap justify-between items-center gap-4">
-                        <select
-                          value={selectedAttBatchId}
-                          onChange={(e) => setSelectedAttBatchId(e.target.value)}
-                          className="border rounded-xl px-4 py-2 text-sm font-bold bg-indigo-50"
-                        >
-                          {batches.map((b) => (
-                            <option key={b.id} value={b.id}>
-                              {b.name}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={handleSaveAttendance}
-                          className="bg-emerald-600 text-white px-5 py-2 rounded-xl text-sm font-bold"
-                        >
-                          ✅ അറ്റൻഡൻസ് സേവ് ചെയ്യുക
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {students
-                          .filter((s) => s.batchId === selectedAttBatchId)
-                          .map((stu) => {
-                            const st = draftAttendance[stu.id] || "Present";
-                            return (
-                              <div
-                                key={stu.id}
-                                className="p-3.5 rounded-xl border flex justify-between items-center bg-slate-50"
-                              >
-                                <div>
-                                  <p className="font-bold text-sm">{stu.name}</p>
-                                  <p className="text-xs text-slate-500">Roll: {stu.rollNo}</p>
-                                </div>
-                                <div className="flex gap-1">
-                                  {["Present", "Absent", "Late"].map((val) => (
-                                    <button
-                                      key={val}
-                                      onClick={() => setDraftAttendance({ ...draftAttendance, [stu.id]: val })}
-                                      className={`px-2.5 py-1 rounded text-xs font-bold ${
-                                        st === val
-                                          ? val === "Present"
-                                            ? "bg-emerald-600 text-white"
-                                            : val === "Absent"
-                                            ? "bg-rose-600 text-white"
-                                            : "bg-amber-500 text-white"
-                                          : "bg-white border"
-                                      }`}
-                                    >
-                                      {val}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl border space-y-3">
-                      <h3 className="font-bold text-slate-800">📜 അറ്റൻഡൻസ് ഹിസ്റ്ററി (Attendance History)</h3>
-                      {attendanceList.map((a) => (
-                        <div key={a.id} className="p-3.5 rounded-xl border bg-slate-50 flex justify-between items-center">
-                          <div>
-                            <p className="font-bold text-sm">
-                              {a.batchName} ({a.date})
-                            </p>
-                            <p className="text-xs text-slate-500">Marked by: {a.markedBy}</p>
+              <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
+                <h3 className="font-bold text-[#195685] mb-3">കുട്ടികളുടെ പട്ടിക (STUDENTS DATA - {students.length})</h3>
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-slate-50 text-xs uppercase border-b">
+                    <tr>
+                      <th className="p-3">പേര് & Roll</th>
+                      <th className="p-3">ബാച്ച് (Batch)</th>
+                      <th className="p-3">ആരാണ് ചേർത്തത് (Added By)</th>
+                      <th className="p-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {students.map((s) => (
+                      <tr key={s.id} className="hover:bg-slate-50">
+                        <td className="p-3">
+                          <div className="font-bold">{s.name}</div>
+                          <div className="text-xs text-slate-500">
+                            {s.rollNo} • {s.schoolName}
                           </div>
-                          <span className="text-xs font-bold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-lg">
-                            Present: {a.records.filter((r) => r.status === "Present").length}/{a.records.length}
+                        </td>
+                        <td className="p-3 text-xs font-semibold">{s.batchName}</td>
+                        <td className="p-3">
+                          <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] border border-emerald-200 rounded text-xs font-bold">
+                            👤 {s.addedBy}
                           </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        </td>
+                        <td className="p-3">
+                          <button
+                            onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
+                            className="text-xs text-rose-600 font-bold hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
 
-                {/* 4. FACULTIES & CHAPTERS */}
-                {activeTab === "faculties" && (
-                  <div className="space-y-4">
-                    {facultyChapters.map((fc) => {
-                      const pct = Math.round((fc.completedPortions / fc.totalPortions) * 100);
+        if (activeView === "attendance") {
+          return (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+                <div className="flex flex-wrap justify-between items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <select
+                      value={selectedAttBatchId}
+                      onChange={(e) => setSelectedAttBatchId(e.target.value)}
+                      className="border-2 border-[#169bc2] rounded-lg px-4 py-2 text-sm font-bold"
+                    >
+                      {batches.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="date"
+                      value={selectedAttDate}
+                      onChange={(e) => setSelectedAttDate(e.target.value)}
+                      className="border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveAttendance}
+                    className="bg-[#2d7a47] hover:bg-[#236038] text-white px-5 py-2 rounded-lg text-sm font-bold"
+                  >
+                    ✅ അറ്റൻഡൻസ് സേവ് ചെയ്യുക
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {students
+                    .filter((s) => s.batchId === selectedAttBatchId)
+                    .map((stu) => {
+                      const st = draftAttendance[stu.id] || "Present";
                       return (
-                        <div key={fc.id} className="bg-white p-5 rounded-2xl border space-y-3">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <span className="text-xs font-bold text-indigo-600">
-                                Class {fc.grade} • {fc.subject}
-                              </span>
-                              <h4 className="font-bold text-base">
-                                Chapter {fc.chapterNo}: {fc.chapterTitle}
-                              </h4>
-                              <p className="text-xs text-slate-500">അധ്യാപകൻ: {fc.facultyName}</p>
-                            </div>
-                            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-xs">
-                              {fc.completedPortions}/{fc.totalPortions} Portions ({pct}%)
-                            </span>
+                        <div
+                          key={stu.id}
+                          className="p-3.5 rounded-lg border flex justify-between items-center bg-slate-50"
+                        >
+                          <div>
+                            <p className="font-bold text-sm">{stu.name}</p>
+                            <p className="text-xs text-slate-500">Roll: {stu.rollNo}</p>
                           </div>
-                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                            <div className="bg-indigo-600 h-full" style={{ width: `${pct}%` }} />
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {fc.topicsCovered.map((t, idx) => (
-                              <span key={idx} className="px-2.5 py-1 bg-slate-100 rounded text-xs">
-                                ✓ {t}
-                              </span>
+                          <div className="flex gap-1.5">
+                            {["Present", "Absent", "Late"].map((val) => (
+                              <button
+                                key={val}
+                                onClick={() => setDraftAttendance({ ...draftAttendance, [stu.id]: val })}
+                                className={`px-3 py-1 rounded text-xs font-bold ${
+                                  st === val
+                                    ? val === "Present"
+                                      ? "bg-[#2d7a47] text-white"
+                                      : val === "Absent"
+                                      ? "bg-rose-600 text-white"
+                                      : "bg-amber-500 text-white"
+                                    : "bg-white border"
+                                }`}
+                              >
+                                {val}
+                              </button>
                             ))}
                           </div>
                         </div>
                       );
                     })}
-                  </div>
-                )}
+                </div>
+              </div>
 
-                {/* 5. EXAM */}
-                {activeTab === "exam" && (
-                  <div className="bg-white p-6 rounded-2xl border space-y-5">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-bold text-slate-800">📝 ഓൺലൈൻ പരീക്ഷ (Instant Score MCQ Exam)</h3>
-                      <select
-                        value={selectedStudentForExam}
-                        onChange={(e) => setSelectedStudentForExam(e.target.value)}
-                        className="border rounded-lg px-3 py-1.5 text-xs font-bold"
-                      >
-                        {students.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
+              <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                <h3 className="font-bold text-[#195685]">📜 അറ്റൻഡൻസ് ഹിസ്റ്ററി (ATTENDANCE HISTORY)</h3>
+                {attendanceList.map((a) => (
+                  <div key={a.id} className="p-3.5 rounded-lg border bg-slate-50 flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-sm">
+                        {a.batchName} ({a.date})
+                      </p>
+                      <p className="text-xs text-slate-500">Marked by: {a.markedBy}</p>
                     </div>
-
-                    {submittedAttempt && (
-                      <div className="p-4 rounded-xl bg-emerald-50 border-2 border-emerald-500 text-emerald-950 font-bold">
-                        🎉 പരീക്ഷാ ഫലം: {submittedAttempt.studentName} നേടിയ മാർക്ക്:{" "}
-                        {submittedAttempt.score} / {submittedAttempt.totalMarks} ({submittedAttempt.percentage}%)
-                      </div>
-                    )}
-
-                    {exams[0].questions.map((q, qIdx) => (
-                      <div key={q.id} className="p-4 rounded-xl border bg-slate-50 space-y-2">
-                        <p className="font-bold text-sm">
-                          {qIdx + 1}. {q.question}
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {q.options.map((opt, oIdx) => (
-                            <button
-                              key={oIdx}
-                              onClick={() => setExamAnswers({ ...examAnswers, [qIdx]: oIdx })}
-                              className={`p-2 rounded-lg border text-left text-xs font-semibold ${
-                                examAnswers[qIdx] === oIdx ? "bg-indigo-600 text-white" : "bg-white"
-                              }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => handleSubmitExam(exams[0])}
-                      className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl text-sm"
-                    >
-                      ✅ പരീക്ഷ സബ്മിറ്റ് ചെയ്ത് മാർക്ക് കാണുക
-                    </button>
+                    <span className="text-xs font-bold px-3 py-1 bg-emerald-100 text-[#2d7a47] rounded-lg">
+                      Present: {a.records.filter((r) => r.status === "Present").length}/{a.records.length}
+                    </span>
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
+          );
+        }
 
-                {/* 6. AI EXAM REPORT */}
-                {activeTab === "exam_report" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-bold text-slate-800">📊 പരീക്ഷാ മാർക്കുകളുടെ ഗ്രാഫിക്കൽ റിപ്പോർട്ട്</h3>
-                        <select
-                          value={reportStudentId}
-                          onChange={(e) => setReportStudentId(e.target.value)}
-                          className="border rounded-lg px-3 py-1.5 text-xs font-bold"
-                        >
-                          {students.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name}
-                            </option>
-                          ))}
-                        </select>
+        if (activeView === "faculties") {
+          return (
+            <div className="space-y-4">
+              {facultyChapters.map((fc) => {
+                const pct = Math.round((fc.completedPortions / fc.totalPortions) * 100);
+                return (
+                  <div key={fc.id} className="bg-white p-5 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-xs font-bold text-[#169bc2]">
+                          Class {fc.grade} • {fc.subject}
+                        </span>
+                        <h4 className="font-bold text-base text-[#195685]">
+                          Chapter {fc.chapterNo}: {fc.chapterTitle}
+                        </h4>
+                        <p className="text-xs text-slate-600">അധ്യാപകൻ: {fc.facultyName}</p>
                       </div>
-                      {studentAttempts.map((att) => (
-                        <div key={att.id} className="space-y-1">
-                          <div className="flex justify-between text-xs font-bold">
-                            <span>{att.examTitle}</span>
-                            <span>
-                              {att.score}/{att.totalMarks} ({att.percentage}%)
-                            </span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-indigo-600 h-full text-[10px] text-white font-bold flex items-center justify-end pr-2"
-                              style={{ width: `${att.percentage}%` }}
-                            >
-                              {att.percentage}%
-                            </div>
-                          </div>
-                        </div>
+                      <span className="px-3 py-1 bg-emerald-50 text-[#2d7a47] font-bold rounded-lg text-xs border border-emerald-200">
+                        {fc.completedPortions}/{fc.totalPortions} Portions ({pct}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                      <div className="bg-[#2d7a47] h-full" style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {fc.topicsCovered.map((t, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-slate-100 rounded text-xs font-medium">
+                          ✓ {t}
+                        </span>
                       ))}
                     </div>
-                    <div className="bg-indigo-950 text-white p-6 rounded-2xl space-y-3">
-                      <h4 className="font-bold text-amber-400">🤖 AI പഠന നിലവാര വിശകലനം</h4>
-                      <p className="text-xs leading-relaxed text-indigo-100">
-                        <b>{selectedReportStudent?.name}</b>-ന്റെ ശരാശരി മാർക്ക് <b>{overallAvgPercentage}%</b> ആണ്. ഗണിതത്തിലും ഫിസിക്സിലും മികച്ച പുരോഗതിയുണ്ട്. വരും പരീക്ഷകളിൽ മുഴുവൻ വിഷയങ്ങളിലും A+ നേടാൻ സാധിക്കുന്ന നിലവാരത്തിലാണ് കുട്ടി.
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (activeView === "exam") {
+          return (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-5 shadow-sm">
+              <div className="flex flex-wrap justify-between items-center gap-3">
+                <h3 className="font-bold text-[#195685]">📝 ഓൺലൈൻ പരീക്ഷ (ONLINE EXAM & INSTANT SCORE)</h3>
+                <select
+                  value={selectedStudentForExam}
+                  onChange={(e) => setSelectedStudentForExam(e.target.value)}
+                  className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold"
+                >
+                  {students.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {submittedAttempt && (
+                <div className="p-4 rounded-xl bg-emerald-50 border-2 border-[#2d7a47] text-emerald-950 font-bold">
+                  🎉 പരീക്ഷാ ഫലം: {submittedAttempt.studentName} നേടിയ മാർക്ക്:{" "}
+                  {submittedAttempt.score} / {submittedAttempt.totalMarks} ({submittedAttempt.percentage}%)
+                </div>
+              )}
+
+              {exams[0].questions.map((q, qIdx) => (
+                <div key={q.id} className="p-4 rounded-xl border bg-slate-50 space-y-2">
+                  <p className="font-bold text-sm">
+                    {qIdx + 1}. {q.question}
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {q.options.map((opt, oIdx) => (
+                      <button
+                        key={oIdx}
+                        onClick={() => setExamAnswers({ ...examAnswers, [qIdx]: oIdx })}
+                        className={`p-2.5 rounded-lg border text-left text-xs font-semibold ${
+                          examAnswers[qIdx] === oIdx
+                            ? "bg-[#2d7a47] text-white border-[#2d7a47]"
+                            : "bg-white hover:bg-slate-100"
+                        }`}
+                      >
+                        {String.fromCharCode(65 + oIdx)}. {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => handleSubmitExam(exams[0])}
+                className="w-full bg-[#195685] hover:bg-[#134266] text-white font-bold py-3 rounded-xl text-sm"
+              >
+                ✅ പരീക്ഷ സബ്മിറ്റ് ചെയ്ത് ഇപ്പോൾ തന്നെ മാർക്ക് കാണുക
+              </button>
+            </div>
+          );
+        }
+
+        if (activeView === "exam_report") {
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-[#195685]">📊 പരീക്ഷാ മാർക്കുകളുടെ ഗ്രാഫിക്കൽ റിപ്പോർട്ട്</h3>
+                  <select
+                    value={reportStudentId}
+                    onChange={(e) => setReportStudentId(e.target.value)}
+                    className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold"
+                  >
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {studentAttempts.map((att) => (
+                  <div key={att.id} className="space-y-1">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span>{att.examTitle}</span>
+                      <span className="text-[#2d7a47]">
+                        {att.score}/{att.totalMarks} ({att.percentage}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#2d7a47] h-full text-[10px] text-white font-bold flex items-center justify-end pr-2"
+                        style={{ width: `${att.percentage}%` }}
+                      >
+                        {att.percentage}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#195685] text-white p-6 rounded-xl space-y-3 shadow-sm">
+                <h4 className="font-bold text-amber-300">🤖 AI പഠന നിലവാര വിശകലനം (EXAMINATION REPORT)</h4>
+                <p className="text-xs leading-relaxed text-slate-100">
+                  <b>{selectedReportStudent?.name}</b>-ന്റെ ശരാശരി മാർക്ക് <b>{overallAvgPercentage}%</b> ആണ്. ഗണിതത്തിലും സയൻസ് വിഷയങ്ങളിലും മികച്ച പുരോഗതിയുണ്ട്. വരും പരീക്ഷകളിൽ മുഴുവൻ വിഷയങ്ങളിലും A+ നേടാൻ സാധിക്കുന്ന നിലവാരത്തിലാണ് കുട്ടി.
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        if (activeView === "live_class") {
+          return (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+              <h3 className="font-bold text-[#195685]">🎥 YouTube ലൈവ് ക്ലാസ്റൂം (LIVE CLASSES)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {liveClasses.map((lc) => (
+                  <div key={lc.id} className="p-4 rounded-xl border bg-slate-50 space-y-2">
+                    <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-bold">
+                      🔴 Class {lc.grade} Live
+                    </span>
+                    <h4 className="font-bold text-[#195685]">{lc.title}</h4>
+                    <p className="text-xs text-slate-600">
+                      {lc.batchName} • {lc.facultyName} ({lc.scheduledTime})
+                    </p>
+                    <a
+                      href={lc.youtubeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block bg-[#2d7a47] hover:bg-[#236038] text-white px-4 py-2 rounded-lg text-xs font-bold"
+                    >
+                      ▶ YouTube Live ക്ലാസ് തുറക്കുക
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (activeView === "student_fee") {
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <form onSubmit={handleRecordFeePayment} className="bg-white p-6 rounded-xl border space-y-3 shadow-sm">
+                <h3 className="font-bold text-[#195685]">💳 കുട്ടിയുടെ ഫീസ് അടയ്ക്കുക</h3>
+                <select
+                  value={selectedFeeStudentId}
+                  onChange={(e) => setSelectedFeeStudentId(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm font-bold"
+                >
+                  {students.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  value={feePaymentAmount}
+                  onChange={(e) => setFeePaymentAmount(Number(e.target.value))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm"
+                >
+                  ഫീസ് രേഖപ്പെടുത്തുക
+                </button>
+              </form>
+              <div className="lg:col-span-2 bg-white p-6 rounded-xl border space-y-4 shadow-sm">
+                {(() => {
+                  const s = students.find((x) => x.id === selectedFeeStudentId) || students[0];
+                  const bal = s.totalFee - s.discount - s.paidFee;
+                  return (
+                    <>
+                      <h3 className="font-bold text-lg text-[#195685]">{s.name} — വ്യക്തിഗത ബാലൻസ് ഷീറ്റ്</h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="p-4 rounded-xl bg-slate-50 border">
+                          <span className="text-xs text-slate-500">ആകെ ഫീസ് (Total)</span>
+                          <p className="text-xl font-extrabold">₹{s.totalFee}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                          <span className="text-xs text-[#2d7a47]">നൽകിയ തുക (Paid)</span>
+                          <p className="text-xl font-extrabold text-[#2d7a47]">₹{s.paidFee}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200">
+                          <span className="text-xs text-rose-700">ഇനി തരാനുള്ളത് (Balance)</span>
+                          <p className="text-xl font-extrabold text-rose-700">₹{bal}</p>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          );
+        }
+
+        if (activeView === "fee_report") {
+          return (
+            <div className="bg-white p-6 rounded-xl border space-y-4 shadow-sm">
+              <div className="flex flex-wrap justify-between items-center gap-2">
+                <h3 className="font-bold text-[#195685]">
+                  📈 സ്ഥാപനത്തിലെ മുഴുവൻ ഫീ റിപ്പോർട്ട് (Fully Paid: {metrics.fullyPaidStudents.length} | Pending: {metrics.studentsWithBalance.length} കുട്ടികൾ)
+                </h3>
+                <span className="text-xs font-extrabold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+                  ആകെ കിട്ടാനുള്ള ബാക്കി: ₹{metrics.totalFeePending.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-xs uppercase border-b">
+                  <tr>
+                    <th className="p-3">കുട്ടി</th>
+                    <th className="p-3">ബാച്ച്</th>
+                    <th className="p-3">ആകെ ഫീസ്</th>
+                    <th className="p-3">അടച്ചത്</th>
+                    <th className="p-3">ബാക്കി</th>
+                    <th className="p-3">സ്റ്റാറ്റസ്</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {students.map((s) => {
+                    const bal = s.totalFee - s.discount - s.paidFee;
+                    return (
+                      <tr key={s.id}>
+                        <td className="p-3 font-bold">{s.name}</td>
+                        <td className="p-3 text-xs">{s.batchName}</td>
+                        <td className="p-3">₹{s.totalFee}</td>
+                        <td className="p-3 text-[#2d7a47] font-bold">₹{s.paidFee}</td>
+                        <td className="p-3 text-rose-600 font-extrabold">₹{bal}</td>
+                        <td className="p-3">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                              bal <= 0 ? "bg-emerald-100 text-[#2d7a47]" : "bg-rose-100 text-rose-800"
+                            }`}
+                          >
+                            {bal <= 0 ? "Fully Paid" : "Pending Balance"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+
+        if (activeView === "communication") {
+          return (
+            <div className="bg-white p-6 rounded-xl border space-y-4 shadow-sm">
+              <h3 className="font-bold text-[#195685]">💬 വാട്സാപ്പ് ഗ്രൂപ്പ് & രക്ഷിതാക്കളുമായുള്ള ആശയവിനിമയം</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {batches.map((b) => (
+                  <div key={b.id} className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/40 space-y-2">
+                    <h4 className="font-bold text-[#195685]">{b.name}</h4>
+                    <p className="text-xs text-slate-600">അധ്യാപകൻ: {b.classTeacher}</p>
+                    <a
+                      href={b.whatsappGroupLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block bg-[#2d7a47] text-white px-4 py-2 rounded-lg text-xs font-bold"
+                    >
+                      💬 ബാച്ച് വാട്സാപ്പ് ഗ്രൂപ്പ് തുറക്കുക
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+
+        if (activeView === "question_bank" || activeView === "materials") {
+          return (
+            <div className="space-y-4">
+              <h3 className="font-bold text-[#195685] text-lg">
+                📚 പഠന സാമഗ്രികളും ക്വസ്റ്റ്യൻ ബാങ്കും (NOTES & QUESTION BANK / MATERIALS)
+              </h3>
+              {questionBank.map((qb) => (
+                <div key={qb.id} className="bg-white p-6 rounded-xl border space-y-3 shadow-sm">
+                  <span className="px-2.5 py-0.5 bg-cyan-50 text-[#169bc2] border border-cyan-200 rounded text-xs font-bold">
+                    Class {qb.grade} • {qb.subject}
+                  </span>
+                  <h4 className="font-bold text-base text-[#195685]">{qb.title}</h4>
+                  {qb.questionsList.map((q, i) => (
+                    <div key={i} className="p-3 rounded-lg bg-slate-50 border space-y-1 text-xs">
+                      <p className="font-bold">{q.q}</p>
+                      <p className="text-[#2d7a47]">
+                        <b>ഉത്തരം:</b> {q.a}
                       </p>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+              ))}
+            </div>
+          );
+        }
 
-                {/* 7. LIVE CLASS */}
-                {activeTab === "live_class" && (
-                  <div className="bg-white p-6 rounded-2xl border space-y-4">
-                    <h3 className="font-bold text-slate-800">🎥 YouTube ലൈവ് ക്ലാസ്റൂം</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {liveClasses.map((lc) => (
-                        <div key={lc.id} className="p-4 rounded-xl border bg-slate-50 space-y-2">
-                          <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-bold">
-                            🔴 Class {lc.grade} Live
-                          </span>
-                          <h4 className="font-bold">{lc.title}</h4>
-                          <p className="text-xs text-slate-500">
-                            {lc.batchName} • {lc.facultyName}
-                          </p>
-                          <a
-                            href={lc.youtubeUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold"
-                          >
-                            ▶ YouTube Live ക്ലാസ് തുറക്കുക
-                          </a>
-                        </div>
-                      ))}
+        if (activeView === "accounts") {
+          const totalIncome = accounts.filter((a) => a.type === "Income").reduce((acc, a) => acc + a.amount, 0) + metrics.totalFeeCollected;
+          const totalExpense = accounts.filter((a) => a.type === "Expense").reduce((acc, a) => acc + a.amount, 0);
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <form onSubmit={handleAddAccountEntry} className="bg-white p-6 rounded-xl border space-y-3 shadow-sm">
+                <h3 className="font-bold text-[#195685]">💵 പുതിയ വരവ് / ചെലവ് ചേർക്കുക (ACCOUNTS)</h3>
+                <input
+                  type="text"
+                  required
+                  placeholder="ഇനം (e.g. Electricity Bill / Exam Paper Print)"
+                  value={newExpenseTitle}
+                  onChange={(e) => setNewExpenseTitle(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <select
+                  value={newExpenseType}
+                  onChange={(e) => setNewExpenseType(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="Expense">ചെലവ് (Expense)</option>
+                  <option value="Income">വരവ് (Income)</option>
+                </select>
+                <input
+                  type="number"
+                  value={newExpenseAmount}
+                  onChange={(e) => setNewExpenseAmount(Number(e.target.value))}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+                <button type="submit" className="w-full bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm">
+                  കണക്കിലേക്ക് ചേർക്കുക
+                </button>
+              </form>
+
+              <div className="lg:col-span-2 bg-white p-6 rounded-xl border space-y-4 shadow-sm">
+                <h3 className="font-bold text-[#195685]">സ്ഥാപനത്തിന്റെ വരവ്-ചെലവ് കണക്കുകൾ (ACCOUNTS LEDGER)</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <span className="text-xs text-[#2d7a47]">ആകെ വരവ് (Total Income)</span>
+                    <p className="text-lg font-extrabold text-[#2d7a47]">₹{totalIncome.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200">
+                    <span className="text-xs text-rose-700">ആകെ ചെലവ് (Expenses)</span>
+                    <p className="text-lg font-extrabold text-rose-700">₹{totalExpense.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-cyan-50 border border-cyan-200">
+                    <span className="text-xs text-[#195685]">നീക്കിയിരിപ്പ് (Net Balance)</span>
+                    <p className="text-lg font-extrabold text-[#195685]">
+                      ₹{(totalIncome - totalExpense).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                </div>
+                <div className="divide-y text-sm">
+                  {accounts.map((acc) => (
+                    <div key={acc.id} className="py-2.5 flex justify-between items-center">
+                      <div>
+                        <p className="font-bold">{acc.title}</p>
+                        <p className="text-xs text-slate-500">{acc.date} • {acc.category}</p>
+                      </div>
+                      <span className={`font-bold ${acc.type === "Income" ? "text-[#2d7a47]" : "text-rose-600"}`}>
+                        {acc.type === "Income" ? "+" : "-"}₹{acc.amount}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Left sidebar buttons: COURSES, SCHEDULE, CLASSES, HOURS
+        return (
+          <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
+            <h3 className="font-bold text-[#195685] uppercase text-lg">
+              {activeView} — A PLUS ACCADEMY (Classes 8, 9 & 10)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {batches.map((b) => (
+                <div key={b.id} className="p-4 rounded-xl border border-cyan-500/40 bg-slate-50 space-y-1.5">
+                  <span className="px-2.5 py-0.5 bg-[#195685] text-white rounded text-xs font-bold">
+                    Class {b.grade}
+                  </span>
+                  <h4 className="font-bold text-base text-slate-900">{b.courseTitle}</h4>
+                  <p className="text-xs text-slate-700"><b>Batch:</b> {b.name}</p>
+                  <p className="text-xs text-slate-700"><b>Schedule / Timing:</b> {b.timing}</p>
+                  <p className="text-xs text-[#2d7a47] font-bold"><b>Total Hours:</b> {b.hoursPerWeek}</p>
+                  <p className="text-xs text-slate-600"><b>Faculty-in-charge:</b> {b.classTeacher}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div className="min-h-screen bg-white flex flex-col">
+          {/* Subtle Top Mode Switcher (Web vs Mobile App View) */}
+          <div className="bg-slate-100 border-b border-slate-200 px-4 py-1.5 flex justify-between items-center text-xs">
+            <span className="text-slate-600 font-medium">
+              A PLUS ACCADEMY • Govt. School Classes 8, 9, 10 Tuition Portal
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setDeviceMode("web")}
+                className={`px-3 py-1 rounded font-bold transition ${
+                  deviceMode === "web" ? "bg-[#195685] text-white" : "text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                💻 Web Landing Page
+              </button>
+              <button
+                onClick={() => setDeviceMode("mobile")}
+                className={`px-3 py-1 rounded font-bold transition ${
+                  deviceMode === "mobile" ? "bg-[#2d7a47] text-white" : "text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                📱 Mobile App View (Android & iOS)
+              </button>
+            </div>
+          </div>
+
+          {deviceMode === "mobile" ? (
+            /* ==================== MOBILE APP VIEW MATCHING THE PDF DESIGN ==================== */
+            <div className="flex-1 bg-slate-100 py-6 px-4 flex flex-col items-center justify-center">
+              <div className="phone-frame">
+                {/* Mobile Header with A+ Logo & Title */}
+                <div className="bg-white border-b border-cyan-600/40 px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2" onClick={() => setActiveView("home")}>
+                    <div className="scale-75 -ml-2">
+                      <AcademyLogoSVG />
+                    </div>
+                    <div>
+                      <h2 className="academy-title font-extrabold text-base leading-none">A PLUS ACCADEMY</h2>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Classes 8, 9 & 10 • Tap icon to open</p>
                     </div>
                   </div>
-                )}
+                  {activeView !== "home" && (
+                    <button
+                      onClick={() => setActiveView("home")}
+                      className="cyan-pill px-2.5 py-1 rounded text-[10px] font-bold"
+                    >
+                      ← HOME
+                    </button>
+                  )}
+                </div>
 
-                {/* 8. STUDENT FEE */}
-                {activeTab === "student_fee" && (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <form onSubmit={handleRecordFeePayment} className="bg-white p-6 rounded-2xl border space-y-3">
-                      <h3 className="font-bold">💳 ഫീസ് അടയ്ക്കുക</h3>
-                      <select
-                        value={selectedFeeStudentId}
-                        onChange={(e) => setSelectedFeeStudentId(e.target.value)}
-                        className="w-full border rounded-lg px-3 py-2 text-sm font-bold"
-                      >
-                        {students.map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="number"
-                        value={feePaymentAmount}
-                        onChange={(e) => setFeePaymentAmount(Number(e.target.value))}
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                      <button
-                        type="submit"
-                        className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-sm"
-                      >
-                        ഫീസ് രേഖപ്പെടുത്തുക
-                      </button>
-                    </form>
-                    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border space-y-4">
-                      {(() => {
-                        const s = students.find((x) => x.id === selectedFeeStudentId) || students[0];
-                        const bal = s.totalFee - s.discount - s.paidFee;
+                {/* Mobile Quick Pills (COURSES, SCHEDULE, CLASSES, HOURS, MATERIALS) */}
+                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex gap-1.5 overflow-x-auto">
+                  {leftSideButtons.map((btn) => (
+                    <button
+                      key={btn.id}
+                      onClick={() => setActiveView(btn.id)}
+                      className={`cyan-pill px-3 py-1 text-[10px] font-bold whitespace-nowrap ${btn.rounded}`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Mobile Content Body */}
+                <div className="flex-1 overflow-y-auto p-3">
+                  {activeView === "home" ? (
+                    <div className="grid grid-cols-3 gap-3 pt-2">
+                      {[...topRowIcons, ...bottomRowIcons].map((item) => {
+                        const IconComp = item.Component;
                         return (
-                          <>
-                            <h3 className="font-bold text-lg">{s.name} — വ്യക്തിഗത ബാലൻസ് ഷീറ്റ്</h3>
-                            <div className="grid grid-cols-3 gap-3">
-                              <div className="p-4 rounded-xl bg-slate-50 border">
-                                <span className="text-xs text-slate-500">ആകെ ഫീസ്</span>
-                                <p className="text-xl font-extrabold">₹{s.totalFee}</p>
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveView(item.id)}
+                            className="launcher-card flex flex-col items-center p-2 rounded-xl hover:bg-slate-50"
+                          >
+                            <div className="scale-75 h-14 flex items-center justify-center">
+                              <IconComp />
+                            </div>
+                            <span className="cyan-pill w-full py-1 px-1 rounded-md text-[9px] font-bold text-center leading-tight whitespace-pre-line">
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-3 text-xs">{renderModuleContent()}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* ==================== EXACT PDF LANDING PAGE LAYOUT (WEB) ==================== */
+            <div className="flex-1 p-4 md:p-8 flex justify-center items-start bg-white">
+              {/* Outer Framed Canvas matching PDF border */}
+              <div className="w-full max-w-[1360px] min-h-[760px] border border-slate-400 bg-white flex relative shadow-sm">
+                {/* Left Vertical Column separated by thin vertical line */}
+                <div className="w-40 md:w-48 border-r border-cyan-600/60 flex flex-col pt-36 px-3 space-y-4 flex-shrink-0">
+                  {leftSideButtons.map((btn) => (
+                    <React.Fragment key={btn.id}>
+                      {btn.spacerBefore && <div className="h-6" />}
+                      <button
+                        onClick={() => setActiveView(btn.id)}
+                        className={`cyan-pill w-full py-2.5 px-3 text-xs md:text-sm font-medium tracking-wide text-center ${
+                          btn.rounded
+                        } ${activeView === btn.id ? "active font-bold" : ""}`}
+                      >
+                        {btn.label}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                  {/* Bottom decorative double line box from PDF */}
+                  <div className="h-9 w-full border border-cyan-600/60 mt-2" />
+                </div>
+
+                {/* Right Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  {/* Top Header with A+ Logo and A PLUS ACCADEMY */}
+                  <div className="h-32 px-6 md:px-14 flex items-center justify-between border-b border-cyan-600/60">
+                    <div
+                      onClick={() => setActiveView("home")}
+                      className="flex items-center gap-8 md:gap-16 cursor-pointer mx-auto"
+                    >
+                      <AcademyLogoSVG />
+                      <h1 className="academy-title text-2xl sm:text-4xl md:text-[42px] font-extrabold tracking-wider">
+                        A PLUS ACCADEMY
+                      </h1>
+                    </div>
+
+                    {activeView !== "home" && (
+                      <button
+                        onClick={() => setActiveView("home")}
+                        className="cyan-pill px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 flex-shrink-0"
+                      >
+                        <span>🏠</span> ഹോം പേജിലേക്ക് മടങ്ങുക (LANDING PAGE)
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Body Area: Either the 12-Icon PDF Landing Grid OR the Selected Module View */}
+                  {activeView === "home" ? (
+                    <div className="flex-1 px-6 md:px-12 py-10 flex flex-col justify-around">
+                      {/* Row 1: 7 Icons (DASH BOARD to LIVE CLASSES) */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-y-8 gap-x-4 items-start justify-items-center">
+                        {topRowIcons.map((item) => {
+                          const IconComp = item.Component;
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => setActiveView(item.id)}
+                              className="launcher-card flex flex-col items-center cursor-pointer group w-full max-w-[155px]"
+                            >
+                              <div className="h-24 flex items-center justify-center mb-2">
+                                <IconComp />
                               </div>
-                              <div className="p-4 rounded-xl bg-emerald-50 border">
-                                <span className="text-xs text-emerald-700">അടച്ച തുക</span>
-                                <p className="text-xl font-extrabold text-emerald-700">₹{s.paidFee}</p>
-                              </div>
-                              <div className="p-4 rounded-xl bg-rose-50 border">
-                                <span className="text-xs text-rose-700">ഇനി തരാനുള്ളത്</span>
-                                <p className="text-xl font-extrabold text-rose-700">₹{bal}</p>
+                              <div className="cyan-pill w-full min-h-[38px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
+                                {item.label}
                               </div>
                             </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                )}
-
-                {/* 9. FEE REPORT */}
-                {activeTab === "fee_report" && (
-                  <div className="bg-white p-6 rounded-2xl border space-y-4">
-                    <h3 className="font-bold text-slate-800">
-                      📈 സ്ഥാപനത്തിലെ മുഴുവൻ ഫീ റിപ്പോർട്ട് (Fully Paid, Pending & Balance)
-                    </h3>
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-50 text-xs uppercase">
-                        <tr>
-                          <th className="p-3">കുട്ടി</th>
-                          <th className="p-3">ആകെ ഫീസ്</th>
-                          <th className="p-3">അടച്ചത്</th>
-                          <th className="p-3">ബാക്കി</th>
-                          <th className="p-3">സ്റ്റാറ്റസ്</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {students.map((s) => {
-                          const bal = s.totalFee - s.discount - s.paidFee;
-                          return (
-                            <tr key={s.id}>
-                              <td className="p-3 font-bold">{s.name}</td>
-                              <td className="p-3">₹{s.totalFee}</td>
-                              <td className="p-3 text-emerald-700 font-bold">₹{s.paidFee}</td>
-                              <td className="p-3 text-rose-600 font-extrabold">₹{bal}</td>
-                              <td className="p-3">
-                                <span
-                                  className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                                    bal <= 0 ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"
-                                  }`}
-                                >
-                                  {bal <= 0 ? "Fully Paid" : "Pending Balance"}
-                                </span>
-                              </td>
-                            </tr>
                           );
                         })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      </div>
 
-                {/* 10. WHATSAPP COMMUNICATION */}
-                {activeTab === "communication" && (
-                  <div className="bg-white p-6 rounded-2xl border space-y-4">
-                    <h3 className="font-bold text-slate-800">💬 വാട്സാപ്പ് ഗ്രൂപ്പ് & രക്ഷിതാക്കളുമായുള്ള ആശയവിനിമയം</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {batches.map((b) => (
-                        <div key={b.id} className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 space-y-2">
-                          <h4 className="font-bold">{b.name}</h4>
-                          <p className="text-xs text-slate-600">അധ്യാപകൻ: {b.classTeacher}</p>
-                          <a
-                            href={b.whatsappGroupLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-block bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold"
-                          >
-                            💬 ബാച്ച് വാട്സാപ്പ് ഗ്രൂപ്പ് തുറക്കുക
-                          </a>
-                        </div>
-                      ))}
+                      {/* Row 2: 5 Icons (STUDENT FEE to ACCOUNTS) */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-6 items-start justify-items-center max-w-5xl mx-auto w-full pt-6">
+                        {bottomRowIcons.map((item) => {
+                          const IconComp = item.Component;
+                          return (
+                            <div
+                              key={item.id}
+                              onClick={() => setActiveView(item.id)}
+                              className="launcher-card flex flex-col items-center cursor-pointer group w-full max-w-[175px]"
+                            >
+                              <div className="h-24 flex items-center justify-center mb-2">
+                                <IconComp />
+                              </div>
+                              <div className="cyan-pill w-full min-h-[40px] px-3 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
+                                {item.label}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {/* 11. QUESTION BANK */}
-                {activeTab === "question_bank" && (
-                  <div className="space-y-4">
-                    {questionBank.map((qb) => (
-                      <div key={qb.id} className="bg-white p-6 rounded-2xl border space-y-3">
-                        <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded text-xs font-bold">
-                          Class {qb.grade} • {qb.subject}
-                        </span>
-                        <h4 className="font-bold text-base">{qb.title}</h4>
-                        {qb.questionsList.map((q, i) => (
-                          <div key={i} className="p-3 rounded-xl bg-slate-50 border space-y-1 text-xs">
-                            <p className="font-bold">{q.q}</p>
-                            <p className="text-emerald-800">
-                              <b>ഉത്തരം:</b> {q.a}
-                            </p>
-                          </div>
+                  ) : (
+                    /* Selected Feature View Inside the A PLUS ACCADEMY Frame */
+                    <div className="flex-1 p-6 md:p-8 bg-slate-50/60 overflow-y-auto space-y-5">
+                      {/* Quick Module Bar for jumping between icons */}
+                      <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-200">
+                        <button
+                          onClick={() => setActiveView("home")}
+                          className="px-3 py-1.5 rounded-lg bg-[#195685] text-white text-xs font-bold"
+                        >
+                          ⬅ എല്ലാം കാണുക (All Icons)
+                        </button>
+                        {[...topRowIcons, ...bottomRowIcons].map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveView(item.id)}
+                            className={`cyan-pill px-3 py-1 rounded-md text-xs font-semibold ${
+                              activeView === item.id ? "active font-bold bg-cyan-50" : ""
+                            }`}
+                          >
+                            {item.label.replace("\n", " ")}
+                          </button>
                         ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </main>
+
+                      {/* Render the clicked icon's full feature page */}
+                      {renderModuleContent()}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>

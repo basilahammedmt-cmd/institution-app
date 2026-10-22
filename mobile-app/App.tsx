@@ -13,7 +13,6 @@ import {
 } from "react-native";
 
 type ClassGrade = "8" | "9" | "10";
-type UserRole = "admin" | "teacher" | "student";
 
 interface Batch {
   id: string;
@@ -131,29 +130,19 @@ const INITIAL_STUDENTS: Student[] = [
 ];
 
 export default function App() {
-  const [role, setRole] = useState<UserRole>("admin");
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
-
+  // "home" shows the A PLUS ACCADEMY Icon Grid Landing Page matching the PDF
+  const [activeView, setActiveView] = useState<string>("home");
   const [batches] = useState<Batch[]>(INITIAL_BATCHES);
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
 
-  // Add Student State
   const [stuName, setStuName] = useState("");
   const [stuParent, setStuParent] = useState("");
   const [stuPhone, setStuPhone] = useState("91");
   const [stuAddedBy, setStuAddedBy] = useState("അനിൽ കുമാർ മാസ്റ്റർ");
-  const [selectedBatchId, setSelectedBatchId] = useState("B10-A");
 
-  // Attendance State
   const [attendanceMap, setAttendanceMap] = useState<Record<string, "Present" | "Absent">>({});
-  const [attendanceHistoryCount, setAttendanceHistoryCount] = useState(3);
-
-  // MCQ Exam State
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [examSubmitted, setExamSubmitted] = useState<boolean>(false);
-
-  // Fee Payment State
-  const [selectedFeeStuId, setSelectedFeeStuId] = useState("STU-102");
   const [payAmount, setPayAmount] = useState("2000");
 
   const metrics = useMemo(() => {
@@ -172,97 +161,81 @@ export default function App() {
     };
   }, [students]);
 
+  const landingIcons = [
+    { id: "dashboard", label: "DASH BOARD", symbol: "🖥️" },
+    { id: "students", label: "STUDENTS", symbol: "👥" },
+    { id: "attendance", label: "ATTENDENCE", symbol: "📅" },
+    { id: "faculties", label: "FACULTIES&CHAPTER", symbol: "👨‍🏫" },
+    { id: "exam", label: "EXAM", symbol: "📖" },
+    { id: "exam_report", label: "EXAMINATION\nREPORT", symbol: "📈" },
+    { id: "live_class", label: "LIVE CLASSES", symbol: "🎬" },
+    { id: "student_fee", label: "STUDENT FEE", symbol: "🎓" },
+    { id: "fee_report", label: "FEE REPORT", symbol: "📊" },
+    { id: "communication", label: "COMMUNICATION", symbol: "✈️" },
+    { id: "question_bank", label: "NOTES & QUESTION\nBANK", symbol: "📚" },
+    { id: "accounts", label: "ACCOUNTS", symbol: "💵" },
+  ];
+
+  const sideButtons = [
+    { id: "courses", label: "COURSES" },
+    { id: "schedule", label: "SCHEDULE" },
+    { id: "classes", label: "CLASSES" },
+    { id: "hours", label: "HOURS" },
+    { id: "materials", label: "MATERIALS" },
+  ];
+
   const handleAddStudent = () => {
     if (!stuName.trim()) {
       Alert.alert("അറിയിപ്പ്", "ദയവായി കുട്ടിയുടെ പേര് നൽകുക");
       return;
     }
-    const batch = batches.find((b) => b.id === selectedBatchId) || batches[0];
+    const batch = batches[0];
     const newStu: Student = {
       id: `STU-${Date.now()}`,
-      rollNo: `${batch.grade}A-0${students.length + 1}`,
+      rollNo: `10A-0${students.length + 1}`,
       name: stuName,
-      grade: batch.grade,
+      grade: "10",
       batchId: batch.id,
       batchName: batch.name,
       schoolName: "Govt. HSS Kerala",
       parentName: stuParent || "രക്ഷിതാവ്",
       parentPhone: stuPhone,
       addedBy: stuAddedBy,
-      totalFee: 10000,
+      totalFee: 12000,
       paidFee: 2000,
       discount: 0,
     };
     setStudents([newStu, ...students]);
     setStuName("");
     setStuParent("");
-    Alert.alert("വിജയിച്ചു", `${newStu.name} എന്ന കുട്ടിയെ ${batch.name} ബാച്ചിലേക്ക് ചേർത്തു!`);
   };
-
-  const handleRemoveStudent = (id: string) => {
-    setStudents(students.filter((s) => s.id !== id));
-  };
-
-  const handleRecordFee = () => {
-    const amt = Number(payAmount) || 0;
-    if (amt <= 0) return;
-    setStudents(
-      students.map((s) => (s.id === selectedFeeStuId ? { ...s, paidFee: s.paidFee + amt } : s))
-    );
-    Alert.alert("ഫീസ് രേഖപ്പെടുത്തി", `₹${amt} വിജയകരമായി ബാലൻസ് ഷീറ്റിൽ ചേർത്തു!`);
-  };
-
-  const tabs = [
-    { id: "dashboard", label: "📊 Dashboard" },
-    { id: "students", label: "👨‍🎓 Students" },
-    { id: "attendance", label: "✅ Attendance" },
-    { id: "faculties", label: "👩‍🏫 Chapters" },
-    { id: "exam", label: "📝 MCQ Exam" },
-    { id: "exam_report", label: "🤖 AI Report" },
-    { id: "live_class", label: "🎥 Live Class" },
-    { id: "student_fee", label: "💳 Student Fee" },
-    { id: "fee_report", label: "📈 Fee Report" },
-    { id: "communication", label: "💬 WhatsApp" },
-    { id: "question_bank", label: "📚 Q-Bank" },
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#1e1b4b" />
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
-      {/* Header */}
+      {/* A PLUS ACCADEMY Header matching PDF */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>🎓 കേരള ട്യൂഷൻ ആപ്പ്</Text>
-          <Text style={styles.headerSubtitle}>Govt. School Classes 8, 9 & 10 (Android & iOS)</Text>
-        </View>
-        <View style={styles.roleSwitch}>
-          {(["admin", "teacher", "student"] as UserRole[]).map((r) => (
-            <TouchableOpacity
-              key={r}
-              onPress={() => setRole(r)}
-              style={[styles.roleBtn, role === r && styles.roleBtnActive]}
-            >
-              <Text style={[styles.roleBtnText, role === r && styles.roleBtnTextActive]}>
-                {r.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <TouchableOpacity onPress={() => setActiveView("home")} style={styles.logoRow}>
+          <View style={styles.logoBadge}>
+            <Text style={styles.logoA}>A</Text>
+            <Text style={styles.logoPlus}>+</Text>
+          </View>
+          <Text style={styles.academyTitle}>A PLUS ACCADEMY</Text>
+        </TouchableOpacity>
+        {activeView !== "home" && (
+          <TouchableOpacity onPress={() => setActiveView("home")} style={styles.cyanBtn}>
+            <Text style={styles.cyanBtnText}>← HOME</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Horizontal Module Navigation */}
-      <View style={styles.tabBarContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabBar}>
-          {tabs.map((t) => (
-            <TouchableOpacity
-              key={t.id}
-              onPress={() => setActiveTab(t.id)}
-              style={[styles.tabPill, activeTab === t.id && styles.tabPillActive]}
-            >
-              <Text style={[styles.tabPillText, activeTab === t.id && styles.tabPillTextActive]}>
-                {t.label}
-              </Text>
+      {/* Left Sidebar Buttons Row (COURSES, SCHEDULE, CLASSES, HOURS, MATERIALS) */}
+      <View style={styles.sideBarRow}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          {sideButtons.map((b) => (
+            <TouchableOpacity key={b.id} onPress={() => setActiveView(b.id)} style={styles.cyanPillSmall}>
+              <Text style={styles.cyanPillSmallText}>{b.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -270,320 +243,214 @@ export default function App() {
 
       {/* Main Content */}
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-        {/* 1. DASHBOARD */}
-        {activeTab === "dashboard" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>1. ഡാഷ്‌ബോർഡ് (Complete Dashboard)</Text>
-            <View style={styles.grid2}>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricLabel}>ആകെ കുട്ടികൾ</Text>
-                <Text style={styles.metricValue}>{metrics.totalStudents}</Text>
-                <Text style={styles.metricSub}>Classes 8, 9 & 10</Text>
-              </View>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricLabel}>ഇന്നത്തെ ഹാജർ</Text>
-                <Text style={[styles.metricValue, { color: "#059669" }]}>94%</Text>
-                <Text style={styles.metricSub}>{batches.length} Active Batches</Text>
-              </View>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricLabel}>ലഭിച്ച ഫീസ് (Paid)</Text>
-                <Text style={[styles.metricValue, { color: "#4f46e5" }]}>₹{metrics.totalPaid}</Text>
-                <Text style={styles.metricSub}>Fully Paid: {metrics.fullyPaidCount}</Text>
-              </View>
-              <View style={styles.metricCard}>
-                <Text style={styles.metricLabel}>ബാക്കി ഫീസ് (Pending)</Text>
-                <Text style={[styles.metricValue, { color: "#e11d48" }]}>₹{metrics.pendingBalance}</Text>
-                <Text style={styles.metricSub}>{metrics.pendingStudentsCount} കുട്ടികൾ തരാനുണ്ട്</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* 2. STUDENTS DATA */}
-        {activeTab === "students" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>2. സ്റ്റുഡന്റ്സ് ഡാറ്റ & ബാച്ച് (Students Data)</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardHeader}>➕ പുതിയ കുട്ടിയെ ബാച്ചിലേക്ക് ചേർക്കുക</Text>
-              <TextInput
-                placeholder="കുട്ടിയുടെ പേര് (Student Name)"
-                value={stuName}
-                onChangeText={setStuName}
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="രക്ഷിതാവിന്റെ പേര് (Parent Name)"
-                value={stuParent}
-                onChangeText={setStuParent}
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="വാട്സാപ്പ് നമ്പർ (919847...)"
-                value={stuPhone}
-                onChangeText={setStuPhone}
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="ആരാണ് ചേർത്തത്? (Added By Teacher/Admin)"
-                value={stuAddedBy}
-                onChangeText={setStuAddedBy}
-                style={styles.input}
-              />
-              <TouchableOpacity style={styles.primaryBtn} onPress={handleAddStudent}>
-                <Text style={styles.primaryBtnText}>കുട്ടിയെ ചേർക്കുക (Add Student)</Text>
-              </TouchableOpacity>
-            </View>
-
-            {students.map((s) => (
-              <View key={s.id} style={styles.cardRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.boldText}>{s.name}</Text>
-                  <Text style={styles.subText}>
-                    {s.batchName} • Roll: {s.rollNo}
-                  </Text>
-                  <Text style={styles.badgeText}>👤 ചേർത്തത്: {s.addedBy}</Text>
+        {activeView === "home" ? (
+          /* PDF ICON GRID LANDING PAGE */
+          <View style={styles.iconGrid}>
+            {landingIcons.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => setActiveView(item.id)}
+                style={styles.iconLauncherCard}
+              >
+                <View style={styles.greenIconBox}>
+                  <Text style={styles.greenIconSymbol}>{item.symbol}</Text>
                 </View>
-                <TouchableOpacity onPress={() => handleRemoveStudent(s.id)} style={styles.dangerBtn}>
-                  <Text style={styles.dangerBtnText}>Remove</Text>
-                </TouchableOpacity>
-              </View>
+                <View style={styles.cyanLabelBox}>
+                  <Text style={styles.cyanLabelText}>{item.label}</Text>
+                </View>
+              </TouchableOpacity>
             ))}
           </View>
-        )}
+        ) : (
+          /* SELECTED MODULE VIEW */
+          <View style={{ gap: 12 }}>
+            {activeView === "dashboard" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>DASH BOARD — A PLUS ACCADEMY</Text>
+                <Text style={styles.boldText}>• ആകെ കുട്ടികൾ (Total Students): {metrics.totalStudents}</Text>
+                <Text style={styles.boldText}>• ശരാശരി ഹാജർ (Attendance): 94%</Text>
+                <Text style={styles.boldText}>• പിരിഞ്ഞ ഫീസ് (Paid Fee): ₹{metrics.totalPaid}</Text>
+                <Text style={[styles.boldText, { color: "#e11d48" }]}>
+                  • ബാക്കി ഫീസ് (Pending Fee): ₹{metrics.pendingBalance}
+                </Text>
+              </View>
+            )}
 
-        {/* 3. ATTENDANCE */}
-        {activeTab === "attendance" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. ബാച്ച് അടിസ്ഥാനത്തിലുള്ള അറ്റൻഡൻസ്</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardHeader}>ബാച്ച് തിരഞ്ഞെടുത്ത് ഹാജർ രേഖപ്പെടുത്തുക</Text>
-              {students.map((s) => {
-                const status = attendanceMap[s.id] || "Present";
-                return (
-                  <View key={s.id} style={styles.cardRow}>
-                    <View style={{ flex: 1 }}>
+            {activeView === "students" && (
+              <View style={{ gap: 10 }}>
+                <View style={styles.card}>
+                  <Text style={styles.cardHeader}>➕ പുതിയ കുട്ടിയെ ചേർക്കുക (STUDENTS)</Text>
+                  <TextInput
+                    placeholder="കുട്ടിയുടെ പേര്"
+                    value={stuName}
+                    onChangeText={setStuName}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="രക്ഷിതാവിന്റെ പേര്"
+                    value={stuParent}
+                    onChangeText={setStuParent}
+                    style={styles.input}
+                  />
+                  <TextInput
+                    placeholder="ആരാണ് ചേർത്തത്? (Added By)"
+                    value={stuAddedBy}
+                    onChangeText={setStuAddedBy}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity style={styles.greenBtn} onPress={handleAddStudent}>
+                    <Text style={styles.greenBtnText}>കുട്ടിയെ ചേർക്കുക</Text>
+                  </TouchableOpacity>
+                </View>
+                {students.map((s) => (
+                  <View key={s.id} style={styles.card}>
+                    <Text style={styles.boldText}>{s.name}</Text>
+                    <Text style={styles.subText}>
+                      {s.batchName} • Added by: {s.addedBy}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {activeView === "attendance" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>ATTENDENCE (Batch-wise Marking)</Text>
+                {students.map((s) => {
+                  const st = attendanceMap[s.id] || "Present";
+                  return (
+                    <View key={s.id} style={styles.rowBetween}>
                       <Text style={styles.boldText}>{s.name}</Text>
-                      <Text style={styles.subText}>{s.batchName}</Text>
+                      <TouchableOpacity
+                        onPress={() =>
+                          setAttendanceMap({
+                            ...attendanceMap,
+                            [s.id]: st === "Present" ? "Absent" : "Present",
+                          })
+                        }
+                        style={[
+                          styles.greenBtn,
+                          { backgroundColor: st === "Present" ? "#2d7a47" : "#e11d48", paddingHorizontal: 14 },
+                        ]}
+                      >
+                        <Text style={styles.greenBtnText}>{st}</Text>
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setAttendanceMap({
-                          ...attendanceMap,
-                          [s.id]: status === "Present" ? "Absent" : "Present",
-                        })
-                      }
-                      style={[
-                        styles.statusBtn,
-                        { backgroundColor: status === "Present" ? "#059669" : "#e11d48" },
-                      ]}
-                    >
-                      <Text style={{ color: "#fff", fontWeight: "700", fontSize: 12 }}>{status}</Text>
-                    </TouchableOpacity>
-                  </View>
-                );
-              })}
-              <TouchableOpacity
-                style={styles.primaryBtn}
-                onPress={() => {
-                  setAttendanceHistoryCount(attendanceHistoryCount + 1);
-                  Alert.alert("ഹജർ രേഖപ്പെടുത്തി", "ഇന്നത്തെ ബാച്ച് അറ്റൻഡൻസ് ഹിസ്റ്ററിയിലേക്ക് സേവ് ചെയ്തു!");
-                }}
-              >
-                <Text style={styles.primaryBtnText}>✅ അറ്റൻഡൻസ് സേവ് ചെയ്യുക ({attendanceHistoryCount} Records)</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
+                  );
+                })}
+              </View>
+            )}
 
-        {/* 4. FACULTIES & CHAPTERS */}
-        {activeTab === "faculties" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. ഫാക്കൽറ്റീസ് & ചാപ്റ്റർ പുരോഗതി</Text>
-            <View style={styles.card}>
-              <Text style={styles.boldText}>അനിൽ കുമാർ മാസ്റ്റർ — ഗണിതം (Class 10)</Text>
-              <Text style={styles.subText}>Chapter 1: സമാന്തരശ്രേണികൾ (6/6 ഭാഗങ്ങൾ പൂർത്തിയായി - 100%)</Text>
-              <Text style={styles.badgeText}>✓ സംഖ്യാ ശ്രേണികൾ, ബീജഗണിത രൂപം, പദങ്ങളുടെ തുക</Text>
-            </View>
-            <View style={styles.card}>
-              <Text style={styles.boldText}>ദീപ ടീച്ചർ — ഊർജ്ജതന്ത്രം (Class 10)</Text>
-              <Text style={styles.subText}>Chapter 2: വൈദ്യുതകാന്തിക ഫലം (5/8 ഭാഗങ്ങൾ - 62%)</Text>
-              <Text style={styles.badgeText}>✓ കാന്തമണ്ഡലം, സോളിനോയിഡ്, മോട്ടോർ തത്വം</Text>
-            </View>
-          </View>
-        )}
+            {activeView === "faculties" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>FACULTIES & CHAPTER</Text>
+                <Text style={styles.boldText}>അനിൽ കുമാർ മാസ്റ്റർ — ഗണിതം (Class 10)</Text>
+                <Text style={styles.subText}>Chapter 1: സമാന്തരശ്രേണികൾ (6/6 ഭാഗങ്ങൾ - 100%)</Text>
+              </View>
+            )}
 
-        {/* 5. EXAM (INSTANT SCORE) */}
-        {activeTab === "exam" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. ഓൺലൈൻ പരീക്ഷ (Instant Marks MCQ Exam)</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardHeader}>SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (5 Marks)</Text>
-              <Text style={styles.boldText}>
-                ചോദ്യം 1: 5, 8, 11, 14... എന്ന സമാന്തരശ്രേണിയുടെ പൊതുവ്യത്യാസം എത്ര?
-              </Text>
-              {["2", "3", "4", "5"].map((opt, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  onPress={() => setSelectedOption(idx)}
-                  style={[
-                    styles.optionBtn,
-                    selectedOption === idx && { backgroundColor: "#4f46e5", borderColor: "#4f46e5" },
-                  ]}
-                >
-                  <Text style={{ color: selectedOption === idx ? "#fff" : "#1e293b", fontWeight: "600" }}>
-                    {opt}
-                  </Text>
+            {activeView === "exam" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>ONLINE MCQ EXAM (Instant Score)</Text>
+                <Text style={styles.boldText}>
+                  1. 5, 8, 11, 14... എന്ന സമാന്തരശ്രേണിയുടെ പൊതുവ്യത്യാസം എത്ര?
+                </Text>
+                {["2", "3", "4", "5"].map((opt, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    onPress={() => setSelectedOption(idx)}
+                    style={[
+                      styles.optionBtn,
+                      selectedOption === idx && { backgroundColor: "#2d7a47" },
+                    ]}
+                  >
+                    <Text style={{ color: selectedOption === idx ? "#fff" : "#000" }}>{opt}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={styles.greenBtn} onPress={() => setExamSubmitted(true)}>
+                  <Text style={styles.greenBtnText}>Submit & View Marks</Text>
                 </TouchableOpacity>
-              ))}
-              <TouchableOpacity
-                style={styles.primaryBtn}
-                onPress={() => setExamSubmitted(true)}
-              >
-                <Text style={styles.primaryBtnText}>സബ്മിറ്റ് ചെയ്ത് മാർക്ക് കാണുക</Text>
-              </TouchableOpacity>
-              {examSubmitted && (
-                <View style={{ marginTop: 12, padding: 12, backgroundColor: "#ecfdf5", borderRadius: 10 }}>
-                  <Text style={{ fontWeight: "800", color: "#065f46" }}>
-                    🎉 നിങ്ങൾ നേടിയ മാർക്ക്: {selectedOption === 1 ? "5 / 5 (100%)" : "0 / 5"} (ശരിയുത്തരം: 3)
+                {examSubmitted && (
+                  <Text style={[styles.boldText, { color: "#2d7a47", marginTop: 8 }]}>
+                    നിങ്ങൾ നേടിയ മാർക്ക്: {selectedOption === 1 ? "5 / 5 (100%)" : "0 / 5"}
                   </Text>
-                </View>
-              )}
-            </View>
-          </View>
-        )}
+                )}
+              </View>
+            )}
 
-        {/* 6. AI EXAM GRAPHICAL REPORT */}
-        {activeTab === "exam_report" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>6. AI എക്സാമിനേഷൻ ഗ്രാഫിക്കൽ റിപ്പോർട്ട്</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardHeader}>🤖 AI Performance Graph — ആദിത്യൻ കെ. ആർ. (Class 10)</Text>
-              {[
-                { sub: "ഗണിതം (Maths)", pct: 90 },
-                { sub: "ഊർജ്ജതന്ത്രം (Physics)", pct: 93 },
-                { sub: "രസതന്ത്രം (Chemistry)", pct: 75 },
-                { sub: "ജീവശാസ്ത്രം (Biology)", pct: 95 },
-              ].map((item, i) => (
-                <View key={i} style={{ marginBottom: 10 }}>
-                  <Text style={styles.subText}>
-                    {item.sub}: {item.pct}%
-                  </Text>
-                  <View style={{ height: 10, backgroundColor: "#e2e8f0", borderRadius: 6 }}>
-                    <View
-                      style={{
-                        width: `${item.pct}%`,
-                        height: 10,
-                        backgroundColor: "#4f46e5",
-                        borderRadius: 6,
-                      }}
-                    />
-                  </View>
-                </View>
-              ))}
-              <Text style={[styles.badgeText, { marginTop: 8 }]}>
-                🤖 AI വിലയിരുത്തൽ: കുട്ടിയുടെ ശരാശരി മാർക്ക് 88% (A+ നിലവാരം). കെമിസ്ട്രിയിൽ അല്പം കൂടി ശ്രദ്ധിച്ചാൽ മുഴുവൻ വിഷയങ്ങളിലും A+ ഉറപ്പാക്കാം.
-              </Text>
-            </View>
-          </View>
-        )}
+            {activeView === "exam_report" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>AI EXAMINATION REPORT</Text>
+                <Text style={styles.boldText}>ആദിത്യൻ കെ. ആർ. — ശരാശരി മാർക്ക്: 88% (A+ Grade)</Text>
+                <Text style={styles.subText}>Maths: 90% | Physics: 93% | Chemistry: 75% | Biology: 95%</Text>
+              </View>
+            )}
 
-        {/* 7. YOUTUBE LIVE CLASS */}
-        {activeTab === "live_class" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>7. YouTube ലൈവ് ക്ലാസ് (Live Classroom)</Text>
-            <View style={styles.card}>
-              <Text style={styles.boldText}>🔴 SSLC Maths - വൃത്തങ്ങളും തൊടുവരകളും Live</Text>
-              <Text style={styles.subText}>Batch A • അനിൽ കുമാർ മാസ്റ്റർ • 07:00 PM</Text>
-              <TouchableOpacity
-                style={[styles.primaryBtn, { backgroundColor: "#dc2626", marginTop: 10 }]}
-                onPress={() => Linking.openURL("https://www.youtube.com/watch?v=aircAruvnKk")}
-              >
-                <Text style={styles.primaryBtnText}>▶ YouTube ലൈവ് ക്ലാസ് തുറക്കുക</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* 8. STUDENT FEE BALANCE SHEET */}
-        {activeTab === "student_fee" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>8. സ്റ്റുഡന്റ് ഫീ ബാലൻസ് ഷീറ്റ്</Text>
-            <View style={styles.card}>
-              <Text style={styles.cardHeader}>💳 ഫീസ് അടയ്ക്കുക</Text>
-              <TextInput
-                placeholder="തുക (₹)"
-                value={payAmount}
-                onChangeText={setPayAmount}
-                keyboardType="numeric"
-                style={styles.input}
-              />
-              <TouchableOpacity style={styles.primaryBtn} onPress={handleRecordFee}>
-                <Text style={styles.primaryBtnText}>ഫീസ് രേഖപ്പെടുത്തുക</Text>
-              </TouchableOpacity>
-            </View>
-            {students.map((s) => {
-              const bal = s.totalFee - s.discount - s.paidFee;
-              return (
-                <View key={s.id} style={styles.card}>
-                  <Text style={styles.boldText}>{s.name}</Text>
-                  <Text style={styles.subText}>
-                    ആകെ ഫീസ്: ₹{s.totalFee} | നൽകിയത്: ₹{s.paidFee} | ഇനി തരാനുള്ളത്: ₹{bal}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        )}
-
-        {/* 9. INSTITUTION FEE REPORT */}
-        {activeTab === "fee_report" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>9. സ്ഥാപനത്തിലെ മൊത്തം ഫീ റിപ്പോർട്ട്</Text>
-            <View style={styles.card}>
-              <Text style={styles.boldText}>• മുഴുവൻ ഫീസും അടച്ചവർ (Fully Paid): {metrics.fullyPaidCount} പേർ</Text>
-              <Text style={styles.boldText}>
-                • ബാക്കി ഫീസ് തരാനുള്ളവർ (Pending Students): {metrics.pendingStudentsCount} പേർ
-              </Text>
-              <Text style={styles.boldText}>• ആകെ പിരിഞ്ഞുകിട്ടിയ തുക: ₹{metrics.totalPaid}</Text>
-              <Text style={[styles.boldText, { color: "#e11d48" }]}>
-                • ഇനി പിരിഞ്ഞുകിട്ടാനുള്ള ബാലൻസ്: ₹{metrics.pendingBalance}
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* 10. WHATSAPP COMMUNICATION */}
-        {activeTab === "communication" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>10. വാട്സാപ്പ് ഗ്രൂപ്പ് കമ്മ്യൂണിക്കേഷൻ</Text>
-            {batches.map((b) => (
-              <View key={b.id} style={styles.card}>
-                <Text style={styles.boldText}>{b.name}</Text>
-                <Text style={styles.subText}>അധ്യാപകൻ: {b.classTeacher}</Text>
+            {activeView === "live_class" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>YOUTUBE LIVE CLASSES</Text>
+                <Text style={styles.boldText}>🔴 SSLC Maths - വൃത്തങ്ങളും തൊടുവരകളും Live</Text>
                 <TouchableOpacity
-                  style={[styles.primaryBtn, { backgroundColor: "#059669", marginTop: 8 }]}
-                  onPress={() => Linking.openURL(b.whatsappGroupLink)}
+                  style={[styles.greenBtn, { marginTop: 10 }]}
+                  onPress={() => Linking.openURL("https://www.youtube.com/watch?v=aircAruvnKk")}
                 >
-                  <Text style={styles.primaryBtnText}>💬 രക്ഷിതാക്കളുടെ വാട്സാപ്പ് ഗ്രൂപ്പ് തുറക്കുക</Text>
+                  <Text style={styles.greenBtnText}>▶ Watch YouTube Live</Text>
                 </TouchableOpacity>
               </View>
-            ))}
-          </View>
-        )}
+            )}
 
-        {/* 11. QUESTION BANK */}
-        {activeTab === "question_bank" && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>11. ക്വസ്റ്റ്യൻ ബാങ്ക് (Question Bank)</Text>
-            <View style={styles.card}>
-              <Text style={styles.boldText}>
-                SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (കഴിഞ്ഞ 5 വർഷത്തെ ചോദ്യങ്ങൾ)
-              </Text>
-              <Text style={styles.subText}>
-                Q1: ഒരു സമാന്തരശ്രേണിയുടെ 5-ാം പദം 17-ഉം 10-ാം പദം 32-ഉം ആയാൽ പൊതുവ്യത്യാസം കാണുക.
-              </Text>
-              <Text style={styles.badgeText}>ഉത്തരം: d = (32 - 17) / 5 = 3</Text>
-            </View>
+            {activeView === "student_fee" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>STUDENT FEE LEDGER</Text>
+                <TextInput value={payAmount} onChangeText={setPayAmount} style={styles.input} />
+                {students.map((s) => (
+                  <Text key={s.id} style={styles.subText}>
+                    {s.name}: Total ₹{s.totalFee} | Paid ₹{s.paidFee} | Balance ₹{s.totalFee - s.paidFee}
+                  </Text>
+                ))}
+              </View>
+            )}
+
+            {activeView === "fee_report" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>INSTITUTION FEE REPORT</Text>
+                <Text style={styles.boldText}>Fully Paid Students: {metrics.fullyPaidCount}</Text>
+                <Text style={styles.boldText}>Pending Fee Students: {metrics.pendingStudentsCount}</Text>
+                <Text style={[styles.boldText, { color: "#e11d48" }]}>
+                  Total Balance Pending: ₹{metrics.pendingBalance}
+                </Text>
+              </View>
+            )}
+
+            {activeView === "communication" && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>WHATSAPP COMMUNICATION</Text>
+                {batches.map((b) => (
+                  <TouchableOpacity
+                    key={b.id}
+                    style={[styles.greenBtn, { marginVertical: 4 }]}
+                    onPress={() => Linking.openURL(b.whatsappGroupLink)}
+                  >
+                    <Text style={styles.greenBtnText}>💬 Open {b.name} WhatsApp Group</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {(activeView === "question_bank" ||
+              activeView === "accounts" ||
+              activeView === "courses" ||
+              activeView === "schedule" ||
+              activeView === "classes" ||
+              activeView === "hours" ||
+              activeView === "materials") && (
+              <View style={styles.card}>
+                <Text style={styles.cardHeader}>{activeView.toUpperCase()} — A PLUS ACCADEMY</Text>
+                <Text style={styles.subText}>
+                  കേരള സിലബസ് 8, 9, 10 ക്ലാസുകളിലെ മുഴുവൻ പഠന വിവരങ്ങളും ഇവിടെ ലഭ്യമാണ്.
+                </Text>
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
@@ -592,89 +459,126 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f8fafc" },
+  safeArea: { flex: 1, backgroundColor: "#ffffff" },
   header: {
-    backgroundColor: "#1e1b4b",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#169bc2",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
   },
-  headerTitle: { color: "#fff", fontSize: 17, fontWeight: "800" },
-  headerSubtitle: { color: "#a5b4fc", fontSize: 11, marginTop: 2 },
-  roleSwitch: { flexDirection: "row", backgroundColor: "#312e81", borderRadius: 8, padding: 2 },
-  roleBtn: { paddingHorizontal: 8, paddingVertical: 5, borderRadius: 6 },
-  roleBtnActive: { backgroundColor: "#fbbf24" },
-  roleBtnText: { color: "#e0e7ff", fontSize: 10, fontWeight: "700" },
-  roleBtnTextActive: { color: "#1e1b4b" },
-  tabBarContainer: { backgroundColor: "#312e81", paddingVertical: 8 },
-  tabBar: { paddingHorizontal: 12, gap: 8 },
-  tabPill: {
+  logoRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  logoBadge: { flexDirection: "row", alignItems: "flex-start" },
+  logoA: { fontSize: 28, fontWeight: "900", color: "#1e4b85", fontStyle: "italic" },
+  logoPlus: { fontSize: 18, fontWeight: "900", color: "#c81e1e", marginTop: -2 },
+  academyTitle: { fontSize: 20, fontWeight: "900", color: "#195685", letterSpacing: 1 },
+  sideBarRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
+  },
+  cyanPillSmall: {
+    borderWidth: 1.5,
+    borderColor: "#169bc2",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: "#3730a3",
+    borderRadius: 8,
     marginRight: 8,
   },
-  tabPillActive: { backgroundColor: "#fbbf24" },
-  tabPillText: { color: "#e0e7ff", fontSize: 12, fontWeight: "700" },
-  tabPillTextActive: { color: "#1e1b4b" },
+  cyanPillSmallText: { fontSize: 11, fontWeight: "600", color: "#0f172a" },
+  cyanBtn: {
+    borderWidth: 1.5,
+    borderColor: "#169bc2",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  cyanBtnText: { fontSize: 11, fontWeight: "700", color: "#195685" },
   container: { flex: 1, padding: 14 },
-  section: { gap: 12 },
-  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#0f172a", marginBottom: 8 },
-  grid2: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  metricCard: {
-    width: "48%",
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-  },
-  metricLabel: { fontSize: 11, color: "#64748b", fontWeight: "600" },
-  metricValue: { fontSize: 22, fontWeight: "800", color: "#0f172a", marginVertical: 4 },
-  metricSub: { fontSize: 10, color: "#64748b" },
-  card: {
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    marginBottom: 10,
-  },
-  cardRow: {
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    marginBottom: 8,
+  iconGrid: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     justifyContent: "space-between",
+    paddingTop: 10,
   },
-  cardHeader: { fontSize: 14, fontWeight: "700", color: "#1e293b", marginBottom: 10 },
+  iconLauncherCard: {
+    width: "31%",
+    alignItems: "center",
+    marginBottom: 22,
+  },
+  greenIconBox: {
+    width: 64,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: "#2d7a47",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 1, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  greenIconSymbol: { fontSize: 28 },
+  cyanLabelBox: {
+    width: "100%",
+    minHeight: 36,
+    borderWidth: 1.5,
+    borderColor: "#169bc2",
+    borderRadius: 8,
+    backgroundColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    paddingVertical: 4,
+  },
+  cyanLabelText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#111827",
+    textAlign: "center",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#169bc2",
+    marginBottom: 10,
+  },
+  cardHeader: { fontSize: 15, fontWeight: "800", color: "#195685", marginBottom: 10 },
+  boldText: { fontSize: 13, fontWeight: "700", color: "#0f172a", marginVertical: 2 },
+  subText: { fontSize: 12, color: "#475569", marginTop: 3 },
   input: {
     borderWidth: 1,
     borderColor: "#cbd5e1",
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderRadius: 8,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    fontSize: 13,
     marginBottom: 8,
-    backgroundColor: "#f8fafc",
   },
-  primaryBtn: {
-    backgroundColor: "#4f46e5",
-    paddingVertical: 11,
-    borderRadius: 10,
+  greenBtn: {
+    backgroundColor: "#2d7a47",
+    paddingVertical: 10,
+    borderRadius: 8,
     alignItems: "center",
   },
-  primaryBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
-  dangerBtn: { backgroundColor: "#ffe4e6", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-  dangerBtnText: { color: "#e11d48", fontSize: 11, fontWeight: "700" },
-  statusBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  greenBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 12 },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
   optionBtn: {
     borderWidth: 1,
     borderColor: "#cbd5e1",
@@ -682,7 +586,4 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 4,
   },
-  boldText: { fontSize: 14, fontWeight: "700", color: "#0f172a" },
-  subText: { fontSize: 12, color: "#475569", marginTop: 2 },
-  badgeText: { fontSize: 11, color: "#4f46e5", fontWeight: "600", marginTop: 4 },
 });
