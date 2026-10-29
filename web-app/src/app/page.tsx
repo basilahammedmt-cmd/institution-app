@@ -710,8 +710,8 @@ export default function APlusAcademyPortal() {
                 </svg>
               </div>
               <div>
-                <h2 className="font-bold text-lg leading-tight tracking-wide text-white">A PLUS</h2>
-                <p className="text-xs text-sky-200 font-medium">High School Tuition</p>
+                <h2 className="font-bold text-base leading-tight tracking-wide text-white">A PLUS ACCADEMY</h2>
+                <p className="text-xs text-sky-200 font-medium">Tuition Centers</p>
               </div>
             </div>
 
@@ -735,9 +735,30 @@ export default function APlusAcademyPortal() {
             </nav>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/80 space-y-1">
-            <div className="font-bold text-white">SCERT Kerala Syllabus</div>
-            <div>Classes 8, 9 & 10 (Govt. Schools)</div>
+          <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/90 space-y-2.5">
+            <div>
+              <div className="font-extrabold text-white tracking-wide">A PLUS ACCADEMY</div>
+              <div className="text-[11px] text-sky-200">Tuition Centers (Std 8, 9 & 10)</div>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { g: "8", batchId: "B08-A" },
+                { g: "9", batchId: "B09-A" },
+                { g: "10", batchId: "B10-A" },
+              ].map((cls) => (
+                <button
+                  key={cls.g}
+                  onClick={() => {
+                    setSelectedAttBatchId(cls.batchId);
+                    setNewStudent({ ...newStudent, batchId: cls.batchId });
+                    setActiveView("attendance");
+                  }}
+                  className="py-1.5 px-1 rounded-md bg-white/10 hover:bg-[#1967d2] text-white font-bold text-[11px] border border-white/20 transition text-center"
+                >
+                  Class {cls.g}
+                </button>
+              ))}
+            </div>
           </div>
         </aside>
 

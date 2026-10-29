@@ -2832,9 +2832,9 @@
                     </div>
                   </div>
                   <div className="p-3.5 rounded-xl border border-cyan-600/40 bg-white shadow-sm text-center space-y-1">
-                    <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">SCERT KERALA</div>
+                    <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">A PLUS ACCADEMY</div>
                     <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-200">
-                      ● Std 8, 9 & 10 Batches
+                      ● Tuition Centers (8, 9 & 10)
                     </div>
                   </div>
                 </div>
@@ -2950,10 +2950,10 @@
                         </svg>
                       </div>
                       <div>
-                        <h2 className="font-bold text-lg leading-tight tracking-wide text-white">
-                          A PLUS
+                        <h2 className="font-bold text-base leading-tight tracking-wide text-white">
+                          A PLUS ACCADEMY
                         </h2>
-                        <p className="text-xs text-sky-200 font-medium">High School Tuition</p>
+                        <p className="text-xs text-sky-200 font-medium">Tuition Centers</p>
                       </div>
                     </div>
 
@@ -2979,10 +2979,32 @@
                     </nav>
                   </div>
 
-                  {/* Bottom Sidebar Info */}
-                  <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/80 space-y-1">
-                    <div className="font-bold text-white">SCERT Kerala Syllabus</div>
-                    <div>Classes 8, 9 & 10 (Govt. Schools)</div>
+                  {/* Bottom Sidebar Info: A PLUS ACCADEMY Tuition Centers + Clickable Class 8, 9, 10 */}
+                  <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/90 space-y-2.5">
+                    <div>
+                      <div className="font-extrabold text-white tracking-wide">A PLUS ACCADEMY</div>
+                      <div className="text-[11px] text-sky-200">Tuition Centers (Std 8, 9 & 10)</div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { g: "8", batchId: "B08-A" },
+                        { g: "9", batchId: "B09-A" },
+                        { g: "10", batchId: "B10-A" },
+                      ].map((cls) => (
+                        <button
+                          key={cls.g}
+                          onClick={() => {
+                            setSelectedAttBatchId(cls.batchId);
+                            setNewStudent({ ...newStudent, batchId: cls.batchId });
+                            setActiveView("attendance");
+                          }}
+                          className="py-1.5 px-1 rounded-md bg-white/10 hover:bg-[#1967d2] text-white font-bold text-[11px] border border-white/20 transition text-center"
+                          title={`Open Class ${cls.g} Batch`}
+                        >
+                          Class {cls.g}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </aside>
 
