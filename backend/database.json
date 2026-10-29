@@ -1,0 +1,235 @@
+{
+  "batches": [
+    {
+      "id": "B10-A",
+      "name": "SSLC (Class 10) - Batch A (Morning)",
+      "grade": "10",
+      "timing": "06:30 AM - 08:30 AM",
+      "hoursPerWeek": "12 Hours / Week",
+      "courseTitle": "SSLC Sure A+ Regular Tuition Course",
+      "classTeacher": "അനിൽ കുമാർ മാസ്റ്റർ (Maths)",
+      "whatsappGroupLink": "https://chat.whatsapp.com/sslc-batch-a-kerala"
+    },
+    {
+      "id": "B10-B",
+      "name": "SSLC (Class 10) - Batch B (Evening)",
+      "grade": "10",
+      "timing": "04:30 PM - 06:30 PM",
+      "hoursPerWeek": "12 Hours / Week",
+      "courseTitle": "SSLC Evening Intensive Batch",
+      "classTeacher": "ദീപ ടീച്ചർ (Physics)",
+      "whatsappGroupLink": "https://chat.whatsapp.com/sslc-batch-b-kerala"
+    },
+    {
+      "id": "B09-A",
+      "name": "Class 9 - State Batch A",
+      "grade": "9",
+      "timing": "04:30 PM - 06:30 PM",
+      "hoursPerWeek": "10 Hours / Week",
+      "courseTitle": "Standard 9 SCERT State Syllabus Tuition",
+      "classTeacher": "ഷാജി മാസ്റ്റർ (Chemistry)",
+      "whatsappGroupLink": "https://chat.whatsapp.com/class9-batch-a-kerala"
+    },
+    {
+      "id": "B08-A",
+      "name": "Class 8 - Foundation Batch A",
+      "grade": "8",
+      "timing": "05:00 PM - 06:45 PM",
+      "hoursPerWeek": "9 Hours / Week",
+      "courseTitle": "Standard 8 High School Foundation Course",
+      "classTeacher": "രമ്യ ടീച്ചർ (Biology)",
+      "whatsappGroupLink": "https://chat.whatsapp.com/class8-batch-a-kerala"
+    }
+  ],
+  "students": [
+    {
+      "id": "STU-101",
+      "rollNo": "10A-01",
+      "name": "ആദിത്യൻ കെ. ആർ. (Adithyan K R)",
+      "grade": "10",
+      "batchId": "B10-A",
+      "batchName": "SSLC (Class 10) - Batch A (Morning)",
+      "schoolName": "Govt. Model Boys HSS, Kozhikode",
+      "parentName": "രാജേഷ് കെ.",
+      "parentPhone": "919847011223",
+      "addedBy": "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+      "joinedDate": "2026-06-01",
+      "totalFee": 12000,
+      "paidFee": 12000,
+      "discount": 0,
+      "feeHistory": [
+        { "id": "FH1", "date": "2026-06-05", "amount": 6000, "mode": "UPI", "receiptNo": "RCP-1001" },
+        { "id": "FH2", "date": "2026-08-10", "amount": 6000, "mode": "Cash", "receiptNo": "RCP-1042" }
+      ]
+    },
+    {
+      "id": "STU-102",
+      "rollNo": "10A-02",
+      "name": "ഫാത്തിമ സഹ്‌റ (Fathima Zahra)",
+      "grade": "10",
+      "batchId": "B10-A",
+      "batchName": "SSLC (Class 10) - Batch A (Morning)",
+      "schoolName": "GVHSS Nadakkavu",
+      "parentName": "അബ്ദുൾ സലാം",
+      "parentPhone": "919847022334",
+      "addedBy": "Admin (Office)",
+      "joinedDate": "2026-06-02",
+      "totalFee": 12000,
+      "paidFee": 8000,
+      "discount": 0,
+      "feeHistory": [
+        { "id": "FH3", "date": "2026-06-02", "amount": 5000, "mode": "UPI", "receiptNo": "RCP-1003" },
+        { "id": "FH4", "date": "2026-09-01", "amount": 3000, "mode": "Cash", "receiptNo": "RCP-1088" }
+      ]
+    },
+    {
+      "id": "STU-104",
+      "rollNo": "09A-01",
+      "name": "മുഹമ്മദ് നിഹാൽ (Muhammed Nihal)",
+      "grade": "9",
+      "batchId": "B09-A",
+      "batchName": "Class 9 - State Batch A",
+      "schoolName": "Govt. Ganapath HSS",
+      "parentName": "ഹംസ കെ.",
+      "parentPhone": "919847044556",
+      "addedBy": "ഷാജി മാസ്റ്റർ (Teacher)",
+      "joinedDate": "2026-06-10",
+      "totalFee": 10000,
+      "paidFee": 10000,
+      "discount": 0,
+      "feeHistory": [
+        { "id": "FH6", "date": "2026-06-10", "amount": 10000, "mode": "Bank", "receiptNo": "RCP-1015" }
+      ]
+    },
+    {
+      "id": "STU-106",
+      "rollNo": "08A-01",
+      "name": "അഭിനവ് കൃഷ്ണ (Abhinav Krishna)",
+      "grade": "8",
+      "batchId": "B08-A",
+      "batchName": "Class 8 - Foundation Batch A",
+      "schoolName": "Govt. Achuthan Girls & Boys HS",
+      "parentName": "കൃഷ്ണകുമാർ",
+      "parentPhone": "919847066778",
+      "addedBy": "രമ്യ ടീച്ചർ (Teacher)",
+      "joinedDate": "2026-06-15",
+      "totalFee": 8500,
+      "paidFee": 0,
+      "discount": 0,
+      "feeHistory": []
+    }
+  ],
+  "attendance": [
+    {
+      "id": "ATT-1",
+      "date": "2026-10-21",
+      "batchId": "B10-A",
+      "batchName": "SSLC (Class 10) - Batch A (Morning)",
+      "grade": "10",
+      "markedBy": "അനിൽ കുമാർ മാസ്റ്റർ",
+      "records": [
+        { "studentId": "STU-101", "studentName": "ആദിത്യൻ കെ. ആർ.", "rollNo": "10A-01", "status": "Present" },
+        { "studentId": "STU-102", "studentName": "ഫാത്തിമ സഹ്‌റ", "rollNo": "10A-02", "status": "Present" }
+      ]
+    }
+  ],
+  "facultyChapters": [
+    {
+      "id": "FC-1",
+      "facultyName": "അനിൽ കുമാർ മാസ്റ്റർ",
+      "grade": "10",
+      "batchId": "B10-A",
+      "batchName": "SSLC (Class 10) - Batch A (Morning)",
+      "subject": "ഗണിതം (Mathematics)",
+      "chapterNo": 1,
+      "chapterTitle": "സമാന്തരശ്രേണികൾ (Arithmetic Sequences)",
+      "totalPortions": 6,
+      "completedPortions": 6,
+      "topicsCovered": ["സംഖ്യാ ശ്രേണികൾ", "ബീജഗണിത രൂപം (Algebraic Form)", "പദങ്ങളുടെ തുക (Sum)"],
+      "lastUpdated": "2026-10-15"
+    }
+  ],
+  "exams": [
+    {
+      "id": "EX-101",
+      "title": "SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (Chapter 1 Model Exam)",
+      "subject": "ഗണിതം (Mathematics)",
+      "grade": "10",
+      "durationMinutes": 15,
+      "totalMarks": 20,
+      "questions": [
+        {
+          "id": "Q1",
+          "question": "5, 8, 11, 14... എന്ന സമാന്തരശ്രേണിയുടെ പൊതുവ്യത്യാസം (Common Difference) എത്ര?",
+          "options": ["2", "3", "4", "5"],
+          "correctAnswerIndex": 1,
+          "marks": 5
+        }
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "id": "AT-1",
+      "examTitle": "SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (Chapter 1)",
+      "subject": "ഗണിതം (Mathematics)",
+      "studentId": "STU-101",
+      "studentName": "ആദിത്യൻ കെ. ആർ.",
+      "date": "2026-10-05",
+      "score": 18,
+      "totalMarks": 20,
+      "percentage": 90
+    }
+  ],
+  "liveClasses": [
+    {
+      "id": "LC-1",
+      "title": "SSLC Maths - വൃത്തങ്ങളും തൊടുവരകളും (Sure A+ Live Revision)",
+      "subject": "ഗണിതം (Mathematics)",
+      "grade": "10",
+      "batchId": "B10-A",
+      "batchName": "SSLC (Class 10) - Batch A (Morning)",
+      "facultyName": "അനിൽ കുമാർ മാസ്റ്റർ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=aircAruvnKk",
+      "scheduledDate": "2026-10-21",
+      "scheduledTime": "07:00 PM",
+      "isLive": true
+    }
+  ],
+  "questionBank": [
+    {
+      "id": "QB-1",
+      "title": "SSLC ഗണിതം - സമാന്തരശ്രേണികൾ (കഴിഞ്ഞ 5 വർഷത്തെ ചോദ്യങ്ങളും ഉത്തരങ്ങളും)",
+      "grade": "10",
+      "subject": "ഗണിതം (Mathematics)",
+      "type": "Previous Year Paper",
+      "uploadedBy": "അനിൽ കുമാർ മാസ്റ്റർ",
+      "uploadedDate": "2026-10-10",
+      "questionsList": [
+        {
+          "q": "1) ഒരു സമാന്തരശ്രേണിയുടെ 5-ാം പദം 17-ഉം 10-ാം പദം 32-ഉം ആയാൽ പൊതുവ്യത്യാസവും ആദ്യപദവും കാണുക.",
+          "a": "പൊതുവ്യത്യാസം d = (32 - 17) / (10 - 5) = 15 / 5 = 3. ആദ്യപദം = 17 - 4(3) = 5.",
+          "marks": 3
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "id": "ACC-1",
+      "date": "2026-10-05",
+      "title": "SSLC & Class 9 Tuition Fee Collection",
+      "type": "Income",
+      "amount": 30000,
+      "category": "Student Fees"
+    },
+    {
+      "id": "ACC-2",
+      "date": "2026-10-10",
+      "title": "Faculty Honorarium (Maths & Science)",
+      "type": "Expense",
+      "amount": 14000,
+      "category": "Salary"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "a-plus-academy-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API & Database Server for A PLUS ACCADEMY (Classes 8, 9, 10 Tuition App)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
+  }
+}
