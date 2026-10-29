@@ -503,11 +503,14 @@ export default function APlusAcademyPortal() {
             <h3>ഫീസ് വിവരങ്ങൾ (Fee Summary)</h3>
             <p>ആകെ ഫീസ് (Total Fee): ₹${stu.totalFee} | അടച്ച ഫീസ് (Paid): ₹${stu.paidFee} | ബാക്കി (Balance): ₹${bal}</p>
           </div>
-          <script>window.onload = function(){ window.print(); }</script>
         </body>
       </html>
     `);
     w.document.close();
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 250);
   };
 
   const handleAddStudent = (e: React.FormEvent) => {

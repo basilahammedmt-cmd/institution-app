@@ -1105,14 +1105,14 @@
                 </tbody>
               </table>
             </div>
-
-            <script>
-              window.onload = function() { window.print(); };
-            </script>
           </body>
           </html>
         `);
         printWin.document.close();
+        setTimeout(() => {
+          printWin.focus();
+          printWin.print();
+        }, 250);
       };
 
       const handleDownloadAllStudentsPDF = () => {
@@ -1169,11 +1169,14 @@
                   .join("")}
               </tbody>
             </table>
-            <script>window.onload = function() { window.print(); };</script>
           </body>
           </html>
         `);
         printWin.document.close();
+        setTimeout(() => {
+          printWin.focus();
+          printWin.print();
+        }, 250);
       };
 
       const handleSaveAttendance = () => {
@@ -1923,12 +1926,12 @@
                           setNewStudent({
                             name: "",
                             rollNo: "",
-                            batchId: "b10a",
-                            schoolName: "ഗവ. മോഡൽ എച്ച്.എസ്.എസ്",
+                            batchId: "B10-A",
+                            schoolName: "Govt. HSS",
                             parentName: "",
                             parentPhone: "91",
-                            addedBy: "അബ്ദുൾ റഹിമാൻ മാസ്റ്റർ",
-                            totalFee: 6000,
+                            addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+                            totalFee: 12000,
                             paidFee: 2000,
                             discount: 0,
                           });
