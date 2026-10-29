@@ -400,11 +400,65 @@ export default function APlusAcademyPortal() {
   ];
 
   const leftSideButtons = [
-    { id: "courses", label: "COURSES", rounded: "rounded-md", spacerBefore: false },
-    { id: "schedule", label: "SCHEDULE", rounded: "rounded-md", spacerBefore: false },
-    { id: "classes", label: "CLASSES", rounded: "rounded-full", spacerBefore: false },
-    { id: "hours", label: "HOURS", rounded: "rounded-full", spacerBefore: true },
-    { id: "materials", label: "MATERIALS", rounded: "rounded-none", spacerBefore: false },
+    {
+      id: "courses",
+      label: "COURSES",
+      bgLight: "#dbeafe",
+      svg: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e40af" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c3 3 9 3 12 0v-5" />
+        </svg>
+      ),
+    },
+    {
+      id: "schedule",
+      label: "SCHEDULE",
+      bgLight: "#ccfbf1",
+      svg: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      ),
+    },
+    {
+      id: "classes",
+      label: "CLASSES",
+      bgLight: "#e0f2fe",
+      svg: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
+    {
+      id: "hours",
+      label: "HOURS",
+      bgLight: "#fef3c7",
+      svg: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      ),
+    },
+    {
+      id: "materials",
+      label: "MATERIALS",
+      bgLight: "#d1fae5",
+      svg: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      ),
+    },
   ];
 
   const handleAddStudent = (e: React.FormEvent) => {
@@ -509,19 +563,52 @@ export default function APlusAcademyPortal() {
       {/* Outer Framed Canvas matching PDF border */}
       <div className="w-full max-w-[1360px] min-h-[760px] border border-slate-400 bg-white flex relative shadow-sm">
         {/* Left Sidebar Column (COURSES, SCHEDULE, CLASSES, HOURS, MATERIALS) */}
-        <div className="w-40 md:w-48 border-r border-[#169bc2]/70 flex flex-col pt-36 px-3 space-y-4 flex-shrink-0">
-          {leftSideButtons.map((btn) => (
-            <React.Fragment key={btn.id}>
-              {btn.spacerBefore && <div className="h-6" />}
-              <button
-                onClick={() => setActiveView(btn.id)}
-                className={`border-[1.6px] border-[#169bc2] bg-white hover:bg-sky-50 text-slate-900 w-full py-2.5 px-3 text-xs md:text-sm font-medium tracking-wide text-center transition ${btn.rounded}`}
-              >
-                {btn.label}
-              </button>
-            </React.Fragment>
-          ))}
-          <div className="h-9 w-full border border-[#169bc2]/70 mt-2" />
+        <div className="w-52 md:w-60 border-r border-[#169bc2]/70 bg-slate-50/40 flex flex-col justify-between py-6 px-4 flex-shrink-0">
+          <div>
+            <div className="mb-6 pb-3 border-b border-slate-200/80 text-center">
+              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#195685]">
+                ACADEMIC MENU
+              </span>
+            </div>
+
+            <div className="space-y-3.5 mt-4">
+              {leftSideButtons.map((btn) => {
+                const isActive = activeView === btn.id;
+                return (
+                  <button
+                    key={btn.id}
+                    onClick={() => setActiveView(btn.id)}
+                    className={`w-full h-12 px-3.5 rounded-xl border-[1.8px] flex items-center gap-3 transition-all duration-200 shadow-sm group ${
+                      isActive
+                        ? "bg-[#195685] border-[#195685] text-white shadow-md scale-[1.02]"
+                        : "bg-white border-[#169bc2] text-slate-800 hover:border-[#195685] hover:bg-sky-50/60 hover:-translate-y-0.5"
+                    }`}
+                  >
+                    <span
+                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                      style={{
+                        backgroundColor: isActive ? "rgba(255,255,255,0.92)" : btn.bgLight,
+                      }}
+                    >
+                      {btn.svg}
+                    </span>
+                    <span className="text-xs md:text-[13px] font-bold tracking-wider truncate">
+                      {btn.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-cyan-600/40 bg-white shadow-sm text-center space-y-1">
+            <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">
+              SCERT KERALA
+            </div>
+            <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-200">
+              ● Std 8, 9 & 10 Batches
+            </div>
+          </div>
         </div>
 
         {/* Right Main Area */}
