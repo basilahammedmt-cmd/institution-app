@@ -894,68 +894,426 @@
       /* ==================== MODULE DETAIL RENDERER ==================== */
       const renderModuleContent = () => {
         if (activeView === "dashboard") {
+          const collectionRate =
+            metrics.totalFeeExpected > 0
+              ? Math.round((metrics.totalFeeCollected / metrics.totalFeeExpected) * 100)
+              : 0;
+          const totalSyllabusPortions = facultyChapters.reduce((s, f) => s + f.totalPortions, 0);
+          const completedSyllabusPortions = facultyChapters.reduce((s, f) => s + f.completedPortions, 0);
+          const syllabusRate =
+            totalSyllabusPortions > 0
+              ? Math.round((completedSyllabusPortions / totalSyllabusPortions) * 100)
+              : 0;
+
           return (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
-                  <p className="text-xs font-bold text-slate-500">ആകെ കുട്ടികൾ (TOTAL STUDENTS)</p>
-                  <h3 className="text-3xl font-extrabold text-[#195685] mt-1">{metrics.totalStudents}</h3>
-                  <p className="text-xs text-slate-600 mt-2">
-                    SSLC (10th): {metrics.class10Count} | 9th: {metrics.class9Count} | 8th: {metrics.class8Count}
-                  </p>
+              {/* Top Institutional Header Strip */}
+              <div className="bg-white border-l-4 border-l-[#195685] border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="px-2.5 py-0.5 bg-[#195685] text-white text-[11px] font-bold tracking-wider uppercase rounded">
+                      Academic Year 2026-27
+                    </span>
+                    <span className="text-xs font-semibold text-[#2d7a47] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">
+                      ● SCERT Kerala State Syllabus (Std 8, 9, 10)
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-extrabold text-slate-900 mt-1.5">
+                    സ്ഥാപനത്തിന്റെ ഒറ്റനോട്ടത്തിലുള്ള പ്രവർത്തന വിവരങ്ങൾ (Executive Overview)
+                  </h2>
                 </div>
-                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
-                  <p className="text-xs font-bold text-slate-500">ശരാശരി ഹാജർ (ATTENDANCE)</p>
-                  <h3 className="text-3xl font-extrabold text-[#2d7a47] mt-1">{metrics.avgAttendance}%</h3>
-                  <p className="text-xs text-slate-600 mt-2">ആകെ {batches.length} ബാച്ചുകൾ</p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
-                  <p className="text-xs font-bold text-slate-500">ലഭിച്ച ഫീസ് (COLLECTED FEE)</p>
-                  <h3 className="text-3xl font-extrabold text-[#195685] mt-1">
-                    ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
-                  </h3>
-                  <p className="text-xs text-slate-600 mt-2">
-                    ആകെ ഫീസ്: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}
-                  </p>
-                </div>
-                <div className="bg-white p-5 rounded-xl border border-cyan-500/40 shadow-sm">
-                  <p className="text-xs font-bold text-slate-500">ബാക്കി ഫീസ് (PENDING FEE)</p>
-                  <h3 className="text-3xl font-extrabold text-rose-600 mt-1">
-                    ₹{metrics.totalFeePending.toLocaleString("en-IN")}
-                  </h3>
-                  <p className="text-xs text-rose-700 font-semibold mt-2">
-                    {metrics.studentsWithBalance.length} കുട്ടികൾ ഫീസ് തരാനുണ്ട്
-                  </p>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => setActiveView("students")}
+                    className="px-3.5 py-2 rounded-lg bg-[#195685] hover:bg-[#134166] text-white text-xs font-bold shadow-sm transition"
+                  >
+                    + പുതിയ കുട്ടി (Add Student)
+                  </button>
+                  <button
+                    onClick={() => setActiveView("attendance")}
+                    className="px-3.5 py-2 rounded-lg bg-[#2d7a47] hover:bg-[#225e36] text-white text-xs font-bold shadow-sm transition"
+                  >
+                    ✓ ഹാജർ രേഖപ്പെടുത്തുക
+                  </button>
+                  <button
+                    onClick={() => setActiveView("student_fee")}
+                    className="cyan-pill px-3.5 py-2 rounded-lg text-xs font-bold"
+                  >
+                    ₹ ഫീസ് രസീത്
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 className="font-bold text-[#195685] mb-4">ബാച്ചുകളും ക്ലാസുകളും (A PLUS ACCADEMY BATCHES)</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-xs uppercase text-slate-600 border-b">
-                      <tr>
-                        <th className="p-3">ബാച്ച് (Batch)</th>
-                        <th className="p-3">ക്ലാസ്</th>
-                        <th className="p-3">സമയം</th>
-                        <th className="p-3">ചുമതലയുള്ള അധ്യാപകൻ</th>
-                        <th className="p-3">കുട്ടികൾ</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {batches.map((b) => (
-                        <tr key={b.id} className="hover:bg-slate-50">
-                          <td className="p-3 font-bold">{b.name}</td>
-                          <td className="p-3">Class {b.grade}</td>
-                          <td className="p-3 text-xs">{b.timing}</td>
-                          <td className="p-3">{b.classTeacher}</td>
-                          <td className="p-3 font-bold text-[#2d7a47]">
-                            {students.filter((s) => s.batchId === b.id).length} പേർ
-                          </td>
+              {/* 4 Key Institutional Ledger Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {/* Card 1: Enrollment Breakdown */}
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#195685] p-5 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        ആകെ വിദ്യാർത്ഥികൾ (Enrollment)
+                      </span>
+                      <span className="text-xs font-bold text-[#195685] bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                        {batches.length} Batches
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-2">
+                      <h3 className="text-3xl font-extrabold text-slate-900">{metrics.totalStudents}</h3>
+                      <span className="text-xs font-semibold text-slate-500">പേർ പഠിക്കുന്നു</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">SSLC (Class 10):</span>
+                      <span className="font-bold text-slate-900">{metrics.class10Count} കുട്ടികൾ</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Standard 9:</span>
+                      <span className="font-bold text-slate-900">{metrics.class9Count} കുട്ടികൾ</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600 font-medium">Standard 8:</span>
+                      <span className="font-bold text-slate-900">{metrics.class8Count} കുട്ടികൾ</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Daily Attendance & Batch Discipline */}
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#2d7a47] p-5 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        ഹാജർ നില (Attendance Rate)
+                      </span>
+                      <span className="text-xs font-bold text-[#2d7a47] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        ഇന്ന് സജീവം
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-2">
+                      <h3 className="text-3xl font-extrabold text-[#2d7a47]">{metrics.avgAttendance}%</h3>
+                      <span className="text-xs font-semibold text-slate-500">ശരാശരി ഹാജർ</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#2d7a47] h-full rounded-full"
+                        style={{ width: `${metrics.avgAttendance}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-600">
+                      <span>രേഖപ്പെടുത്തിയ ക്ലാസുകൾ: {attendanceList.length}</span>
+                      <button
+                        onClick={() => setActiveView("attendance")}
+                        className="text-[#195685] font-bold hover:underline"
+                      >
+                        പരിശോധിക്കുക →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 3: Fee Collection & Realized Revenue */}
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#169bc2] p-5 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        പിരിഞ്ഞുകിട്ടിയ ഫീസ് (Collected)
+                      </span>
+                      <span className="text-xs font-bold text-[#0e7490] bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
+                        {collectionRate}% Paid
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-2">
+                      <h3 className="text-3xl font-extrabold text-[#195685]">
+                        ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#169bc2] h-full rounded-full"
+                        style={{ width: `${collectionRate}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-600">
+                      <span>ആകെ ഫീസ്: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}</span>
+                      <span className="font-bold text-[#2d7a47]">
+                        Full Paid: {metrics.fullyPaidStudents.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 4: Pending Dues & Follow-up */}
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-rose-600 p-5 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        ബാക്കി കിട്ടാനുള്ള ഫീസ് (Dues)
+                      </span>
+                      <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                        {metrics.studentsWithBalance.length} Students
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mt-2">
+                      <h3 className="text-3xl font-extrabold text-rose-600">
+                        ₹{metrics.totalFeePending.toLocaleString("en-IN")}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="text-slate-600">
+                      {metrics.studentsWithBalance.length} കുട്ടികൾ ബാക്കി തരാനുണ്ട്
+                    </span>
+                    <button
+                      onClick={() => setActiveView("fee_report")}
+                      className="text-rose-600 font-bold hover:underline"
+                    >
+                      ഫീ റിപ്പോർട്ട് →
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Middle Section: Batch-wise Academic Table + Syllabus & Financial Chart */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left 2 Columns: Batch-wise Register & Schedule */}
+                <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                      <h3 className="font-bold text-[#195685] text-base">
+                        ക്ലാസ് ബാച്ചുകളും സമയക്രമവും (Active Batch Register)
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        ഓരോ ബാച്ചിലെയും കുട്ടികളുടെ എണ്ണവും ഫീസ് ശേഖരണ നിലവാരവും
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveView("communication")}
+                      className="text-xs font-bold text-[#2d7a47] bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100"
+                    >
+                      വാട്സാപ്പ് ഗ്രൂപ്പുകൾ →
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-100/80 text-[11px] uppercase text-slate-600 border-b border-slate-200">
+                        <tr>
+                          <th className="py-3 px-4">ബാച്ച് (Batch Name)</th>
+                          <th className="py-3 px-3">ക്ലാസ്</th>
+                          <th className="py-3 px-3">സമയം</th>
+                          <th className="py-3 px-3">അധ്യാപകൻ</th>
+                          <th className="py-3 px-3 text-center">കുട്ടികൾ</th>
+                          <th className="py-3 px-4 text-right">ഫീസ് നില</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200/70">
+                        {batches.map((b) => {
+                          const batchStu = students.filter((s) => s.batchId === b.id);
+                          const batchPaid = batchStu.reduce((acc, s) => acc + s.paidFee, 0);
+                          const batchTotal = batchStu.reduce((acc, s) => acc + (s.totalFee - s.discount), 0);
+                          return (
+                            <tr key={b.id} className="hover:bg-sky-50/40 transition">
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-slate-900">{b.name}</div>
+                                <div className="text-[11px] text-slate-500">{b.courseTitle}</div>
+                              </td>
+                              <td className="py-3.5 px-3">
+                                <span className="px-2.5 py-0.5 bg-[#195685]/10 text-[#195685] rounded font-bold text-xs">
+                                  Std {b.grade}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-3 text-xs font-medium text-slate-700">{b.timing}</td>
+                              <td className="py-3.5 px-3 text-xs font-semibold text-slate-800">{b.classTeacher}</td>
+                              <td className="py-3.5 px-3 text-center">
+                                <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] border border-emerald-200 rounded-md font-bold text-xs">
+                                  {batchStu.length} പേർ
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-right text-xs">
+                                <div className="font-bold text-slate-900">₹{batchPaid.toLocaleString("en-IN")}</div>
+                                <div className="text-[11px] text-slate-500">
+                                  of ₹{batchTotal.toLocaleString("en-IN")}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Right Column: Syllabus Completion & Top Exam Performers */}
+                <div className="space-y-6">
+                  {/* Syllabus Progress Box */}
+                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <div>
+                        <h4 className="font-bold text-[#195685] text-sm">
+                          പാഠഭാഗങ്ങളുടെ പുരോഗതി (Syllabus Tracker)
+                        </h4>
+                        <p className="text-[11px] text-slate-500">അധ്യാപകർ എടുത്ത ചാപ്റ്ററുകൾ</p>
+                      </div>
+                      <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] font-extrabold text-xs rounded border border-emerald-200">
+                        {syllabusRate}% Done
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {facultyChapters.slice(0, 4).map((fc) => {
+                        const pct = Math.round((fc.completedPortions / fc.totalPortions) * 100);
+                        return (
+                          <div key={fc.id} className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="font-bold text-slate-800">
+                                Std {fc.grade} • {fc.subject}
+                              </span>
+                              <span className="font-semibold text-[#2d7a47]">
+                                {fc.completedPortions}/{fc.totalPortions} ({pct}%)
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                              <div
+                                className="bg-[#2d7a47] h-full rounded-full"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <p className="text-[11px] text-slate-500 truncate">
+                              Ch {fc.chapterNo}: {fc.chapterTitle} ({fc.facultyName})
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Live Classes & Exam Merit Box */}
+                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                      <h4 className="font-bold text-[#195685] text-sm">
+                        ഇന്നത്തെ ലൈവ് ക്ലാസുകൾ (Live Schedule)
+                      </h4>
+                      <button
+                        onClick={() => setActiveView("live_class")}
+                        className="text-xs font-bold text-[#169bc2] hover:underline"
+                      >
+                        എല്ലാം കാണുക
+                      </button>
+                    </div>
+                    {liveClasses.map((lc) => (
+                      <div
+                        key={lc.id}
+                        className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded">
+                            ● Class {lc.grade} ({lc.scheduledTime})
+                          </span>
+                          <p className="font-bold text-xs text-slate-900 truncate mt-1">{lc.title}</p>
+                          <p className="text-[11px] text-slate-500">{lc.facultyName}</p>
+                        </div>
+                        <a
+                          href={lc.youtubeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 bg-[#195685] text-white rounded text-xs font-bold flex-shrink-0"
+                        >
+                          ▶ Open
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Section: Recent Student Admissions & Fee Dues Alert Table */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Recent Admissions with Added By attribution */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h4 className="font-bold text-[#195685] text-sm">
+                      അടുത്തിടെ ചേർന്ന കുട്ടികളും ചേർത്ത അധ്യാപകരും (Recent Admissions)
+                    </h4>
+                    <button
+                      onClick={() => setActiveView("students")}
+                      className="text-xs font-bold text-[#195685] hover:underline"
+                    >
+                      മുഴുവൻ ലിസ്റ്റ് →
+                    </button>
+                  </div>
+                  <div className="divide-y divide-slate-100 text-xs">
+                    {students.slice(0, 4).map((stu) => (
+                      <div key={stu.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50">
+                        <div>
+                          <span className="font-bold text-slate-900 text-sm">{stu.name}</span>
+                          <p className="text-slate-500 mt-0.5">
+                            {stu.batchName} • {stu.schoolName}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-bold">
+                            ചേർത്തത്: {stu.addedBy}
+                          </span>
+                          <p className="text-[11px] text-slate-400 mt-1">Roll: {stu.rollNo}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pending Fee Reminders */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h4 className="font-bold text-rose-700 text-sm">
+                      ഫീസ് ബാക്കിയുള്ളവരുടെ വിവരങ്ങൾ (Pending Fee Follow-up)
+                    </h4>
+                    <button
+                      onClick={() => setActiveView("fee_report")}
+                      className="text-xs font-bold text-rose-700 hover:underline"
+                    >
+                      ഫീ റിപ്പോർട്ട് →
+                    </button>
+                  </div>
+                  <div className="divide-y divide-slate-100 text-xs">
+                    {metrics.studentsWithBalance.map((stu) => {
+                      const bal = stu.totalFee - stu.discount - stu.paidFee;
+                      return (
+                        <div key={stu.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50">
+                          <div>
+                            <span className="font-bold text-slate-900 text-sm">{stu.name}</span>
+                            <p className="text-slate-500 mt-0.5">
+                              രക്ഷിതാവ്: {stu.parentName} ({stu.batchName})
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <span className="font-extrabold text-rose-600 text-sm">₹{bal}</span>
+                              <p className="text-[10px] text-slate-400">Paid: ₹{stu.paidFee}</p>
+                            </div>
+                            <a
+                              href={`https://wa.me/${stu.parentPhone}?text=${encodeURIComponent(
+                                `നമസ്കാരം ${stu.parentName}, A PLUS ACCADEMY-ൽ പഠിക്കുന്ന ${stu.name}-ന്റെ ട്യൂഷൻ ഫീസ് ബാക്കി ₹${bal} അടയ്ക്കാൻ ഓർമ്മിപ്പിക്കുന്നു.`
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-2.5 py-1.5 bg-[#2d7a47] hover:bg-[#225e36] text-white rounded font-bold"
+                            >
+                              WhatsApp
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
