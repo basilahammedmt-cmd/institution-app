@@ -20,39 +20,75 @@ import {
   QuestionBankItem,
 } from "@/lib/store";
 
-/* ==================== HAND-CRAFTED 3D GREEN SVGs MATCHING PDF ==================== */
+/* ==================== PROFESSIONAL MULTI-TONE VECTOR ICONS ==================== */
 const AcademyLogoSVG = () => (
   <svg width="78" height="68" viewBox="0 0 90 80" fill="none" className="drop-shadow-md">
-    <path d="M42 10 L18 66 H29 L42 32 L54 62 H64 L42 10 Z" fill="#1e4b85" />
-    <path d="M12 67 C32 54, 58 46, 80 42 C56 54, 34 62, 12 67 Z" fill="#1e4b85" />
-    <path d="M22 52 C40 44, 60 39, 76 36 C58 44, 38 49, 22 52 Z" fill="#2563eb" />
-    <path d="M62 12 V28 M54 20 H70" stroke="#c81e1e" strokeWidth="3.8" strokeLinecap="round" />
-    <path d="M58 16 L66 24 M66 16 L58 24" stroke="#c81e1e" strokeWidth="1.8" strokeLinecap="round" />
+    <defs>
+      <linearGradient id="logoBlue" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#1e40af" />
+        <stop offset="100%" stopColor="#0284c7" />
+      </linearGradient>
+    </defs>
+    <path d="M42 10 L18 66 H29 L42 32 L54 62 H64 L42 10 Z" fill="url(#logoBlue)" />
+    <path d="M12 67 C32 54, 58 46, 80 42 C56 54, 34 62, 12 67 Z" fill="#1e3a8a" />
+    <path d="M22 52 C40 44, 60 39, 76 36 C58 44, 38 49, 22 52 Z" fill="#0284c7" />
+    <path d="M62 12 V28 M54 20 H70" stroke="#dc2626" strokeWidth="3.8" strokeLinecap="round" />
+    <path d="M58 16 L66 24 M66 16 L58 24" stroke="#ef4444" strokeWidth="1.8" strokeLinecap="round" />
   </svg>
 );
 
 const IconDashboard = () => (
   <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="drop-shadow-md">
-    <rect x="8" y="10" width="76" height="56" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2.5" />
-    <rect x="13" y="21" width="66" height="40" fill="#ffffff" stroke="#143d22" strokeWidth="2" />
-    <circle cx="62" cy="15.5" r="2" fill="#ffffff" />
-    <circle cx="68" cy="15.5" r="2" fill="#ffffff" />
-    <circle cx="74" cy="15.5" r="2" fill="#ffffff" />
+    <defs>
+      <linearGradient id="dashGrad" x1="8" y1="10" x2="84" y2="66" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#1e40af" />
+        <stop offset="100%" stopColor="#0284c7" />
+      </linearGradient>
+    </defs>
+    <rect x="8" y="10" width="76" height="56" rx="8" fill="url(#dashGrad)" stroke="#1e3a8a" strokeWidth="2" />
+    <rect x="13" y="22" width="66" height="39" rx="4" fill="#f8fafc" />
+    <circle cx="17" cy="16" r="2.2" fill="#f87171" />
+    <circle cx="24" cy="16" r="2.2" fill="#fbbf24" />
+    <circle cx="31" cy="16" r="2.2" fill="#34d399" />
+    <rect x="18" y="27" width="16" height="12" rx="2.5" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.2" />
+    <rect x="38" y="27" width="16" height="12" rx="2.5" fill="#d1fae5" stroke="#10b981" strokeWidth="1.2" />
+    <rect x="58" y="27" width="16" height="12" rx="2.5" fill="#fef3c7" stroke="#f59e0b" strokeWidth="1.2" />
+    <rect x="20" y="49" width="7" height="8" rx="1.5" fill="#3b82f6" />
+    <rect x="31" y="45" width="7" height="12" rx="1.5" fill="#0284c7" />
+    <rect x="42" y="42" width="7" height="15" rx="1.5" fill="#10b981" />
+    <rect x="53" y="46" width="7" height="11" rx="1.5" fill="#6366f1" />
+    <path d="M22 46 L34 42 L45 39 L68 35" stroke="#f59e0b" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
 
 const IconStudents = () => (
   <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="drop-shadow-md">
-    {[18, 38, 58, 78].map((cx, idx) => (
+    <defs>
+      <linearGradient id="stuBlue" x1="0" y1="12" x2="0" y2="66" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#0284c7" />
+        <stop offset="100%" stopColor="#1e40af" />
+      </linearGradient>
+      <linearGradient id="stuTeal" x1="0" y1="12" x2="0" y2="66" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#0d9488" />
+        <stop offset="100%" stopColor="#115e59" />
+      </linearGradient>
+    </defs>
+    {[
+      { cx: 19, grad: "url(#stuBlue)", stroke: "#1e3a8a", tie: "#fbbf24" },
+      { cx: 38, grad: "url(#stuTeal)", stroke: "#134e4a", tie: "#38bdf8" },
+      { cx: 57, grad: "url(#stuBlue)", stroke: "#1e3a8a", tie: "#fbbf24" },
+      { cx: 76, grad: "url(#stuTeal)", stroke: "#134e4a", tie: "#38bdf8" },
+    ].map((item, idx) => (
       <g key={idx}>
-        <circle cx={cx} cy="20" r="6.5" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
+        <circle cx={item.cx} cy="19" r="6.8" fill={item.grad} stroke={item.stroke} strokeWidth="1.6" />
         <path
-          d={`M${cx - 9} 33 C${cx - 9} 29, ${cx + 9} 29, ${cx + 9} 33 L${cx + 10} 50 H${cx + 5} L${cx + 4} 65 H${cx - 4} L${cx - 5} 50 H${cx - 10} Z`}
-          fill="#2d7a47"
-          stroke="#143d22"
-          strokeWidth="2"
+          d={`M${item.cx - 8.5} 32 C${item.cx - 8.5} 27.5, ${item.cx + 8.5} 27.5, ${item.cx + 8.5} 32 L${item.cx + 9.5} 49 H${item.cx + 5} L${item.cx + 4} 65 H${item.cx - 4} L${item.cx - 5} 49 H${item.cx - 9.5} Z`}
+          fill={item.grad}
+          stroke={item.stroke}
+          strokeWidth="1.6"
           strokeLinejoin="round"
         />
+        <polygon points={`${item.cx - 2.5},30 ${item.cx + 2.5},30 ${item.cx},37`} fill={item.tie} />
       </g>
     ))}
   </svg>
@@ -60,147 +96,203 @@ const IconStudents = () => (
 
 const IconAttendance = () => (
   <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="drop-shadow-md">
-    <rect x="14" y="15" width="60" height="50" rx="4" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2" />
-    <rect x="24" y="8" width="8" height="13" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <rect x="56" y="8" width="8" height="13" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <line x1="14" y1="27" x2="74" y2="27" stroke="#143d22" strokeWidth="2.2" />
-    {[31, 41, 51].map((y, r) =>
-      [19, 36, 53].map((x, c) => (
-        <rect
-          key={`${r}-${c}`}
-          x={x}
-          y={y}
-          width="14"
-          height="7"
-          rx="1"
-          fill="#ffffff"
-          stroke="#143d22"
-          strokeWidth="1.5"
-        />
-      ))
+    <defs>
+      <linearGradient id="calHeader" x1="14" y1="14" x2="74" y2="28" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#059669" />
+        <stop offset="100%" stopColor="#0d9488" />
+      </linearGradient>
+    </defs>
+    <rect x="14" y="15" width="60" height="50" rx="7" fill="#ffffff" stroke="#0f766e" strokeWidth="2.2" />
+    <path d="M14 22 C14 18, 17 15, 21 15 H67 C71 15, 74 18, 74 22 V28 H14 V22 Z" fill="url(#calHeader)" />
+    <rect x="25" y="9" width="7" height="12" rx="3.5" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+    <rect x="56" y="9" width="7" height="12" rx="3.5" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+    {[33, 43, 53].map((y, r) =>
+      [20, 37, 54].map((x, c) => {
+        const isChecked = (r === 0 && c === 0) || (r === 1 && c === 1) || (r === 2 && c === 2);
+        return (
+          <rect
+            key={`${r}-${c}`}
+            x={x}
+            y={y}
+            width="13"
+            height="7"
+            rx="2"
+            fill={isChecked ? "#10b981" : "#e2e8f0"}
+            stroke={isChecked ? "#047857" : "#94a3b8"}
+            strokeWidth="1.2"
+          />
+        );
+      })
     )}
   </svg>
 );
 
 const IconFaculties = () => (
   <svg width="102" height="76" viewBox="0 0 102 76" fill="none" className="drop-shadow-md">
-    <rect x="34" y="10" width="52" height="34" rx="2" fill="#ffffff" stroke="#2d7a47" strokeWidth="4" />
-    <rect x="34" y="10" width="52" height="34" rx="2" stroke="#143d22" strokeWidth="1.5" />
-    <circle cx="24" cy="22" r="6.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8" />
+    <defs>
+      <linearGradient id="profGrad" x1="12" y1="16" x2="38" y2="65" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#4f46e5" />
+        <stop offset="100%" stopColor="#1e40af" />
+      </linearGradient>
+    </defs>
+    <rect x="35" y="9" width="54" height="35" rx="4" fill="#f8fafc" stroke="#1e40af" strokeWidth="3.5" />
+    <line x1="43" y1="18" x2="68" y2="18" stroke="#93c5fd" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="43" y1="25" x2="78" y2="25" stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="43" y1="32" x2="62" y2="32" stroke="#6ee7b7" strokeWidth="2.5" strokeLinecap="round" />
+    <circle cx="24" cy="21" r="6.5" fill="url(#profGrad)" stroke="#1e1b4b" strokeWidth="1.5" />
     <path
-      d="M14 35 C14 30, 34 30, 34 35 L39 46 L33 49 L29 41 V65 H19 V43 L15 51 L11 48 Z"
-      fill="#2d7a47"
-      stroke="#143d22"
-      strokeWidth="1.8"
+      d="M14 34 C14 29, 34 29, 34 34 L39 45 L33 48 L29 40 V65 H19 V42 L15 50 L11 47 Z"
+      fill="url(#profGrad)"
+      stroke="#1e1b4b"
+      strokeWidth="1.5"
       strokeLinejoin="round"
     />
-    <line x1="36" y1="45" x2="56" y2="24" stroke="#143d22" strokeWidth="2.8" strokeLinecap="round" />
-    {[48, 64, 80].map((cx, i) => (
+    <line x1="36" y1="44" x2="57" y2="22" stroke="#d97706" strokeWidth="2.8" strokeLinecap="round" />
+    {[49, 65, 81].map((cx, i) => (
       <g key={i}>
-        <circle cx={cx} cy="53" r="4" fill="#2d7a47" stroke="#143d22" strokeWidth="1.5" />
-        <path
-          d={`M${cx - 6} 63 C${cx - 6} 58, ${cx + 6} 58, ${cx + 6} 63 Z`}
-          fill="#2d7a47"
-          stroke="#143d22"
-          strokeWidth="1.5"
-        />
+        <circle cx={cx} cy="53" r="4.2" fill="#0284c7" />
+        <path d={`M${cx - 6.5} 63 C${cx - 6.5} 57.5, ${cx + 6.5} 57.5, ${cx + 6.5} 63 Z`} fill="#0369a1" />
       </g>
     ))}
-    <line x1="40" y1="65" x2="88" y2="65" stroke="#2d7a47" strokeWidth="3" />
+    <line x1="40" y1="65" x2="90" y2="65" stroke="#1e40af" strokeWidth="3" strokeLinecap="round" />
   </svg>
 );
 
 const IconExam = () => (
   <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="drop-shadow-md">
-    <rect x="12" y="14" width="72" height="50" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <path d="M18 12 H46 V56 H18 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2.2" />
-    <path d="M46 12 H74 V56 H46 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2.2" />
-    <rect x="24" y="12" width="22" height="44" fill="#2d7a47" fillOpacity="0.85" stroke="#143d22" strokeWidth="1.8" />
-    <line x1="53" y1="24" x2="67" y2="24" stroke="#2d7a47" strokeWidth="2.5" />
-    <line x1="53" y1="31" x2="67" y2="31" stroke="#2d7a47" strokeWidth="2.5" />
-    <line x1="53" y1="38" x2="63" y2="38" stroke="#2d7a47" strokeWidth="2.5" />
+    <defs>
+      <linearGradient id="examCover" x1="12" y1="14" x2="84" y2="64" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#2563eb" />
+        <stop offset="100%" stopColor="#1d4ed8" />
+      </linearGradient>
+      <linearGradient id="examBookmark" x1="24" y1="12" x2="46" y2="56" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#0ea5e9" />
+        <stop offset="100%" stopColor="#0284c7" />
+      </linearGradient>
+    </defs>
+    <rect x="12" y="15" width="72" height="49" rx="5" fill="url(#examCover)" stroke="#1e3a8a" strokeWidth="2" />
+    <path d="M18 12 H48 V56 H18 Z" fill="#ffffff" stroke="#1e3a8a" strokeWidth="1.8" />
+    <path d="M48 12 H78 V56 H48 Z" fill="#f8fafc" stroke="#1e3a8a" strokeWidth="1.8" />
+    <rect x="24" y="12" width="24" height="44" fill="url(#examBookmark)" stroke="#1e3a8a" strokeWidth="1.6" />
+    <circle cx="36" cy="34" r="6.5" fill="#fef3c7" />
+    <line x1="54" y1="23" x2="71" y2="23" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="54" y1="31" x2="71" y2="31" stroke="#0ea5e9" strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="54" y1="39" x2="65" y2="39" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
 const IconExamReport = () => (
   <svg width="100" height="76" viewBox="0 0 100 76" fill="none" className="drop-shadow-md">
+    <defs>
+      <linearGradient id="repArrow" x1="18" y1="64" x2="84" y2="24" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#10b981" />
+      </linearGradient>
+    </defs>
     {[24, 42, 60].map((cx, i) => (
       <g key={i}>
-        <circle cx={cx} cy="18" r="5.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8" />
+        <circle cx={cx} cy="18" r="5.8" fill={i === 1 ? "#0284c7" : "#1e40af"} stroke="#ffffff" strokeWidth="1.2" />
         <path
           d={`M${cx - 8} 30 C${cx - 8} 25, ${cx + 8} 25, ${cx + 8} 30 V48 H${cx - 8} Z`}
-          fill="#2d7a47"
-          stroke="#143d22"
-          strokeWidth="1.8"
+          fill={i === 1 ? "#0284c7" : "#1e40af"}
+          stroke="#ffffff"
+          strokeWidth="1.2"
         />
       </g>
     ))}
-    <path d="M18 64 L40 42 L54 55 L82 27" stroke="#2d7a47" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M18 64 L40 42 L54 55 L82 27" stroke="#143d22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M69 26 H83 V40" stroke="#2d7a47" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M18 64 L40 42 L54 54 L82 26" stroke="url(#repArrow)" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M68 25 H83 V40" stroke="#10b981" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const IconLiveClasses = () => (
   <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="drop-shadow-md">
-    <rect x="14" y="10" width="64" height="5" rx="2" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8" />
-    <line x1="46" y1="5" x2="46" y2="10" stroke="#143d22" strokeWidth="3" />
-    <rect x="18" y="15" width="56" height="38" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <rect x="24" y="20" width="44" height="28" fill="#ffffff" stroke="#143d22" strokeWidth="1.6" />
-    <polygon points="41,27 41,41 54,34" fill="#2d7a47" stroke="#143d22" strokeWidth="1.5" />
-    <line x1="46" y1="53" x2="46" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round" />
-    <line x1="46" y1="56" x2="28" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round" />
-    <line x1="46" y1="56" x2="64" y2="68" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round" />
+    <defs>
+      <linearGradient id="liveScreen" x1="18" y1="15" x2="74" y2="53" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#1e293b" />
+        <stop offset="100%" stopColor="#0f172a" />
+      </linearGradient>
+      <linearGradient id="playRed" x1="38" y1="24" x2="56" y2="44" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#ef4444" />
+        <stop offset="100%" stopColor="#dc2626" />
+      </linearGradient>
+    </defs>
+    <rect x="14" y="10" width="64" height="5" rx="2.5" fill="#1e40af" />
+    <line x1="46" y1="5" x2="46" y2="10" stroke="#1e3a8a" strokeWidth="3" strokeLinecap="round" />
+    <rect x="18" y="15" width="56" height="38" rx="4" fill="url(#liveScreen)" stroke="#1e40af" strokeWidth="2" />
+    <rect x="23" y="20" width="46" height="28" rx="2.5" fill="#f8fafc" />
+    <rect x="35" y="25" width="22" height="17" rx="4.5" fill="url(#playRed)" />
+    <polygon points="43,29 43,38 51,33.5" fill="#ffffff" />
+    <line x1="46" y1="53" x2="46" y2="68" stroke="#334155" strokeWidth="4" strokeLinecap="round" />
+    <line x1="46" y1="56" x2="28" y2="68" stroke="#1e40af" strokeWidth="4" strokeLinecap="round" />
+    <line x1="46" y1="56" x2="64" y2="68" stroke="#1e40af" strokeWidth="4" strokeLinecap="round" />
   </svg>
 );
 
 const IconStudentFee = () => (
   <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="drop-shadow-md">
-    <circle cx="44" cy="24" r="11" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <path d="M35 16 L44 10 L53 16" stroke="#143d22" strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M24 64 C24 46, 64 46, 64 64 Z" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2" />
-    <path d="M32 50 L44 54 L56 50 V63 L44 67 L32 63 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2" />
-    <line x1="44" y1="54" x2="44" y2="67" stroke="#143d22" strokeWidth="2" />
+    <defs>
+      <linearGradient id="gradStuFee" x1="24" y1="12" x2="64" y2="66" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#0284c7" />
+        <stop offset="100%" stopColor="#1e3a8a" />
+      </linearGradient>
+    </defs>
+    <polygon points="44,8 27,15 44,21 61,15" fill="#1e293b" />
+    <line x1="58" y1="16" x2="61" y2="24" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="44" cy="25" r="10.5" fill="url(#gradStuFee)" stroke="#1e3a8a" strokeWidth="1.8" />
+    <path d="M24 64 C24 46, 64 46, 64 64 Z" fill="url(#gradStuFee)" stroke="#1e3a8a" strokeWidth="2" />
+    <path d="M32 50 L44 54 L56 50 V63 L44 67 L32 63 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="1.8" />
+    <line x1="44" y1="54" x2="44" y2="67" stroke="#d97706" strokeWidth="1.8" />
   </svg>
 );
 
 const IconFeeReport = () => (
   <svg width="88" height="76" viewBox="0 0 88 76" fill="none" className="drop-shadow-md">
-    <polyline points="18,12 18,64 74,64" stroke="#2d7a47" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-    <rect x="26" y="42" width="8" height="20" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6" />
-    <rect x="39" y="28" width="8" height="34" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6" />
-    <rect x="52" y="18" width="8" height="44" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6" />
-    <rect x="64" y="34" width="8" height="28" fill="#2d7a47" stroke="#143d22" strokeWidth="1.6" />
+    <polyline points="18,12 18,64 74,64" stroke="#1e3a8a" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    <rect x="25" y="42" width="9" height="20" rx="2" fill="#38bdf8" />
+    <rect x="38" y="29" width="9" height="33" rx="2" fill="#0284c7" />
+    <rect x="51" y="17" width="9" height="45" rx="2" fill="#10b981" />
+    <rect x="64" y="33" width="9" height="29" rx="2" fill="#f59e0b" />
   </svg>
 );
 
 const IconCommunication = () => (
   <svg width="92" height="76" viewBox="0 0 92 76" fill="none" className="drop-shadow-md">
-    <polygon points="14,38 76,14 54,64 42,46" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2" strokeLinejoin="round" />
-    <polygon points="42,46 76,14 34,42" fill="#ffffff" stroke="#143d22" strokeWidth="1.8" strokeLinejoin="round" />
-    <polygon points="34,42 42,46 38,58" fill="#1b5230" stroke="#143d22" strokeWidth="1.8" strokeLinejoin="round" />
+    <defs>
+      <linearGradient id="planeGrad" x1="14" y1="14" x2="76" y2="64" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#0ea5e9" />
+        <stop offset="100%" stopColor="#1e40af" />
+      </linearGradient>
+    </defs>
+    <polygon points="14,38 76,14 54,64 42,46" fill="url(#planeGrad)" stroke="#1e3a8a" strokeWidth="2" strokeLinejoin="round" />
+    <polygon points="42,46 76,14 34,42" fill="#e0f2fe" stroke="#1e3a8a" strokeWidth="1.6" strokeLinejoin="round" />
+    <polygon points="34,42 42,46 38,58" fill="#0369a1" stroke="#1e3a8a" strokeWidth="1.6" strokeLinejoin="round" />
   </svg>
 );
 
 const IconQuestionBank = () => (
   <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="drop-shadow-md">
-    {[44, 31, 18].map((y, idx) => (
+    {[
+      { y: 44, fill: "#059669", stroke: "#064e3b" },
+      { y: 31, fill: "#0284c7", stroke: "#1e3a8a" },
+      { y: 18, fill: "#d97706", stroke: "#78350f" },
+    ].map((book, idx) => (
       <g key={idx}>
         <polygon
-          points={`20,${y} 52,${y - 10} 76,${y} 44,${y + 10}`}
-          fill="#2d7a47"
-          stroke="#143d22"
-          strokeWidth="2"
+          points={`20,${book.y} 52,${book.y - 10} 76,${book.y} 44,${book.y + 10}`}
+          fill={book.fill}
+          stroke={book.stroke}
+          strokeWidth="1.8"
           strokeLinejoin="round"
         />
         <polygon
-          points={`20,${y} 44,${y + 10} 76,${y} 76,${y + 8} 44,${y + 18} 20,${y + 8}`}
+          points={`20,${book.y} 44,${book.y + 10} 76,${book.y} 76,${book.y + 8} 44,${book.y + 18} 20,${book.y + 8}`}
           fill="#ffffff"
-          stroke="#143d22"
-          strokeWidth="2"
+          stroke={book.stroke}
+          strokeWidth="1.8"
           strokeLinejoin="round"
         />
-        <line x1="44" y1={y + 10} x2="44" y2={y + 18} stroke="#143d22" strokeWidth="2" />
+        <line x1="44" y1={book.y + 10} x2="44" y2={book.y + 18} stroke={book.stroke} strokeWidth="1.8" />
       </g>
     ))}
   </svg>
@@ -208,13 +300,19 @@ const IconQuestionBank = () => (
 
 const IconAccounts = () => (
   <svg width="96" height="76" viewBox="0 0 96 76" fill="none" className="drop-shadow-md">
-    <path d="M22 28 L64 12 L70 28 Z" fill="#ffffff" stroke="#143d22" strokeWidth="2" />
-    <path d="M26 28 L72 18 L74 28 Z" fill="#2d7a47" stroke="#143d22" strokeWidth="2" />
-    <rect x="14" y="28" width="68" height="36" rx="3" fill="#2d7a47" stroke="#143d22" strokeWidth="2.2" />
-    <rect x="19" y="33" width="58" height="26" rx="2" fill="#ffffff" stroke="#143d22" strokeWidth="1.8" />
-    <circle cx="48" cy="46" r="7.5" fill="#2d7a47" stroke="#143d22" strokeWidth="1.8" />
-    <circle cx="28" cy="46" r="3" fill="#2d7a47" />
-    <circle cx="68" cy="46" r="3" fill="#2d7a47" />
+    <defs>
+      <linearGradient id="cashGrad" x1="14" y1="28" x2="82" y2="64" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#059669" />
+        <stop offset="100%" stopColor="#047857" />
+      </linearGradient>
+    </defs>
+    <path d="M22 28 L64 12 L70 28 Z" fill="#fef3c7" stroke="#b45309" strokeWidth="1.8" />
+    <path d="M26 28 L72 18 L74 28 Z" fill="#10b981" stroke="#065f46" strokeWidth="1.8" />
+    <rect x="14" y="28" width="68" height="36" rx="5" fill="url(#cashGrad)" stroke="#064e3b" strokeWidth="2" />
+    <rect x="19" y="33" width="58" height="26" rx="3" fill="#ecfdf5" stroke="#047857" strokeWidth="1.5" />
+    <circle cx="48" cy="46" r="8" fill="#fbbf24" stroke="#b45309" strokeWidth="1.6" />
+    <circle cx="28" cy="46" r="3" fill="#059669" />
+    <circle cx="68" cy="46" r="3" fill="#059669" />
   </svg>
 );
 
