@@ -323,7 +323,7 @@ export default function APlusAcademyPortal() {
   const [batches] = useState<Batch[]>(INITIAL_BATCHES);
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [attendanceList, setAttendanceList] = useState<AttendanceRecord[]>(INITIAL_ATTENDANCE);
-  const [facultyChapters] = useState<FacultyChapter[]>(INITIAL_FACULTY_CHAPTERS);
+  const [facultyChapters, setFacultyChapters] = useState<FacultyChapter[]>(INITIAL_FACULTY_CHAPTERS);
   const [exams] = useState<Exam[]>(INITIAL_EXAMS);
   const [attempts, setAttempts] = useState<ExamAttempt[]>(INITIAL_ATTEMPTS);
   const [liveClasses] = useState<LiveClass[]>(INITIAL_LIVE_CLASSES);
@@ -338,10 +338,23 @@ export default function APlusAcademyPortal() {
     schoolName: "Govt. HSS",
     parentName: "",
     parentPhone: "91",
-    addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+    addedBy: "Anil Kumar Master (Teacher)",
     totalFee: 12000,
     paidFee: 2000,
     discount: 0,
+  });
+
+  // Faculty & Chapter Form & Edit State
+  const [editingFacultyId, setEditingFacultyId] = useState<string | null>(null);
+  const [newFacultyChapter, setNewFacultyChapter] = useState({
+    facultyName: "Anil Kumar Master",
+    batchId: "B10-A",
+    subject: "Mathematics",
+    chapterNo: 3,
+    chapterTitle: "",
+    totalPortions: 6,
+    completedPortions: 4,
+    topicsInput: "",
   });
 
   // Attendance
@@ -496,12 +509,12 @@ export default function APlusAcademyPortal() {
         </head>
         <body>
           <h1>A PLUS ACCADEMY — STUDENT REPORT CARD & FEE STATEMENT</h1>
-          <p><b>പേര് (Name):</b> ${stu.name} | <b>Roll No:</b> ${stu.rollNo} | <b>Batch:</b> ${stu.batchName}</p>
-          <p><b>സ്കൂൾ:</b> ${stu.schoolName} | <b>രക്ഷിതാവ്:</b> ${stu.parentName} (${stu.parentPhone})</p>
-          <p><b>ചേർത്തത് (Added By):</b> ${stu.addedBy}</p>
+          <p><b>Student Name:</b> ${stu.name} | <b>Roll No:</b> ${stu.rollNo} | <b>Batch:</b> ${stu.batchName}</p>
+          <p><b>School:</b> ${stu.schoolName} | <b>Parent:</b> ${stu.parentName} (${stu.parentPhone})</p>
+          <p><b>Added By:</b> ${stu.addedBy}</p>
           <div class="card">
-            <h3>ഫീസ് വിവരങ്ങൾ (Fee Summary)</h3>
-            <p>ആകെ ഫീസ് (Total Fee): ₹${stu.totalFee} | അടച്ച ഫീസ് (Paid): ₹${stu.paidFee} | ബാക്കി (Balance): ₹${bal}</p>
+            <h3>Fee Summary</h3>
+            <p>Total Fee: ₹${stu.totalFee} | Paid Fee: ₹${stu.paidFee} | Balance Due: ₹${bal}</p>
           </div>
         </body>
       </html>
@@ -567,11 +580,109 @@ export default function APlusAcademyPortal() {
       schoolName: "Govt. HSS",
       parentName: "",
       parentPhone: "91",
-      addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+      addedBy: "Anil Kumar Master (Teacher)",
       totalFee: 12000,
       paidFee: 2000,
       discount: 0,
     });
+  };
+
+  const handleSaveFacultyChapter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFacultyChapter.chapterTitle.trim()) return;
+    const batchObj = batches.find((b) => b.id === newFacultyChapter.batchId) || batches[0];
+    const totalP = Math.max(1, Number(newFacultyChapter.totalPortions) || 6);
+    const completedP = Math.min(totalP, Math.max(0, Number(newFacultyChapter.completedPortions) || 0));
+    const topicsArr = newFacultyChapter.topicsInput
+      ? newFacultyChapter.topicsInput
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ["Core Concepts", "SCERT Textbook Problems", "Previous Year Questions"];
+
+    if (editingFacultyId) {
+      setFacultyChapters(
+        facultyChapters.map((fc) =>
+          fc.id === editingFacultyId
+            ? {
+                ...fc,
+                facultyName: newFacultyChapter.facultyName,
+                grade: batchObj.grade,
+                batchId: batchObj.id,
+                batchName: batchObj.name,
+                subject: newFacultyChapter.subject,
+                chapterNo: Number(newFacultyChapter.chapterNo) || 1,
+                chapterTitle: newFacultyChapter.chapterTitle,
+                totalPortions: totalP,
+                completedPortions: completedP,
+                topicsCovered: topicsArr,
+                status: completedP >= totalP ? "Completed" : "In Progress",
+                lastUpdated: "2026-10-29",
+              }
+            : fc
+        )
+      );
+      setEditingFacultyId(null);
+    } else {
+      const created: FacultyChapter = {
+        id: `FC-${Date.now()}`,
+        facultyName: newFacultyChapter.facultyName || "Anil Kumar Master",
+        phone: "919447100200",
+        grade: batchObj.grade,
+        batchId: batchObj.id,
+        batchName: batchObj.name,
+        subject: newFacultyChapter.subject || "Mathematics",
+        chapterNo: Number(newFacultyChapter.chapterNo) || 1,
+        chapterTitle: newFacultyChapter.chapterTitle,
+        totalPortions: totalP,
+        completedPortions: completedP,
+        topicsCovered: topicsArr,
+        status: completedP >= totalP ? "Completed" : "In Progress",
+        lastUpdated: "2026-10-29",
+      };
+      setFacultyChapters([created, ...facultyChapters]);
+    }
+
+    setNewFacultyChapter({
+      facultyName: "Anil Kumar Master",
+      batchId: "B10-A",
+      subject: "Mathematics",
+      chapterNo: facultyChapters.length + 1,
+      chapterTitle: "",
+      totalPortions: 6,
+      completedPortions: 6,
+      topicsInput: "",
+    });
+  };
+
+  const handleStartEditFaculty = (fc: FacultyChapter) => {
+    setEditingFacultyId(fc.id);
+    setNewFacultyChapter({
+      facultyName: fc.facultyName,
+      batchId: fc.batchId || "B10-A",
+      subject: fc.subject,
+      chapterNo: fc.chapterNo,
+      chapterTitle: fc.chapterTitle,
+      totalPortions: fc.totalPortions,
+      completedPortions: fc.completedPortions,
+      topicsInput: (fc.topicsCovered || []).join(", "),
+    });
+    setActiveView("faculties");
+  };
+
+  const handleUpdateFacultyPortion = (id: string, delta: number) => {
+    setFacultyChapters(
+      facultyChapters.map((fc) => {
+        if (fc.id !== id) return fc;
+        const nextCompleted = Math.min(fc.totalPortions, Math.max(0, fc.completedPortions + delta));
+        return {
+          ...fc,
+          completedPortions: nextCompleted,
+          status: nextCompleted >= fc.totalPortions ? "Completed" : "In Progress",
+          lastUpdated: "2026-10-29",
+        };
+      })
+    );
   };
 
   const handleSaveAttendance = () => {
@@ -591,7 +702,7 @@ export default function APlusAcademyPortal() {
         batchId: batchObj.id,
         batchName: batchObj.name,
         grade: batchObj.grade,
-        markedBy: "അനിൽ കുമാർ മാസ്റ്റർ",
+        markedBy: "Anil Kumar Master",
         records,
       },
       ...attendanceList,
@@ -920,7 +1031,7 @@ export default function APlusAcademyPortal() {
                         📄 STUDENT REPORT & FEE STATEMENT (PDF DOWNLOAD)
                       </span>
                       <h4 className="font-extrabold text-sm">
-                        ഓരോ കുട്ടിയുടെയും അക്കാദമിക് & ഫീ റിപ്പോർട്ട് PDF ഫോർമാറ്റിൽ ഡൗൺലോഡ് ചെയ്യാം
+                        Download Individual Student Academic & Fee Statement in PDF Format
                       </h4>
                     </div>
                     <div className="flex items-center gap-2">
@@ -943,7 +1054,7 @@ export default function APlusAcademyPortal() {
                         }}
                         className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-3.5 py-1.5 rounded-lg text-xs"
                       >
-                        📄 കുട്ടിയുടെ PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക
+                        📄 Download Student PDF Report
                       </button>
                     </div>
                   </div>
@@ -951,12 +1062,12 @@ export default function APlusAcademyPortal() {
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border space-y-3">
                       <h3 className="font-bold text-[#195685]">
-                        {editingStudentId ? "✏️ കുട്ടിയുടെ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുക" : "➕ പുതിയ കുട്ടിയെ ചേർക്കുക"}
+                        {editingStudentId ? "✏️ EDIT STUDENT & FEE DETAILS" : "➕ ADD NEW STUDENT"}
                       </h3>
                       <input
                         type="text"
                         required
-                        placeholder="കുട്ടിയുടെ പേര് *"
+                        placeholder="Student Name *"
                         value={newStudent.name}
                         onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
                         className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -975,16 +1086,16 @@ export default function APlusAcademyPortal() {
                       <input
                         type="text"
                         required
-                        placeholder="ആരാണ് ചേർത്തത്? (Added By)"
+                        placeholder="Added By (Teacher / Admin)"
                         value={newStudent.addedBy}
                         onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
                         className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                       <div className="p-3 rounded-xl bg-sky-50 border border-[#169bc2]/40 space-y-2">
-                        <h4 className="font-bold text-xs text-[#195685]">💳 കുട്ടിയുടെ ഫീ രജിസ്ട്രേഷൻ (Fee Registration)</h4>
+                        <h4 className="font-bold text-xs text-[#195685]">💳 STUDENT FEE REGISTRATION</h4>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <label className="text-[11px] font-bold block">ആകെ ഫീസ് (₹)</label>
+                            <label className="text-[11px] font-bold block">Total Fee (₹)</label>
                             <input
                               type="number"
                               value={newStudent.totalFee}
@@ -993,7 +1104,7 @@ export default function APlusAcademyPortal() {
                             />
                           </div>
                           <div>
-                            <label className="text-[11px] font-bold text-[#2d7a47] block">അടച്ചത് (₹)</label>
+                            <label className="text-[11px] font-bold text-[#2d7a47] block">Paid Fee (₹)</label>
                             <input
                               type="number"
                               value={newStudent.paidFee}
@@ -1002,7 +1113,7 @@ export default function APlusAcademyPortal() {
                             />
                           </div>
                           <div>
-                            <label className="text-[11px] font-bold block">ഡിസ്കൗണ്ട് (₹)</label>
+                            <label className="text-[11px] font-bold block">Discount (₹)</label>
                             <input
                               type="number"
                               value={newStudent.discount}
@@ -1013,7 +1124,7 @@ export default function APlusAcademyPortal() {
                         </div>
                       </div>
                       <button type="submit" className="w-full bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm">
-                        {editingStudentId ? "💾 മാറ്റങ്ങൾ സേവ് ചെയ്യുക" : "➕ കുട്ടിയെ ചേർക്കുക & ഫീ രജിസ്റ്റർ ചെയ്യുക"}
+                        {editingStudentId ? "💾 Save Changes" : "➕ Add Student & Register Fee"}
                       </button>
                     </form>
                     <div className="lg:col-span-2 bg-white p-6 rounded-xl border">
@@ -1101,17 +1212,215 @@ export default function APlusAcademyPortal() {
               )}
 
               {activeView === "faculties" && (
-                <div className="space-y-3">
-                  {facultyChapters.map((fc) => (
-                    <div key={fc.id} className="bg-white p-5 rounded-xl border space-y-2">
-                      <h4 className="font-bold text-[#195685]">
-                        {fc.subject} — Chapter {fc.chapterNo}: {fc.chapterTitle}
-                      </h4>
-                      <p className="text-xs text-slate-600">
-                        Faculty: {fc.facultyName} • Completed: {fc.completedPortions}/{fc.totalPortions}
-                      </p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <form
+                    onSubmit={handleSaveFacultyChapter}
+                    className="bg-white p-6 rounded-xl border-2 border-slate-200 space-y-3 shadow-sm h-fit"
+                  >
+                    <h3 className="font-extrabold text-[#195685] text-sm border-b pb-2">
+                      {editingFacultyId ? "✏️ EDIT TEACHER & CHAPTER" : "➕ ADD TEACHER & CHAPTER"}
+                    </h3>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600">Teacher / Faculty Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Anil Kumar Master"
+                        value={newFacultyChapter.facultyName}
+                        onChange={(e) =>
+                          setNewFacultyChapter({ ...newFacultyChapter, facultyName: e.target.value })
+                        }
+                        className="w-full border rounded-lg px-3 py-2 text-sm mt-1"
+                      />
                     </div>
-                  ))}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="text-xs font-bold text-slate-600">Batch *</label>
+                        <select
+                          value={newFacultyChapter.batchId}
+                          onChange={(e) =>
+                            setNewFacultyChapter({ ...newFacultyChapter, batchId: e.target.value })
+                          }
+                          className="w-full border rounded-lg px-2 py-2 text-xs font-semibold mt-1"
+                        >
+                          {batches.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-600">Subject *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Mathematics"
+                          value={newFacultyChapter.subject}
+                          onChange={(e) =>
+                            setNewFacultyChapter({ ...newFacultyChapter, subject: e.target.value })
+                          }
+                          className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-slate-600">Chapter No</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={newFacultyChapter.chapterNo}
+                          onChange={(e) =>
+                            setNewFacultyChapter({ ...newFacultyChapter, chapterNo: Number(e.target.value) })
+                          }
+                          className="w-full border rounded-lg px-2.5 py-2 text-sm mt-1"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-xs font-bold text-slate-600">Chapter Title *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Arithmetic Sequences"
+                          value={newFacultyChapter.chapterTitle}
+                          onChange={(e) =>
+                            setNewFacultyChapter({ ...newFacultyChapter, chapterTitle: e.target.value })
+                          }
+                          className="w-full border rounded-lg px-3 py-2 text-sm mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs font-bold text-[#2d7a47]">Completed Portions</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={newFacultyChapter.completedPortions}
+                          onChange={(e) =>
+                            setNewFacultyChapter({
+                              ...newFacultyChapter,
+                              completedPortions: Number(e.target.value),
+                            })
+                          }
+                          className="w-full border rounded-lg px-3 py-1.5 text-sm mt-1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-600">Total Portions</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={newFacultyChapter.totalPortions}
+                          onChange={(e) =>
+                            setNewFacultyChapter({
+                              ...newFacultyChapter,
+                              totalPortions: Number(e.target.value),
+                            })
+                          }
+                          className="w-full border rounded-lg px-3 py-1.5 text-sm mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600">Topics Covered (Comma separated)</label>
+                      <input
+                        type="text"
+                        placeholder="Number Patterns, Algebraic Form, Sum of Terms"
+                        value={newFacultyChapter.topicsInput}
+                        onChange={(e) =>
+                          setNewFacultyChapter({ ...newFacultyChapter, topicsInput: e.target.value })
+                        }
+                        className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm"
+                      >
+                        {editingFacultyId ? "💾 Update Chapter" : "➕ Add Teacher & Chapter"}
+                      </button>
+                      {editingFacultyId && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingFacultyId(null)}
+                          className="px-3 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-bold"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+
+                  <div className="lg:col-span-2 space-y-3.5">
+                    {facultyChapters.map((fc) => {
+                      const pct = Math.round((fc.completedPortions / fc.totalPortions) * 100);
+                      return (
+                        <div key={fc.id} className="bg-white p-5 rounded-xl border border-slate-200 space-y-3 shadow-sm">
+                          <div className="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                              <span className="text-xs font-bold text-[#169bc2] uppercase">
+                                Class {fc.grade} • {fc.subject}
+                              </span>
+                              <h4 className="font-bold text-base text-[#195685]">
+                                Chapter {fc.chapterNo}: {fc.chapterTitle}
+                              </h4>
+                              <p className="text-xs text-slate-600">
+                                Faculty: <b>{fc.facultyName}</b> • Batch: {fc.batchName}
+                              </p>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] font-bold rounded text-xs border border-emerald-200">
+                                {fc.completedPortions}/{fc.totalPortions} Portions ({pct}%)
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateFacultyPortion(fc.id, -1)}
+                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-xs font-bold border"
+                              >
+                                -1 Portion
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateFacultyPortion(fc.id, 1)}
+                                className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold"
+                              >
+                                +1 Portion
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditFaculty(fc)}
+                                className="px-2 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded text-xs font-bold"
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setFacultyChapters(facultyChapters.filter((x) => x.id !== fc.id))
+                                }
+                                className="px-2 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded text-xs font-bold"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div className="bg-[#2d7a47] h-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {fc.topicsCovered.map((t, idx) => (
+                              <span key={idx} className="px-2.5 py-1 bg-slate-100 rounded text-xs font-medium">
+                                ✓ {t}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
