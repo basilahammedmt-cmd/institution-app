@@ -787,9 +787,9 @@
     ];
 
     function App() {
-      // activeView === "home" shows the exact PDF Landing Page!
-      const [activeView, setActiveView] = useState("home");
-      const [deviceMode, setDeviceMode] = useState("web"); // "web" | "mobile"
+      // Default to "dashboard" in the classic School Management Software layout!
+      const [activeView, setActiveView] = useState("dashboard");
+      const [deviceMode, setDeviceMode] = useState("web"); // "web" | "classic_grid" | "mobile"
 
       const [batches, setBatches] = useState(INITIAL_BATCHES);
       const [students, setStudents] = useState(INITIAL_STUDENTS);
@@ -1279,449 +1279,409 @@
             metrics.totalFeeExpected > 0
               ? Math.round((metrics.totalFeeCollected / metrics.totalFeeExpected) * 100)
               : 0;
-          const totalSyllabusPortions = facultyChapters.reduce((s, f) => s + f.totalPortions, 0);
-          const completedSyllabusPortions = facultyChapters.reduce((s, f) => s + f.completedPortions, 0);
-          const syllabusRate =
-            totalSyllabusPortions > 0
-              ? Math.round((completedSyllabusPortions / totalSyllabusPortions) * 100)
-              : 0;
+          const totalDiscount = students.reduce((acc, s) => acc + (s.discount || 0), 0);
+
+          // SVG Donut math (r = 54, circumference = 2 * pi * 54 ≈ 339.29)
+          const circumference = 339.29;
+          const collectedRatio = metrics.totalFeeExpected > 0 ? metrics.totalFeeCollected / metrics.totalFeeExpected : 0.7;
+          const pendingRatio = metrics.totalFeeExpected > 0 ? (metrics.totalFeePending * 0.75) / metrics.totalFeeExpected : 0.2;
+          const overdueRatio = Math.max(0, 1 - collectedRatio - pendingRatio);
+
+          const collectedStroke = collectedRatio * circumference;
+          const pendingStroke = pendingRatio * circumference;
+          const overdueStroke = overdueRatio * circumference;
 
           return (
             <div className="space-y-6">
-              {/* Top Institutional Header Strip */}
-              <div className="bg-white border-l-4 border-l-[#195685] border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <span className="px-2.5 py-0.5 bg-[#195685] text-white text-[11px] font-bold tracking-wider uppercase rounded">
-                      Academic Year 2026-27
-                    </span>
-                    <span className="text-xs font-semibold text-[#2d7a47] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">
-                      ● SCERT Kerala State Syllabus (Std 8, 9, 10)
-                    </span>
-                  </div>
-                  <h2 className="text-xl font-extrabold text-slate-900 mt-1.5">
-                    സ്ഥാപനത്തിന്റെ ഒറ്റനോട്ടത്തിലുള്ള പ്രവർത്തന വിവരങ്ങൾ (Executive Overview)
-                  </h2>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <button
-                    onClick={() => setActiveView("students")}
-                    className="px-3.5 py-2 rounded-lg bg-[#195685] hover:bg-[#134166] text-white text-xs font-bold shadow-sm transition"
-                  >
-                    + പുതിയ കുട്ടി (Add Student)
-                  </button>
-                  <button
-                    onClick={() => setActiveView("attendance")}
-                    className="px-3.5 py-2 rounded-lg bg-[#2d7a47] hover:bg-[#225e36] text-white text-xs font-bold shadow-sm transition"
-                  >
-                    ✓ ഹാജർ രേഖപ്പെടുത്തുക
-                  </button>
-                  <button
-                    onClick={() => setActiveView("student_fee")}
-                    className="cyan-pill px-3.5 py-2 rounded-lg text-xs font-bold"
-                  >
-                    ₹ ഫീസ് രസീത്
-                  </button>
-                </div>
-              </div>
-
-              {/* 4 Key Institutional Ledger Cards */}
+              {/* Row 1: 4 Pastel KPI Cards matching the School Management Software Design */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {/* Card 1: Enrollment Breakdown */}
-                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#195685] p-5 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        ആകെ വിദ്യാർത്ഥികൾ (Enrollment)
+                {/* 1. Students Card (Soft Blue) */}
+                <div className="bg-[#eef6ff] border border-[#d6e8ff] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow transition">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[#1d68c4] flex-shrink-0">
+                    <svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-slate-600">Students (കുട്ടികൾ)</p>
+                    <h3 className="text-2xl font-extrabold text-slate-900 mt-0.5">
+                      {metrics.totalStudents}{" "}
+                      <span className="text-xs font-semibold text-slate-500">
+                        (8th:{metrics.class8Count}, 9th:{metrics.class9Count}, 10th:{metrics.class10Count})
                       </span>
-                      <span className="text-xs font-bold text-[#195685] bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                        {batches.length} Batches
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <h3 className="text-3xl font-extrabold text-slate-900">{metrics.totalStudents}</h3>
-                      <span className="text-xs font-semibold text-slate-500">പേർ പഠിക്കുന്നു</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-600 font-medium">SSLC (Class 10):</span>
-                      <span className="font-bold text-slate-900">{metrics.class10Count} കുട്ടികൾ</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-600 font-medium">Standard 9:</span>
-                      <span className="font-bold text-slate-900">{metrics.class9Count} കുട്ടികൾ</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-slate-600 font-medium">Standard 8:</span>
-                      <span className="font-bold text-slate-900">{metrics.class8Count} കുട്ടികൾ</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 2: Daily Attendance & Batch Discipline */}
-                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#2d7a47] p-5 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        ഹാജർ നില (Attendance Rate)
-                      </span>
-                      <span className="text-xs font-bold text-[#2d7a47] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        ഇന്ന് സജീവം
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <h3 className="text-3xl font-extrabold text-[#2d7a47]">{metrics.avgAttendance}%</h3>
-                      <span className="text-xs font-semibold text-slate-500">ശരാശരി ഹാജർ</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#2d7a47] h-full rounded-full"
-                        style={{ width: `${metrics.avgAttendance}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-slate-600">
-                      <span>രേഖപ്പെടുത്തിയ ക്ലാസുകൾ: {attendanceList.length}</span>
-                      <button
-                        onClick={() => setActiveView("attendance")}
-                        className="text-[#195685] font-bold hover:underline"
-                      >
-                        പരിശോധിക്കുക →
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 3: Fee Collection & Realized Revenue */}
-                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#169bc2] p-5 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        പിരിഞ്ഞുകിട്ടിയ ഫീസ് (Collected)
-                      </span>
-                      <span className="text-xs font-bold text-[#0e7490] bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
-                        {collectionRate}% Paid
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <h3 className="text-3xl font-extrabold text-[#195685]">
-                        ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
-                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-[#169bc2] h-full rounded-full"
-                        style={{ width: `${collectionRate}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-slate-600">
-                      <span>ആകെ ഫീസ്: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}</span>
-                      <span className="font-bold text-[#2d7a47]">
-                        Full Paid: {metrics.fullyPaidStudents.length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 4: Pending Dues & Follow-up */}
-                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-rose-600 p-5 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        ബാക്കി കിട്ടാനുള്ള ഫീസ് (Dues)
-                      </span>
-                      <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                        {metrics.studentsWithBalance.length} Students
-                      </span>
-                    </div>
-                    <div className="flex items-baseline gap-2 mt-2">
-                      <h3 className="text-3xl font-extrabold text-rose-600">
-                        ₹{metrics.totalFeePending.toLocaleString("en-IN")}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-600">
-                      {metrics.studentsWithBalance.length} കുട്ടികൾ ബാക്കി തരാനുണ്ട്
-                    </span>
-                    <button
-                      onClick={() => setActiveView("fee_report")}
-                      className="text-rose-600 font-bold hover:underline"
-                    >
-                      ഫീ റിപ്പോർട്ട് →
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Middle Section: Batch-wise Academic Table + Syllabus & Financial Chart */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left 2 Columns: Batch-wise Register & Schedule */}
-                <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
-                    <div>
-                      <h3 className="font-bold text-[#195685] text-base">
-                        ക്ലാസ് ബാച്ചുകളും സമയക്രമവും (Active Batch Register)
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        ഓരോ ബാച്ചിലെയും കുട്ടികളുടെ എണ്ണവും ഫീസ് ശേഖരണ നിലവാരവും
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setActiveView("communication")}
-                      className="text-xs font-bold text-[#2d7a47] bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100"
-                    >
-                      വാട്സാപ്പ് ഗ്രൂപ്പുകൾ →
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-100/80 text-[11px] uppercase text-slate-600 border-b border-slate-200">
-                        <tr>
-                          <th className="py-3 px-4">ബാച്ച് (Batch Name)</th>
-                          <th className="py-3 px-3">ക്ലാസ്</th>
-                          <th className="py-3 px-3">സമയം</th>
-                          <th className="py-3 px-3">അധ്യാപകൻ</th>
-                          <th className="py-3 px-3 text-center">കുട്ടികൾ</th>
-                          <th className="py-3 px-4 text-right">ഫീസ് നില</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200/70">
-                        {batches.map((b) => {
-                          const batchStu = students.filter((s) => s.batchId === b.id);
-                          const batchPaid = batchStu.reduce((acc, s) => acc + s.paidFee, 0);
-                          const batchTotal = batchStu.reduce((acc, s) => acc + (s.totalFee - s.discount), 0);
-                          return (
-                            <tr key={b.id} className="hover:bg-sky-50/40 transition">
-                              <td className="py-3.5 px-4">
-                                <div className="font-bold text-slate-900">{b.name}</div>
-                                <div className="text-[11px] text-slate-500">{b.courseTitle}</div>
-                              </td>
-                              <td className="py-3.5 px-3">
-                                <span className="px-2.5 py-0.5 bg-[#195685]/10 text-[#195685] rounded font-bold text-xs">
-                                  Std {b.grade}
-                                </span>
-                              </td>
-                              <td className="py-3.5 px-3 text-xs font-medium text-slate-700">{b.timing}</td>
-                              <td className="py-3.5 px-3 text-xs font-semibold text-slate-800">{b.classTeacher}</td>
-                              <td className="py-3.5 px-3 text-center">
-                                <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] border border-emerald-200 rounded-md font-bold text-xs">
-                                  {batchStu.length} പേർ
-                                </span>
-                              </td>
-                              <td className="py-3.5 px-4 text-right text-xs">
-                                <div className="font-bold text-slate-900">₹{batchPaid.toLocaleString("en-IN")}</div>
-                                <div className="text-[11px] text-slate-500">
-                                  of ₹{batchTotal.toLocaleString("en-IN")}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Right Column: Syllabus Completion & Top Exam Performers */}
-                <div className="space-y-6">
-                  {/* Syllabus Progress Box */}
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                      <div>
-                        <h4 className="font-bold text-[#195685] text-sm">
-                          പാഠഭാഗങ്ങളുടെ പുരോഗതി (Syllabus Tracker)
-                        </h4>
-                        <p className="text-[11px] text-slate-500">അധ്യാപകർ എടുത്ത ചാപ്റ്ററുകൾ</p>
-                      </div>
-                      <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] font-extrabold text-xs rounded border border-emerald-200">
-                        {syllabusRate}% Done
-                      </span>
-                    </div>
-
-                    <div className="space-y-3">
-                      {facultyChapters.slice(0, 4).map((fc) => {
-                        const pct = Math.round((fc.completedPortions / fc.totalPortions) * 100);
-                        return (
-                          <div key={fc.id} className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span className="font-bold text-slate-800">
-                                Std {fc.grade} • {fc.subject}
-                              </span>
-                              <span className="font-semibold text-[#2d7a47]">
-                                {fc.completedPortions}/{fc.totalPortions} ({pct}%)
-                              </span>
-                            </div>
-                            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                              <div
-                                className="bg-[#2d7a47] h-full rounded-full"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                            <p className="text-[11px] text-slate-500 truncate">
-                              Ch {fc.chapterNo}: {fc.chapterTitle} ({fc.facultyName})
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Live Classes & Exam Merit Box */}
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                      <h4 className="font-bold text-[#195685] text-sm">
-                        ഇന്നത്തെ ലൈവ് ക്ലാസുകൾ (Live Schedule)
-                      </h4>
-                      <button
-                        onClick={() => setActiveView("live_class")}
-                        className="text-xs font-bold text-[#169bc2] hover:underline"
-                      >
-                        എല്ലാം കാണുക
-                      </button>
-                    </div>
-                    {liveClasses.map((lc) => (
-                      <div
-                        key={lc.id}
-                        className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3"
-                      >
-                        <div className="min-w-0">
-                          <span className="text-[10px] font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded">
-                            ● Class {lc.grade} ({lc.scheduledTime})
-                          </span>
-                          <p className="font-bold text-xs text-slate-900 truncate mt-1">{lc.title}</p>
-                          <p className="text-[11px] text-slate-500">{lc.facultyName}</p>
-                        </div>
-                        <a
-                          href={lc.youtubeUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1.5 bg-[#195685] text-white rounded text-xs font-bold flex-shrink-0"
-                        >
-                          ▶ Open
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Section: Recent Student Admissions & Fee Dues Alert Table */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Admissions with Added By attribution */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                    <h4 className="font-bold text-[#195685] text-sm">
-                      അടുത്തിടെ ചേർന്ന കുട്ടികളും ചേർത്ത അധ്യാപകരും (Recent Admissions)
-                    </h4>
+                    </h3>
                     <button
                       onClick={() => setActiveView("students")}
-                      className="text-xs font-bold text-[#195685] hover:underline"
+                      className="text-xs font-bold text-[#1967d2] hover:underline mt-1.5 inline-block"
                     >
-                      മുഴുവൻ ലിസ്റ്റ് →
+                      View all
                     </button>
-                  </div>
-                  <div className="divide-y divide-slate-100 text-xs">
-                    {students.slice(0, 4).map((stu) => (
-                      <div key={stu.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50">
-                        <div>
-                          <span className="font-bold text-slate-900 text-sm">{stu.name}</span>
-                          <p className="text-slate-500 mt-0.5">
-                            {stu.batchName} • {stu.schoolName}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-right">
-                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-bold">
-                              ചേർത്തത്: {stu.addedBy}
-                            </span>
-                            <p className="text-[11px] text-slate-400 mt-1">Roll: {stu.rollNo}</p>
-                          </div>
-                          <button
-                            onClick={() => handleDownloadStudentPDF(stu)}
-                            title="PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക"
-                            className="px-2 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded font-bold"
-                          >
-                            📄 PDF
-                          </button>
-                          <button
-                            onClick={() => handleStartEditStudent(stu)}
-                            title="കുട്ടിയുടെ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുക"
-                            className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded font-bold"
-                          >
-                            ✏️ Edit
-                          </button>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </div>
 
-                {/* Pending Fee Reminders */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                    <h4 className="font-bold text-rose-700 text-sm">
-                      ഫീസ് ബാക്കിയുള്ളവരുടെ വിവരങ്ങൾ (Pending Fee Follow-up)
-                    </h4>
+                {/* 2. Teachers Card (Soft Mint Green) */}
+                <div className="bg-[#eefbf3] border border-[#d3f4e0] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow transition">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[#2e9e5b] flex-shrink-0">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-600">Teachers (അധ്യാപകർ)</p>
+                    <h3 className="text-2xl font-extrabold text-slate-900 mt-0.5">
+                      {facultyChapters.length}{" "}
+                      <span className="text-xs font-semibold text-slate-500">Faculties</span>
+                    </h3>
                     <button
-                      onClick={() => setActiveView("fee_report")}
-                      className="text-xs font-bold text-rose-700 hover:underline"
+                      onClick={() => setActiveView("faculties")}
+                      className="text-xs font-bold text-[#1967d2] hover:underline mt-1.5 inline-block"
                     >
-                      ഫീ റിപ്പോർട്ട് →
+                      View all
                     </button>
                   </div>
-                  <div className="divide-y divide-slate-100 text-xs">
-                    {metrics.studentsWithBalance.map((stu) => {
-                      const bal = stu.totalFee - stu.discount - stu.paidFee;
-                      return (
-                        <div key={stu.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50">
-                          <div>
-                            <span className="font-bold text-slate-900 text-sm">{stu.name}</span>
-                            <p className="text-slate-500 mt-0.5">
-                              രക്ഷിതാവ്: {stu.parentName} ({stu.batchName})
+                </div>
+
+                {/* 3. Attendance Card (Soft Lavender Purple) */}
+                <div className="bg-[#f5f0ff] border border-[#e4d7ff] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow transition">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-[#7c3aed] flex-shrink-0">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                      <path d="M9 16l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-600">Attendance (ഹാജർ)</p>
+                    <h3 className="text-2xl font-extrabold text-slate-900 mt-0.5">{metrics.avgAttendance}%</h3>
+                    <button
+                      onClick={() => setActiveView("attendance")}
+                      className="text-xs font-bold text-[#1967d2] hover:underline mt-1.5 inline-block"
+                    >
+                      View all
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4. Fees Collection Card (Soft Warm Amber) */}
+                <div className="bg-[#fff8eb] border border-[#fde7c0] rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow transition">
+                  <div className="w-11 h-11 rounded-full bg-[#f5a623] text-white flex items-center justify-center font-extrabold text-xl flex-shrink-0 shadow-sm">
+                    ₹
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-600">Fees Collection (ഫീസ്)</p>
+                    <h3 className="text-2xl font-extrabold text-slate-900 mt-0.5">
+                      ₹ {metrics.totalFeeCollected.toLocaleString("en-IN")}
+                    </h3>
+                    <button
+                      onClick={() => setActiveView("fee_report")}
+                      className="text-xs font-bold text-[#1967d2] hover:underline mt-1.5 inline-block"
+                    >
+                      View all
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Attendance Overview Line Chart + Recent Admissions/Announcements */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Attendance Overview Line Chart (Exact match to uploaded image) */}
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-base">Attendance Overview (ഹാജർ ഗ്രാഫ്)</h4>
+                      <p className="text-xs text-slate-500">Weekly Batch Attendance — Std 8, 9 & 10</p>
+                    </div>
+                    <button
+                      onClick={() => setActiveView("attendance")}
+                      className="text-xs font-bold text-[#1967d2] hover:underline"
+                    >
+                      Mark Attendance →
+                    </button>
+                  </div>
+
+                  <div className="w-full pt-2">
+                    <svg viewBox="0 0 460 190" className="w-full h-44 overflow-visible">
+                      <defs>
+                        <linearGradient id="attAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+                          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.02" />
+                        </linearGradient>
+                      </defs>
+                      {/* Y-axis labels */}
+                      <text x="8" y="28" fontSize="11" fill="#64748b" fontWeight="600">100%</text>
+                      <text x="14" y="92" fontSize="11" fill="#64748b" fontWeight="600">50%</text>
+                      <text x="20" y="155" fontSize="11" fill="#64748b" fontWeight="600">0%</text>
+
+                      {/* Horizontal Grid Lines */}
+                      <line x1="48" y1="24" x2="440" y2="24" stroke="#f1f5f9" strokeWidth="1.5" />
+                      <line x1="48" y1="88" x2="440" y2="88" stroke="#f1f5f9" strokeWidth="1.5" />
+                      <line x1="48" y1="152" x2="440" y2="152" stroke="#e2e8f0" strokeWidth="1.5" />
+                      <line x1="48" y1="20" x2="48" y2="152" stroke="#e2e8f0" strokeWidth="1.5" />
+
+                      {/* Shaded Area under Line */}
+                      <polygon
+                        points="65,88 135,64 205,46 275,74 345,50 420,34 420,152 65,152"
+                        fill="url(#attAreaGrad)"
+                      />
+
+                      {/* Smooth Attendance Polyline */}
+                      <polyline
+                        fill="none"
+                        stroke="#1e5685"
+                        strokeWidth="2.6"
+                        points="65,88 135,64 205,46 275,74 345,50 420,34"
+                      />
+
+                      {/* Data Dots & X-axis Days */}
+                      {[
+                        { x: 65, y: 88, day: "Mon", pct: "86%" },
+                        { x: 135, y: 64, day: "Tue", pct: "91%" },
+                        { x: 205, y: 46, day: "Wed", pct: "95%" },
+                        { x: 275, y: 74, day: "Thu", pct: "89%" },
+                        { x: 345, y: 50, day: "Fri", pct: "94%" },
+                        { x: 420, y: 34, day: "Sat", pct: "98%" },
+                      ].map((pt, i) => (
+                        <g key={i}>
+                          <circle cx={pt.x} cy={pt.y} r="4.5" fill="#2563eb" stroke="#ffffff" strokeWidth="1.8" />
+                          <text x={pt.x} y="174" fontSize="11" fill="#475569" textAnchor="middle" fontWeight="600">
+                            {pt.day}
+                          </text>
+                        </g>
+                      ))}
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Right: Recent Admissions & Announcements (Exact match to uploaded image) */}
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[#053361]">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM20.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z" />
+                          </svg>
+                        </span>
+                        <h4 className="font-bold text-slate-900 text-base">
+                          Recent Admissions & Updates
+                        </h4>
+                      </div>
+                      <button
+                        onClick={() => setActiveView("students")}
+                        className="text-xs font-bold text-[#1967d2] hover:underline"
+                      >
+                        View all
+                      </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-100">
+                      {students.slice(0, 4).map((stu) => (
+                        <div key={stu.id} className="py-3 flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-800 text-sm truncate">
+                              {stu.name}{" "}
+                              <span className="text-xs font-normal text-slate-500">({stu.batchName})</span>
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Added by: <b className="text-slate-700">{stu.addedBy}</b> • Fee: ₹{stu.paidFee}/₹{stu.totalFee}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <div className="text-right">
-                              <span className="font-extrabold text-rose-600 text-sm">₹{bal}</span>
-                              <p className="text-[10px] text-slate-400">Paid: ₹{stu.paidFee}</p>
-                            </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className="text-xs text-slate-400 mr-1 hidden sm:inline">{stu.joinedDate}</span>
                             <button
                               onClick={() => handleDownloadStudentPDF(stu)}
-                              className="px-2 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded font-bold"
+                              className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded text-[11px] font-bold"
+                              title="Download Student PDF"
                             >
                               📄 PDF
                             </button>
                             <button
                               onClick={() => handleStartEditStudent(stu)}
-                              className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded font-bold"
+                              className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[11px] font-bold"
+                              title="Edit Student"
                             >
                               ✏️ Edit
                             </button>
-                            <a
-                              href={`https://wa.me/${stu.parentPhone}?text=${encodeURIComponent(
-                                `നമസ്കാരം ${stu.parentName}, A PLUS ACCADEMY-ൽ പഠിക്കുന്ന ${stu.name}-ന്റെ ട്യൂഷൻ ഫീസ് ബാക്കി ₹${bal} അടയ്ക്കാൻ ഓർമ്മിപ്പിക്കുന്നു.`
-                              )}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="px-2.5 py-1.5 bg-[#2d7a47] hover:bg-[#225e36] text-white rounded font-bold"
-                            >
-                              WhatsApp
-                            </a>
                           </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: Fee Collection Donut Chart + Upcoming Exams & Live Classes */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left: Fee Collection Donut Chart Card (Exact match to uploaded image) */}
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-slate-900 text-base">Fee Collection (ഫീസ് ശേഖരണം)</h4>
+                    <button
+                      onClick={() => setActiveView("fee_report")}
+                      className="text-xs font-bold text-[#1967d2] hover:underline"
+                    >
+                      View all
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
+                    {/* SVG Donut Chart */}
+                    <div className="relative w-44 h-44 flex items-center justify-center">
+                      <svg viewBox="0 0 140 140" className="w-full h-full -rotate-90">
+                        <circle cx="70" cy="70" r="54" fill="none" stroke="#f1f5f9" strokeWidth="18" />
+                        {/* Collected Segment (Green) */}
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#4db66b"
+                          strokeWidth="18"
+                          strokeDasharray={`${collectedStroke} ${circumference}`}
+                          strokeDashoffset="0"
+                        />
+                        {/* Pending Segment (Amber) */}
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#f5a623"
+                          strokeWidth="18"
+                          strokeDasharray={`${pendingStroke} ${circumference}`}
+                          strokeDashoffset={-collectedStroke}
+                        />
+                        {/* Overdue Segment (Red) */}
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#d9534f"
+                          strokeWidth="18"
+                          strokeDasharray={`${overdueStroke} ${circumference}`}
+                          strokeDashoffset={-(collectedStroke + pendingStroke)}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-semibold text-slate-500">Total</span>
+                        <span className="text-base font-extrabold text-slate-900">
+                          ₹ {metrics.totalFeeExpected.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Legend matching the image */}
+                    <div className="space-y-4 text-xs">
+                      <div className="flex items-start gap-3">
+                        <span className="w-4 h-2 rounded-full bg-[#4db66b] mt-1.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-slate-500 font-medium">Collected (ലഭിച്ചത് - {collectionRate}%)</p>
+                          <p className="text-sm font-extrabold text-slate-900">
+                            ₹ {metrics.totalFeeCollected.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="w-4 h-2 rounded-full bg-[#f5a623] mt-1.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-slate-500 font-medium">
+                            Pending ({metrics.studentsWithBalance.length} Students)
+                          </p>
+                          <p className="text-sm font-extrabold text-slate-900">
+                            ₹ {metrics.totalFeePending.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="w-4 h-2 rounded-full bg-[#d9534f] mt-1.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-slate-500 font-medium">
+                            Fully Paid Students ({metrics.fullyPaidStudents.length} പേർ)
+                          </p>
+                          <p className="text-sm font-extrabold text-slate-900">
+                            Discount: ₹ {totalDiscount.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Upcoming Exams & Live Classes (Exact match to uploaded image) */}
+                <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="font-bold text-slate-900 text-base">Upcoming Exams & Live Classes</h4>
+                      <button
+                        onClick={() => setActiveView("exam")}
+                        className="text-xs font-bold text-[#1967d2] hover:underline"
+                      >
+                        View all
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {exams.map((ex) => (
+                        <div
+                          key={ex.id}
+                          onClick={() => setActiveView("exam")}
+                          className="p-3.5 rounded-xl border border-slate-200/90 hover:border-[#1967d2] hover:bg-sky-50/30 transition cursor-pointer flex items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-[#eef6ff] text-[#1967d2] flex items-center justify-center flex-shrink-0">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                              </svg>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900 text-sm truncate">{ex.title}</p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {ex.date} • Class {ex.grade} ({ex.totalMarks} Marks)
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-slate-400 flex-shrink-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                          </span>
+                        </div>
+                      ))}
+
+                      {liveClasses.slice(0, 1).map((lc) => (
+                        <div
+                          key={lc.id}
+                          onClick={() => setActiveView("live_class")}
+                          className="p-3.5 rounded-xl border border-slate-200/90 hover:border-[#1967d2] hover:bg-sky-50/30 transition cursor-pointer flex items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900 text-sm truncate">
+                                🔴 Live: {lc.title}
+                              </p>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {lc.scheduledDate} ({lc.scheduledTime}) • {lc.facultyName}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-xs font-bold text-[#1967d2] flex-shrink-0">Watch →</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2613,106 +2573,230 @@
         );
       };
 
+      const sidebarMenuItems = [
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          title: "Dashboard",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+          ),
+        },
+        {
+          id: "students",
+          label: "Students",
+          title: "Students Data & Fee Registration",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+            </svg>
+          ),
+        },
+        {
+          id: "faculties",
+          label: "Teachers & Chapters",
+          title: "Teachers & Syllabus Chapters",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          ),
+        },
+        {
+          id: "attendance",
+          label: "Attendance",
+          title: "Batch-wise Class Attendance",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+            </svg>
+          ),
+        },
+        {
+          id: "student_fee",
+          label: "Fees",
+          title: "Student Fee & Balance Sheet",
+          icon: (
+            <span className="w-[18px] h-[18px] rounded-full bg-white text-[#003366] inline-flex items-center justify-center font-extrabold text-[11px]">
+              ₹
+            </span>
+          ),
+        },
+        {
+          id: "exam",
+          label: "Exams",
+          title: "Online Exams & Instant Score",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+            </svg>
+          ),
+        },
+        {
+          id: "schedule",
+          label: "Timetable",
+          title: "Class Batches & Timetable",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+            </svg>
+          ),
+        },
+        {
+          id: "question_bank",
+          label: "Library & Notes",
+          title: "Notes & Question Bank",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1z" />
+            </svg>
+          ),
+        },
+        {
+          id: "exam_report",
+          label: "Reports (AI Exam)",
+          title: "AI Graphical Examination Report",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z" />
+            </svg>
+          ),
+        },
+        {
+          id: "fee_report",
+          label: "Fee Report",
+          title: "Institution Fee Report (Full Paid & Pending)",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+            </svg>
+          ),
+        },
+        {
+          id: "live_class",
+          label: "Live Classes",
+          title: "YouTube Live Classes",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
+            </svg>
+          ),
+        },
+        {
+          id: "communication",
+          label: "WhatsApp Groups",
+          title: "Parent & Batch WhatsApp Communication",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" />
+            </svg>
+          ),
+        },
+        {
+          id: "accounts",
+          label: "Accounts & Settings",
+          title: "Institution Income & Expense Accounts",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+            </svg>
+          ),
+        },
+      ];
+
+      const currentSectionTitle =
+        sidebarMenuItems.find((m) => m.id === activeView)?.title || "Dashboard";
+
       return (
-        <div className="min-h-screen bg-white flex flex-col">
-          {/* Subtle Top Mode Switcher (Web vs Mobile App View) */}
-          <div className="bg-slate-100 border-b border-slate-200 px-4 py-1.5 flex justify-between items-center text-xs">
-            <span className="text-slate-600 font-medium">
-              A PLUS ACCADEMY • Govt. School Classes 8, 9, 10 Tuition Portal
+        <div className="min-h-screen bg-[#f5f7fb] flex flex-col">
+          {/* Top Mode Switcher Bar */}
+          <div className="bg-white border-b border-slate-200 px-4 py-1.5 flex flex-wrap justify-between items-center text-xs gap-2">
+            <span className="text-slate-600 font-semibold">
+              🎓 A PLUS ACCADEMY • Kerala Govt. School Classes 8, 9 & 10 Tuition Management Software
             </span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setDeviceMode("web")}
-                className={`px-3 py-1 rounded font-bold transition ${
-                  deviceMode === "web" ? "bg-[#195685] text-white" : "text-slate-600 hover:bg-slate-200"
+                onClick={() => {
+                  setDeviceMode("web");
+                  if (activeView === "home") setActiveView("dashboard");
+                }}
+                className={`px-3 py-1 rounded-md font-bold transition ${
+                  deviceMode === "web" ? "bg-[#003366] text-white" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                💻 Web Landing Page
+                🖥️ School Management Software
+              </button>
+              <button
+                onClick={() => {
+                  setDeviceMode("classic_grid");
+                  setActiveView("home");
+                }}
+                className={`px-3 py-1 rounded-md font-bold transition ${
+                  deviceMode === "classic_grid" ? "bg-[#195685] text-white" : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                🏛️ 12-Icon Grid View
               </button>
               <button
                 onClick={() => setDeviceMode("mobile")}
-                className={`px-3 py-1 rounded font-bold transition ${
-                  deviceMode === "mobile" ? "bg-[#2d7a47] text-white" : "text-slate-600 hover:bg-slate-200"
+                className={`px-3 py-1 rounded-md font-bold transition ${
+                  deviceMode === "mobile" ? "bg-[#2d7a47] text-white" : "text-slate-600 hover:bg-slate-100"
                 }`}
               >
-                📱 Mobile App View (Android & iOS)
+                📱 Mobile App View
               </button>
             </div>
           </div>
 
           {deviceMode === "mobile" ? (
-            /* ==================== MOBILE APP VIEW MATCHING THE PDF DESIGN ==================== */
+            /* ==================== MOBILE APP VIEW ==================== */
             <div className="flex-1 bg-slate-100 py-6 px-4 flex flex-col items-center justify-center">
               <div className="phone-frame">
-                {/* Mobile Header with A+ Logo & Title */}
-                <div className="bg-white border-b border-cyan-600/40 px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2" onClick={() => setActiveView("home")}>
-                    <div className="scale-75 -ml-2">
-                      <AcademyLogoSVG />
+                <div className="bg-[#003366] text-white px-4 py-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5" onClick={() => setActiveView("dashboard")}>
+                    <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center font-extrabold text-sm">
+                      A+
                     </div>
                     <div>
-                      <h2 className="academy-title font-extrabold text-base leading-none">A PLUS ACCADEMY</h2>
-                      <p className="text-[10px] text-slate-500 mt-0.5">Classes 8, 9 & 10 • Tap icon to open</p>
+                      <h2 className="font-extrabold text-sm leading-none">A PLUS ACCADEMY</h2>
+                      <p className="text-[10px] text-sky-200 mt-0.5">Classes 8, 9 & 10 Tuition App</p>
                     </div>
                   </div>
-                  {activeView !== "home" && (
-                    <button
-                      onClick={() => setActiveView("home")}
-                      className="cyan-pill px-2.5 py-1 rounded text-[10px] font-bold"
-                    >
-                      ← HOME
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setActiveView("dashboard")}
+                    className="bg-white/15 px-2.5 py-1 rounded text-[10px] font-bold"
+                  >
+                    Dashboard
+                  </button>
                 </div>
 
-                {/* Mobile Quick Pills (COURSES, SCHEDULE, CLASSES, HOURS, MATERIALS) */}
-                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex gap-2 overflow-x-auto">
-                  {leftSideButtons.map((btn) => (
+                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex gap-1.5 overflow-x-auto">
+                  {sidebarMenuItems.map((m) => (
                     <button
-                      key={btn.id}
-                      onClick={() => setActiveView(btn.id)}
-                      className="cyan-pill px-3 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap flex items-center gap-1.5"
+                      key={m.id}
+                      onClick={() => setActiveView(m.id)}
+                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold whitespace-nowrap flex items-center gap-1 ${
+                        activeView === m.id
+                          ? "bg-[#1967d2] text-white"
+                          : "bg-white border border-slate-200 text-slate-700"
+                      }`}
                     >
-                      <span className="scale-75">{btn.svg}</span>
-                      <span>{btn.label}</span>
+                      <span>{m.label}</span>
                     </button>
                   ))}
                 </div>
 
-                {/* Mobile Content Body */}
-                <div className="flex-1 overflow-y-auto p-3">
-                  {activeView === "home" ? (
-                    <div className="grid grid-cols-3 gap-3 pt-2">
-                      {[...topRowIcons, ...bottomRowIcons].map((item) => {
-                        const IconComp = item.Component;
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setActiveView(item.id)}
-                            className="launcher-card flex flex-col items-center p-2 rounded-xl hover:bg-slate-50"
-                          >
-                            <div className="scale-75 h-14 flex items-center justify-center">
-                              <IconComp />
-                            </div>
-                            <span className="cyan-pill w-full py-1 px-1 rounded-md text-[9px] font-bold text-center leading-tight whitespace-pre-line">
-                              {item.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="space-y-3 text-xs">{renderModuleContent()}</div>
-                  )}
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 text-xs bg-[#f8fafc]">
+                  {renderModuleContent()}
                 </div>
               </div>
             </div>
-          ) : (
-            /* ==================== EXACT PDF LANDING PAGE LAYOUT (WEB) ==================== */
+          ) : deviceMode === "classic_grid" ? (
+            /* ==================== 12-ICON PDF LANDING PAGE LAYOUT ==================== */
             <div className="flex-1 p-4 md:p-8 flex justify-center items-start bg-white">
-              {/* Outer Framed Canvas matching PDF border */}
               <div className="w-full max-w-[1360px] min-h-[760px] border border-slate-400 bg-white flex relative shadow-sm">
-                {/* Left Vertical Column: Systematic, Equal-Length Boxes with Attractive Icons */}
                 <div className="w-52 md:w-60 border-r border-cyan-600/60 bg-slate-50/40 flex flex-col justify-between py-6 px-4 flex-shrink-0">
                   <div>
                     <div className="mb-6 pb-3 border-b border-slate-200/80 text-center">
@@ -2720,7 +2804,6 @@
                         ACADEMIC MENU
                       </span>
                     </div>
-
                     <div className="space-y-3.5 mt-4">
                       {leftSideButtons.map((btn) => {
                         const isActive = activeView === btn.id;
@@ -2735,10 +2818,8 @@
                             }`}
                           >
                             <span
-                              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                              style={{
-                                backgroundColor: isActive ? "rgba(255,255,255,0.92)" : btn.bgLight,
-                              }}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                              style={{ backgroundColor: isActive ? "rgba(255,255,255,0.92)" : btn.bgLight }}
                             >
                               {btn.svg}
                             </span>
@@ -2750,21 +2831,15 @@
                       })}
                     </div>
                   </div>
-
-                  {/* Systematic Footer Status Card inside Sidebar */}
                   <div className="p-3.5 rounded-xl border border-cyan-600/40 bg-white shadow-sm text-center space-y-1">
-                    <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">
-                      SCERT KERALA
-                    </div>
+                    <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">SCERT KERALA</div>
                     <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-200">
                       ● Std 8, 9 & 10 Batches
                     </div>
                   </div>
                 </div>
 
-                {/* Right Main Content Area */}
                 <div className="flex-1 flex flex-col min-w-0">
-                  {/* Top Header with A+ Logo and A PLUS ACCADEMY */}
                   <div className="h-32 px-6 md:px-14 flex items-center justify-between border-b border-cyan-600/60">
                     <div
                       onClick={() => setActiveView("home")}
@@ -2775,21 +2850,18 @@
                         A PLUS ACCADEMY
                       </h1>
                     </div>
-
                     {activeView !== "home" && (
                       <button
                         onClick={() => setActiveView("home")}
                         className="cyan-pill px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 flex-shrink-0"
                       >
-                        <span>🏠</span> ഹോം പേജിലേക്ക് മടങ്ങുക (LANDING PAGE)
+                        <span>🏠</span> ഹോം പേജിലേക്ക് മടങ്ങുക
                       </button>
                     )}
                   </div>
 
-                  {/* Body Area: Either the 12-Icon PDF Landing Grid OR the Selected Module View */}
                   {activeView === "home" ? (
                     <div className="flex-1 px-6 md:px-12 py-10 flex flex-col justify-around">
-                      {/* Row 1: 7 Icons (DASH BOARD to LIVE CLASSES) */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-y-8 gap-x-3 items-start justify-items-center">
                         {topRowIcons.map((item) => {
                           const IconComp = item.Component;
@@ -2810,7 +2882,6 @@
                         })}
                       </div>
 
-                      {/* Row 2: 5 Icons (STUDENT FEE to ACCOUNTS) */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-6 items-start justify-items-center max-w-5xl mx-auto w-full pt-6">
                         {bottomRowIcons.map((item) => {
                           const IconComp = item.Component;
@@ -2832,34 +2903,138 @@
                       </div>
                     </div>
                   ) : (
-                    /* Selected Feature View Inside the A PLUS ACCADEMY Frame */
                     <div className="flex-1 p-6 md:p-8 bg-slate-50/60 overflow-y-auto space-y-5">
-                      {/* Quick Module Bar for jumping between icons */}
-                      <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-200">
-                        <button
-                          onClick={() => setActiveView("home")}
-                          className="px-3 py-1.5 rounded-lg bg-[#195685] text-white text-xs font-bold"
-                        >
-                          ⬅ എല്ലാം കാണുക (All Icons)
-                        </button>
-                        {[...topRowIcons, ...bottomRowIcons].map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => setActiveView(item.id)}
-                            className={`cyan-pill px-3 py-1 rounded-md text-xs font-semibold ${
-                              activeView === item.id ? "active font-bold bg-cyan-50" : ""
-                            }`}
-                          >
-                            {item.label.replace("\n", " ")}
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Render the clicked icon's full feature page */}
                       {renderModuleContent()}
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          ) : (
+            /* ==================== SCHOOL MANAGEMENT SOFTWARE LAYOUT (MATCHING UPLOADED IMAGE) ==================== */
+            <div className="flex-1 py-6 px-4 md:px-8 flex flex-col items-center">
+              {/* Top Title Banner with Stacked Books & Graduation Cap */}
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <svg width="64" height="58" viewBox="0 0 72 64" fill="none" className="drop-shadow-sm">
+                  {/* Bottom Green Book */}
+                  <path d="M12 46 L36 56 L60 46 L36 36 Z" fill="#4db66b" stroke="#2e7d32" strokeWidth="1.5" />
+                  <path d="M12 46 L36 56 L60 46 L60 52 L36 62 L12 52 Z" fill="#e8f5e9" stroke="#2e7d32" strokeWidth="1.5" />
+                  {/* Middle Amber Book */}
+                  <path d="M14 36 L36 46 L58 36 L36 26 Z" fill="#f5b041" stroke="#b7791f" strokeWidth="1.5" />
+                  <path d="M14 36 L36 46 L58 36 L58 42 L36 52 L14 42 Z" fill="#fef9e7" stroke="#b7791f" strokeWidth="1.5" />
+                  {/* Top Navy Graduation Cap */}
+                  <polygon points="36,8 8,20 36,32 64,20" fill="#1e4b85" stroke="#0d2b52" strokeWidth="1.8" />
+                  <path d="M20 25 V33 C20 37, 52 37, 52 33 V25" fill="#2b5fa6" stroke="#0d2b52" strokeWidth="1.5" />
+                  <path d="M56 23 V36" stroke="#f5b041" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="56" cy="37" r="2.5" fill="#f5b041" />
+                </svg>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#0b1f3a] tracking-tight">
+                  A PLUS ACCADEMY — Tuition Management Software
+                </h1>
+              </div>
+
+              {/* Main Rounded Software Window */}
+              <div className="w-full max-w-[1320px] min-h-[760px] bg-white rounded-2xl shadow-[0_12px_40px_rgba(15,23,42,0.08)] border border-slate-200/90 overflow-hidden flex">
+                {/* Deep Navy Left Sidebar */}
+                <aside className="w-60 md:w-64 bg-[#003366] text-white flex flex-col justify-between py-6 px-4 flex-shrink-0">
+                  <div>
+                    {/* School Crest + Name */}
+                    <div
+                      onClick={() => setActiveView("dashboard")}
+                      className="flex items-center gap-3 px-2 pb-6 border-b border-white/10 cursor-pointer"
+                    >
+                      <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/25 flex items-center justify-center flex-shrink-0">
+                        <svg width="26" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                          <path d="M12 8v8M8 12h8" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-lg leading-tight tracking-wide text-white">
+                          A PLUS
+                        </h2>
+                        <p className="text-xs text-sky-200 font-medium">High School Tuition</p>
+                      </div>
+                    </div>
+
+                    {/* Navigation Menu Items */}
+                    <nav className="space-y-1.5 mt-5">
+                      {sidebarMenuItems.map((item) => {
+                        const isActive = activeView === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveView(item.id)}
+                            className={`w-full px-3.5 py-2.5 rounded-lg flex items-center gap-3.5 text-sm transition-all ${
+                              isActive
+                                ? "bg-[#1967d2] text-white font-bold shadow-sm"
+                                : "text-slate-100/90 hover:bg-white/10 font-medium"
+                            }`}
+                          >
+                            <span className="flex-shrink-0">{item.icon}</span>
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+
+                  {/* Bottom Sidebar Info */}
+                  <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/80 space-y-1">
+                    <div className="font-bold text-white">SCERT Kerala Syllabus</div>
+                    <div>Classes 8, 9 & 10 (Govt. Schools)</div>
+                  </div>
+                </aside>
+
+                {/* Right Main Content Area */}
+                <main className="flex-1 flex flex-col min-w-0 bg-white">
+                  {/* Top Header Bar */}
+                  <header className="px-6 md:px-8 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+                    <h2 className="text-xl md:text-2xl font-bold text-slate-900">
+                      {currentSectionTitle}
+                    </h2>
+
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={handleDownloadAllStudentsPDF}
+                        className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#eef6ff] hover:bg-[#dcebff] text-[#1967d2] text-xs font-bold border border-[#d0e4ff] transition"
+                      >
+                        📄 PDF Register
+                      </button>
+
+                      {/* Notification Bell with Red Badge */}
+                      <button
+                        onClick={() => setActiveView("fee_report")}
+                        className="relative p-1.5 text-slate-700 hover:bg-slate-100 rounded-full transition"
+                        title="Pending Fee Reminders"
+                      >
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white absolute top-1 right-1" />
+                      </button>
+
+                      {/* Admin Profile */}
+                      <div className="flex items-center gap-2.5 pl-2 cursor-pointer">
+                        <div className="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm font-semibold text-slate-800">Admin</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.2">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </div>
+                    </div>
+                  </header>
+
+                  {/* Body Content */}
+                  <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-white">
+                    {renderModuleContent()}
+                  </div>
+                </main>
               </div>
             </div>
           )}

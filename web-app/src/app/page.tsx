@@ -317,8 +317,8 @@ const IconAccounts = () => (
 );
 
 export default function APlusAcademyPortal() {
-  // "home" renders the exact A PLUS ACCADEMY PDF Landing Page
-  const [activeView, setActiveView] = useState<string>("home");
+  // Default to "dashboard" in the School Management Software layout
+  const [activeView, setActiveView] = useState<string>("dashboard");
 
   const [batches] = useState<Batch[]>(INITIAL_BATCHES);
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
@@ -646,275 +646,246 @@ export default function APlusAcademyPortal() {
       ? Math.round(studentAttempts.reduce((acc, a) => acc + a.percentage, 0) / studentAttempts.length)
       : 88;
 
+  const sidebarMenuItems = [
+    { id: "dashboard", label: "Dashboard", title: "Dashboard" },
+    { id: "students", label: "Students", title: "Students Data & Fee Registration" },
+    { id: "faculties", label: "Teachers & Chapters", title: "Teachers & Syllabus Chapters" },
+    { id: "attendance", label: "Attendance", title: "Batch-wise Class Attendance" },
+    { id: "student_fee", label: "Fees", title: "Student Fee & Balance Sheet" },
+    { id: "exam", label: "Exams", title: "Online Exams & Instant Score" },
+    { id: "schedule", label: "Timetable", title: "Class Batches & Timetable" },
+    { id: "question_bank", label: "Library & Notes", title: "Notes & Question Bank" },
+    { id: "exam_report", label: "Reports (AI Exam)", title: "AI Graphical Examination Report" },
+    { id: "fee_report", label: "Fee Report", title: "Institution Fee Report" },
+    { id: "live_class", label: "Live Classes", title: "YouTube Live Classes" },
+    { id: "communication", label: "WhatsApp Groups", title: "WhatsApp Parent Communication" },
+    { id: "accounts", label: "Accounts & Settings", title: "Institution Accounts" },
+  ];
+
+  const currentSectionTitle =
+    sidebarMenuItems.find((m) => m.id === activeView)?.title || "Dashboard";
+
+  const circumference = 339.29;
+  const collectedRatio =
+    metrics.totalFeeExpected > 0 ? metrics.totalFeeCollected / metrics.totalFeeExpected : 0.7;
+  const pendingRatio =
+    metrics.totalFeeExpected > 0 ? (metrics.totalFeePending * 0.75) / metrics.totalFeeExpected : 0.2;
+  const overdueRatio = Math.max(0, 1 - collectedRatio - pendingRatio);
+  const collectedStroke = collectedRatio * circumference;
+  const pendingStroke = pendingRatio * circumference;
+  const overdueStroke = overdueRatio * circumference;
+
   return (
-    <div className="min-h-screen bg-white p-4 md:p-8 flex justify-center items-start">
-      {/* Outer Framed Canvas matching PDF border */}
-      <div className="w-full max-w-[1360px] min-h-[760px] border border-slate-400 bg-white flex relative shadow-sm">
-        {/* Left Sidebar Column (COURSES, SCHEDULE, CLASSES, HOURS, MATERIALS) */}
-        <div className="w-52 md:w-60 border-r border-[#169bc2]/70 bg-slate-50/40 flex flex-col justify-between py-6 px-4 flex-shrink-0">
+    <div className="min-h-screen bg-[#f5f7fb] py-6 px-4 md:px-8 flex flex-col items-center">
+      {/* Top Title Banner with Stacked Books & Graduation Cap */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <svg width="64" height="58" viewBox="0 0 72 64" fill="none" className="drop-shadow-sm">
+          <path d="M12 46 L36 56 L60 46 L36 36 Z" fill="#4db66b" stroke="#2e7d32" strokeWidth="1.5" />
+          <path d="M12 46 L36 56 L60 46 L60 52 L36 62 L12 52 Z" fill="#e8f5e9" stroke="#2e7d32" strokeWidth="1.5" />
+          <path d="M14 36 L36 46 L58 36 L36 26 Z" fill="#f5b041" stroke="#b7791f" strokeWidth="1.5" />
+          <path d="M14 36 L36 46 L58 36 L58 42 L36 52 L14 42 Z" fill="#fef9e7" stroke="#b7791f" strokeWidth="1.5" />
+          <polygon points="36,8 8,20 36,32 64,20" fill="#1e4b85" stroke="#0d2b52" strokeWidth="1.8" />
+          <path d="M20 25 V33 C20 37, 52 37, 52 33 V25" fill="#2b5fa6" stroke="#0d2b52" strokeWidth="1.5" />
+          <path d="M56 23 V36" stroke="#f5b041" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="56" cy="37" r="2.5" fill="#f5b041" />
+        </svg>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#0b1f3a] tracking-tight">
+          A PLUS ACCADEMY — Tuition Management Software
+        </h1>
+      </div>
+
+      {/* Main Rounded Software Window */}
+      <div className="w-full max-w-[1320px] min-h-[760px] bg-white rounded-2xl shadow-[0_12px_40px_rgba(15,23,42,0.08)] border border-slate-200/90 overflow-hidden flex">
+        {/* Deep Navy Left Sidebar */}
+        <aside className="w-60 md:w-64 bg-[#003366] text-white flex flex-col justify-between py-6 px-4 flex-shrink-0">
           <div>
-            <div className="mb-6 pb-3 border-b border-slate-200/80 text-center">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#195685]">
-                ACADEMIC MENU
-              </span>
-            </div>
-
-            <div className="space-y-3.5 mt-4">
-              {leftSideButtons.map((btn) => {
-                const isActive = activeView === btn.id;
-                return (
-                  <button
-                    key={btn.id}
-                    onClick={() => setActiveView(btn.id)}
-                    className={`w-full h-12 px-3.5 rounded-xl border-[1.8px] flex items-center gap-3 transition-all duration-200 shadow-sm group ${
-                      isActive
-                        ? "bg-[#195685] border-[#195685] text-white shadow-md scale-[1.02]"
-                        : "bg-white border-[#169bc2] text-slate-800 hover:border-[#195685] hover:bg-sky-50/60 hover:-translate-y-0.5"
-                    }`}
-                  >
-                    <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                      style={{
-                        backgroundColor: isActive ? "rgba(255,255,255,0.92)" : btn.bgLight,
-                      }}
-                    >
-                      {btn.svg}
-                    </span>
-                    <span className="text-xs md:text-[13px] font-bold tracking-wider truncate">
-                      {btn.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-cyan-600/40 bg-white shadow-sm text-center space-y-1">
-            <div className="text-[11px] font-extrabold text-[#195685] tracking-wide">
-              SCERT KERALA
-            </div>
-            <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-200">
-              ● Std 8, 9 & 10 Batches
-            </div>
-          </div>
-        </div>
-
-        {/* Right Main Area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Header with A+ Logo & A PLUS ACCADEMY */}
-          <div className="h-32 px-6 md:px-14 flex items-center justify-between border-b border-[#169bc2]/70">
             <div
-              onClick={() => setActiveView("home")}
-              className="flex items-center gap-8 md:gap-16 cursor-pointer mx-auto"
+              onClick={() => setActiveView("dashboard")}
+              className="flex items-center gap-3 px-2 pb-6 border-b border-white/10 cursor-pointer"
             >
-              <AcademyLogoSVG />
-              <h1 className="text-2xl sm:text-4xl md:text-[42px] font-extrabold tracking-wider text-[#195685]">
-                A PLUS ACCADEMY
-              </h1>
-            </div>
-
-            {activeView !== "home" && (
-              <button
-                onClick={() => setActiveView("home")}
-                className="border-[1.6px] border-[#169bc2] bg-white hover:bg-sky-50 px-4 py-2 rounded-lg text-xs font-bold"
-              >
-                🏠 LANDING PAGE
-              </button>
-            )}
-          </div>
-
-          {/* Landing Grid or Selected Module */}
-          {activeView === "home" ? (
-            <div className="flex-1 px-6 md:px-12 py-10 flex flex-col justify-around">
-              {/* Row 1: 7 Icons */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-y-8 gap-x-4 items-start justify-items-center">
-                {topRowIcons.map((item) => {
-                  const IconComp = item.Component;
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => setActiveView(item.id)}
-                      className="flex flex-col items-center cursor-pointer group w-full max-w-[155px]"
-                    >
-                      <div className="h-24 flex items-center justify-center mb-2 transition-transform group-hover:-translate-y-1">
-                        <IconComp />
-                      </div>
-                      <div className="border-[1.6px] border-[#169bc2] bg-white group-hover:bg-sky-50 w-full min-h-[42px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-[11px] md:text-xs font-semibold tracking-tight whitespace-pre-line break-words leading-tight overflow-hidden">
-                        {item.label}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/25 flex items-center justify-center flex-shrink-0">
+                <svg width="26" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M12 8v8M8 12h8" />
+                </svg>
               </div>
-
-              {/* Row 2: 5 Icons */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-6 items-start justify-items-center max-w-5xl mx-auto w-full pt-6">
-                {bottomRowIcons.map((item) => {
-                  const IconComp = item.Component;
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => setActiveView(item.id)}
-                      className="flex flex-col items-center cursor-pointer group w-full max-w-[175px]"
-                    >
-                      <div className="h-24 flex items-center justify-center mb-2 transition-transform group-hover:-translate-y-1">
-                        <IconComp />
-                      </div>
-                      <div className="border-[1.6px] border-[#169bc2] bg-white group-hover:bg-sky-50 w-full min-h-[40px] px-3 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
-                        {item.label}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div>
+                <h2 className="font-bold text-lg leading-tight tracking-wide text-white">A PLUS</h2>
+                <p className="text-xs text-sky-200 font-medium">High School Tuition</p>
               </div>
             </div>
-          ) : (
-            <div className="flex-1 p-6 md:p-8 bg-slate-50/60 overflow-y-auto space-y-5">
-              <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-200">
-                <button
-                  onClick={() => setActiveView("home")}
-                  className="px-3 py-1.5 rounded-lg bg-[#195685] text-white text-xs font-bold"
-                >
-                  ⬅ Back to Landing Page
-                </button>
-                {[...topRowIcons, ...bottomRowIcons].map((item) => (
+
+            <nav className="space-y-1.5 mt-5">
+              {sidebarMenuItems.map((item) => {
+                const isActive = activeView === item.id;
+                return (
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id)}
-                    className={`border border-[#169bc2] bg-white px-3 py-1 rounded-md text-xs font-semibold ${
-                      activeView === item.id ? "bg-sky-50 font-bold" : ""
+                    className={`w-full px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm transition-all ${
+                      isActive
+                        ? "bg-[#1967d2] text-white font-bold shadow-sm"
+                        : "text-slate-100/90 hover:bg-white/10 font-medium"
                     }`}
                   >
-                    {item.label.replace("\n", " ")}
+                    <span className="truncate">{item.label}</span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
+            </nav>
+          </div>
 
+          <div className="mt-6 pt-4 border-t border-white/10 px-2 text-xs text-sky-200/80 space-y-1">
+            <div className="font-bold text-white">SCERT Kerala Syllabus</div>
+            <div>Classes 8, 9 & 10 (Govt. Schools)</div>
+          </div>
+        </aside>
+
+        {/* Right Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 bg-white">
+          <header className="px-6 md:px-8 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900">{currentSectionTitle}</h2>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 pl-2">
+                <div className="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs">
+                  A
+                </div>
+                <span className="text-sm font-semibold text-slate-800">Admin</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-5">
               {activeView === "dashboard" && (
                 <div className="space-y-6">
-                  {/* Top Institutional Header Strip */}
-                  <div className="bg-white border-l-4 border-l-[#195685] border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2.5">
-                        <span className="px-2.5 py-0.5 bg-[#195685] text-white text-[11px] font-bold tracking-wider uppercase rounded">
-                          Academic Year 2026-27
-                        </span>
-                        <span className="text-xs font-semibold text-[#2d7a47] bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">
-                          ● SCERT Kerala State Syllabus (Std 8, 9, 10)
-                        </span>
-                      </div>
-                      <h2 className="text-xl font-extrabold text-slate-900 mt-1.5">
-                        സ്ഥാപനത്തിന്റെ ഒറ്റനോട്ടത്തിലുള്ള പ്രവർത്തന വിവരങ്ങൾ (Executive Overview)
-                      </h2>
+                  {/* 4 Pastel KPI Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="bg-[#eef6ff] border border-[#d6e8ff] rounded-2xl p-5">
+                      <p className="text-xs font-semibold text-slate-600">Students</p>
+                      <h3 className="text-2xl font-extrabold text-slate-900 mt-1">{metrics.totalStudents}</h3>
+                      <button onClick={() => setActiveView("students")} className="text-xs font-bold text-[#1967d2] mt-2">
+                        View all
+                      </button>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <button
-                        onClick={() => setActiveView("students")}
-                        className="px-3.5 py-2 rounded-lg bg-[#195685] hover:bg-[#134166] text-white text-xs font-bold shadow-sm transition"
-                      >
-                        + പുതിയ കുട്ടി (Add Student)
+                    <div className="bg-[#eefbf3] border border-[#d3f4e0] rounded-2xl p-5">
+                      <p className="text-xs font-semibold text-slate-600">Teachers</p>
+                      <h3 className="text-2xl font-extrabold text-slate-900 mt-1">{facultyChapters.length}</h3>
+                      <button onClick={() => setActiveView("faculties")} className="text-xs font-bold text-[#1967d2] mt-2">
+                        View all
                       </button>
-                      <button
-                        onClick={() => setActiveView("attendance")}
-                        className="px-3.5 py-2 rounded-lg bg-[#2d7a47] hover:bg-[#225e36] text-white text-xs font-bold shadow-sm transition"
-                      >
-                        ✓ ഹാജർ രേഖപ്പെടുത്തുക
+                    </div>
+                    <div className="bg-[#f5f0ff] border border-[#e4d7ff] rounded-2xl p-5">
+                      <p className="text-xs font-semibold text-slate-600">Attendance</p>
+                      <h3 className="text-2xl font-extrabold text-slate-900 mt-1">{metrics.avgAttendance}%</h3>
+                      <button onClick={() => setActiveView("attendance")} className="text-xs font-bold text-[#1967d2] mt-2">
+                        View all
                       </button>
-                      <button
-                        onClick={() => setActiveView("student_fee")}
-                        className="border-[1.6px] border-[#169bc2] bg-white hover:bg-sky-50 px-3.5 py-2 rounded-lg text-xs font-bold"
-                      >
-                        ₹ ഫീസ് രസീത്
+                    </div>
+                    <div className="bg-[#fff8eb] border border-[#fde7c0] rounded-2xl p-5">
+                      <p className="text-xs font-semibold text-slate-600">Fees Collection</p>
+                      <h3 className="text-2xl font-extrabold text-slate-900 mt-1">
+                        ₹ {metrics.totalFeeCollected.toLocaleString("en-IN")}
+                      </h3>
+                      <button onClick={() => setActiveView("fee_report")} className="text-xs font-bold text-[#1967d2] mt-2">
+                        View all
                       </button>
                     </div>
                   </div>
 
-                  {/* 4 Key Institutional Ledger Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#195685] p-5 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            ആകെ വിദ്യാർത്ഥികൾ (Enrollment)
-                          </span>
-                          <span className="text-xs font-bold text-[#195685] bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                            {batches.length} Batches
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-2 mt-2">
-                          <h3 className="text-3xl font-extrabold text-slate-900">{metrics.totalStudents}</h3>
-                          <span className="text-xs font-semibold text-slate-500">പേർ പഠിക്കുന്നു</span>
-                        </div>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">SSLC (Class 10):</span>
-                          <span className="font-bold">{metrics.class10Count} കുട്ടികൾ</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-600">Standard 9 & 8:</span>
-                          <span className="font-bold">{metrics.class9Count + metrics.class8Count} കുട്ടികൾ</span>
-                        </div>
-                      </div>
+                  {/* Middle Row: Attendance Overview + Recent Admissions */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                      <h4 className="font-bold text-slate-900 text-base mb-4">Attendance Overview</h4>
+                      <svg viewBox="0 0 460 190" className="w-full h-44">
+                        <polyline
+                          fill="none"
+                          stroke="#1e5685"
+                          strokeWidth="2.6"
+                          points="65,88 135,64 205,46 275,74 345,50 420,34"
+                        />
+                      </svg>
                     </div>
-
-                    <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#2d7a47] p-5 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-start">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                            ഹാജർ നില (Attendance Rate)
-                          </span>
-                          <span className="text-xs font-bold text-[#2d7a47] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            ഇന്ന് സജീവം
-                          </span>
-                        </div>
-                        <h3 className="text-3xl font-extrabold text-[#2d7a47] mt-2">{metrics.avgAttendance}%</h3>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                          <div className="bg-[#2d7a47] h-full" style={{ width: `${metrics.avgAttendance}%` }} />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-[#169bc2] p-5 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                          പിരിഞ്ഞുകിട്ടിയ ഫീസ് (Collected)
-                        </span>
-                        <h3 className="text-3xl font-extrabold text-[#195685] mt-2">
-                          ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}
-                        </h3>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between text-xs text-slate-600">
-                        <span>ആകെ: ₹{metrics.totalFeeExpected.toLocaleString("en-IN")}</span>
-                        <span className="font-bold text-[#2d7a47]">
-                          Full Paid: {metrics.fullyPaidStudents.length}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-rose-600 p-5 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                          ബാക്കി കിട്ടാനുള്ള ഫീസ് (Dues)
-                        </span>
-                        <h3 className="text-3xl font-extrabold text-rose-600 mt-2">
-                          ₹{metrics.totalFeePending.toLocaleString("en-IN")}
-                        </h3>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between text-xs">
-                        <span className="text-slate-600">
-                          {metrics.studentsWithBalance.length} കുട്ടികൾ ബാക്കിയുണ്ട്
-                        </span>
-                        <button
-                          onClick={() => setActiveView("fee_report")}
-                          className="text-rose-600 font-bold hover:underline"
-                        >
-                          ഫീ റിപ്പോർട്ട് →
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="font-bold text-slate-900 text-base">Recent Admissions</h4>
+                        <button onClick={() => setActiveView("students")} className="text-xs font-bold text-[#1967d2]">
+                          View all
                         </button>
                       </div>
+                      <div className="divide-y">
+                        {students.slice(0, 4).map((stu) => (
+                          <div key={stu.id} className="py-2.5 flex justify-between items-center text-xs">
+                            <div>
+                              <p className="font-bold text-slate-900 text-sm">{stu.name}</p>
+                              <p className="text-slate-500">Added by: {stu.addedBy}</p>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <button
+                                onClick={() => handleDownloadStudentPDF(stu)}
+                                className="px-2 py-1 bg-sky-50 text-[#195685] border rounded font-bold"
+                              >
+                                📄 PDF
+                              </button>
+                              <button
+                                onClick={() => handleStartEditStudent(stu)}
+                                className="px-2 py-1 bg-amber-50 text-amber-800 border rounded font-bold"
+                              >
+                                ✏️ Edit
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Fee Collection Donut + Upcoming Exams */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex items-center justify-around">
+                      <svg viewBox="0 0 140 140" className="w-40 h-40 -rotate-90">
+                        <circle cx="70" cy="70" r="54" fill="none" stroke="#f1f5f9" strokeWidth="18" />
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#4db66b"
+                          strokeWidth="18"
+                          strokeDasharray={`${collectedStroke} ${circumference}`}
+                        />
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#f5a623"
+                          strokeWidth="18"
+                          strokeDasharray={`${pendingStroke} ${circumference}`}
+                          strokeDashoffset={-collectedStroke}
+                        />
+                        <circle
+                          cx="70"
+                          cy="70"
+                          r="54"
+                          fill="none"
+                          stroke="#d9534f"
+                          strokeWidth="18"
+                          strokeDasharray={`${overdueStroke} ${circumference}`}
+                          strokeDashoffset={-(collectedStroke + pendingStroke)}
+                        />
+                      </svg>
+                      <div className="text-xs space-y-2">
+                        <p><b>Collected:</b> ₹{metrics.totalFeeCollected.toLocaleString("en-IN")}</p>
+                        <p><b>Pending:</b> ₹{metrics.totalFeePending.toLocaleString("en-IN")}</p>
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3">
+                      <h4 className="font-bold text-slate-900 text-base">Upcoming Exams</h4>
+                      {exams.map((ex) => (
+                        <div key={ex.id} className="p-3 border rounded-xl text-sm">
+                          <b>{ex.title}</b> — {ex.date}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -1325,7 +1296,6 @@ export default function APlusAcademyPortal() {
                 </div>
               )}
             </div>
-          )}
         </div>
       </div>
     </div>
