@@ -859,7 +859,7 @@
         { id: "dashboard", label: "DASH BOARD", Component: IconDashboard },
         { id: "students", label: "STUDENTS", Component: IconStudents },
         { id: "attendance", label: "ATTENDENCE", Component: IconAttendance },
-        { id: "faculties", label: "FACULTIES&CHAPTER", Component: IconFaculties },
+        { id: "faculties", label: "FACULTIES &\nCHAPTER", Component: IconFaculties },
         { id: "exam", label: "EXAM", Component: IconExam },
         { id: "exam_report", label: "EXAMINATION\nREPORT", Component: IconExamReport },
         { id: "live_class", label: "LIVE CLASSES", Component: IconLiveClasses },
@@ -2292,7 +2292,7 @@
                   {activeView === "home" ? (
                     <div className="flex-1 px-6 md:px-12 py-10 flex flex-col justify-around">
                       {/* Row 1: 7 Icons (DASH BOARD to LIVE CLASSES) */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-y-8 gap-x-4 items-start justify-items-center">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-y-8 gap-x-3 items-start justify-items-center">
                         {topRowIcons.map((item) => {
                           const IconComp = item.Component;
                           return (
@@ -2304,7 +2304,7 @@
                               <div className="h-24 flex items-center justify-center mb-2">
                                 <IconComp />
                               </div>
-                              <div className="cyan-pill w-full min-h-[38px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
+                              <div className="cyan-pill w-full min-h-[42px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-[11px] md:text-xs font-semibold tracking-tight whitespace-pre-line break-words leading-tight overflow-hidden">
                                 {item.label}
                               </div>
                             </div>
@@ -2325,7 +2325,7 @@
                               <div className="h-24 flex items-center justify-center mb-2">
                                 <IconComp />
                               </div>
-                              <div className="cyan-pill w-full min-h-[40px] px-3 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
+                              <div className="cyan-pill w-full min-h-[42px] px-2.5 py-1.5 rounded-lg flex items-center justify-center text-center text-[11px] md:text-xs font-semibold tracking-tight whitespace-pre-line break-words leading-tight overflow-hidden">
                                 {item.label}
                               </div>
                             </div>

@@ -385,7 +385,7 @@ export default function APlusAcademyPortal() {
     { id: "dashboard", label: "DASH BOARD", Component: IconDashboard },
     { id: "students", label: "STUDENTS", Component: IconStudents },
     { id: "attendance", label: "ATTENDENCE", Component: IconAttendance },
-    { id: "faculties", label: "FACULTIES&CHAPTER", Component: IconFaculties },
+    { id: "faculties", label: "FACULTIES &\nCHAPTER", Component: IconFaculties },
     { id: "exam", label: "EXAM", Component: IconExam },
     { id: "exam_report", label: "EXAMINATION\nREPORT", Component: IconExamReport },
     { id: "live_class", label: "LIVE CLASSES", Component: IconLiveClasses },
@@ -651,7 +651,7 @@ export default function APlusAcademyPortal() {
                       <div className="h-24 flex items-center justify-center mb-2 transition-transform group-hover:-translate-y-1">
                         <IconComp />
                       </div>
-                      <div className="border-[1.6px] border-[#169bc2] bg-white group-hover:bg-sky-50 w-full min-h-[38px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-xs md:text-[13px] font-medium tracking-wide whitespace-pre-line leading-snug">
+                      <div className="border-[1.6px] border-[#169bc2] bg-white group-hover:bg-sky-50 w-full min-h-[42px] px-2 py-1.5 rounded-lg flex items-center justify-center text-center text-[11px] md:text-xs font-semibold tracking-tight whitespace-pre-line break-words leading-tight overflow-hidden">
                         {item.label}
                       </div>
                     </div>
