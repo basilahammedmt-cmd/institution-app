@@ -329,7 +329,8 @@ export default function APlusAcademyPortal() {
   const [liveClasses] = useState<LiveClass[]>(INITIAL_LIVE_CLASSES);
   const [questionBank] = useState<QuestionBankItem[]>(INITIAL_QUESTION_BANK);
 
-  // Student Form
+  // Student Form & Edit State
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [newStudent, setNewStudent] = useState({
     name: "",
     rollNo: "",
@@ -340,6 +341,7 @@ export default function APlusAcademyPortal() {
     addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
     totalFee: 12000,
     paidFee: 2000,
+    discount: 0,
   });
 
   // Attendance
@@ -461,29 +463,112 @@ export default function APlusAcademyPortal() {
     },
   ];
 
+  const handleStartEditStudent = (stu: Student) => {
+    setEditingStudentId(stu.id);
+    setNewStudent({
+      name: stu.name,
+      rollNo: stu.rollNo,
+      batchId: stu.batchId,
+      schoolName: stu.schoolName,
+      parentName: stu.parentName,
+      parentPhone: stu.parentPhone,
+      addedBy: stu.addedBy,
+      totalFee: stu.totalFee,
+      paidFee: stu.paidFee,
+      discount: stu.discount || 0,
+    });
+    setActiveView("students");
+  };
+
+  const handleDownloadStudentPDF = (stu: Student) => {
+    const bal = stu.totalFee - (stu.discount || 0) - stu.paidFee;
+    const w = window.open("", "_blank", "width=850,height=950");
+    if (!w) return;
+    w.document.write(`
+      <html>
+        <head>
+          <title>${stu.name} - Student Report PDF</title>
+          <style>
+            body { font-family: sans-serif; padding: 32px; color: #0f172a; }
+            h1 { color: #195685; margin-bottom: 4px; }
+            .card { border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 16px; }
+          </style>
+        </head>
+        <body>
+          <h1>A PLUS ACCADEMY — STUDENT REPORT CARD & FEE STATEMENT</h1>
+          <p><b>പേര് (Name):</b> ${stu.name} | <b>Roll No:</b> ${stu.rollNo} | <b>Batch:</b> ${stu.batchName}</p>
+          <p><b>സ്കൂൾ:</b> ${stu.schoolName} | <b>രക്ഷിതാവ്:</b> ${stu.parentName} (${stu.parentPhone})</p>
+          <p><b>ചേർത്തത് (Added By):</b> ${stu.addedBy}</p>
+          <div class="card">
+            <h3>ഫീസ് വിവരങ്ങൾ (Fee Summary)</h3>
+            <p>ആകെ ഫീസ് (Total Fee): ₹${stu.totalFee} | അടച്ച ഫീസ് (Paid): ₹${stu.paidFee} | ബാക്കി (Balance): ₹${bal}</p>
+          </div>
+          <script>window.onload = function(){ window.print(); }</script>
+        </body>
+      </html>
+    `);
+    w.document.close();
+  };
+
   const handleAddStudent = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStudent.name.trim()) return;
     const batchObj = batches.find((b) => b.id === newStudent.batchId) || batches[0];
-    const created: Student = {
-      id: `STU-${100 + students.length + 1}`,
-      rollNo: newStudent.rollNo || `${batchObj.grade}A-0${students.length + 1}`,
-      name: newStudent.name,
-      grade: batchObj.grade,
-      batchId: batchObj.id,
-      batchName: batchObj.name,
-      schoolName: newStudent.schoolName,
-      parentName: newStudent.parentName,
-      parentPhone: newStudent.parentPhone,
-      addedBy: newStudent.addedBy,
-      joinedDate: "2026-10-21",
-      totalFee: Number(newStudent.totalFee),
-      paidFee: Number(newStudent.paidFee),
+    if (editingStudentId) {
+      setStudents(
+        students.map((s) =>
+          s.id === editingStudentId
+            ? {
+                ...s,
+                name: newStudent.name,
+                rollNo: newStudent.rollNo || s.rollNo,
+                grade: batchObj.grade,
+                batchId: batchObj.id,
+                batchName: batchObj.name,
+                schoolName: newStudent.schoolName,
+                parentName: newStudent.parentName,
+                parentPhone: newStudent.parentPhone,
+                addedBy: newStudent.addedBy,
+                totalFee: Number(newStudent.totalFee),
+                paidFee: Number(newStudent.paidFee),
+                discount: Number(newStudent.discount || 0),
+              }
+            : s
+        )
+      );
+      setEditingStudentId(null);
+    } else {
+      const created: Student = {
+        id: `STU-${100 + students.length + 1}`,
+        rollNo: newStudent.rollNo || `${batchObj.grade}A-0${students.length + 1}`,
+        name: newStudent.name,
+        grade: batchObj.grade,
+        batchId: batchObj.id,
+        batchName: batchObj.name,
+        schoolName: newStudent.schoolName,
+        parentName: newStudent.parentName,
+        parentPhone: newStudent.parentPhone,
+        addedBy: newStudent.addedBy,
+        joinedDate: "2026-10-21",
+        totalFee: Number(newStudent.totalFee),
+        paidFee: Number(newStudent.paidFee),
+        discount: Number(newStudent.discount || 0),
+        feeHistory: [],
+      };
+      setStudents([created, ...students]);
+    }
+    setNewStudent({
+      name: "",
+      rollNo: "",
+      batchId: "B10-A",
+      schoolName: "Govt. HSS",
+      parentName: "",
+      parentPhone: "91",
+      addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+      totalFee: 12000,
+      paidFee: 2000,
       discount: 0,
-      feeHistory: [],
-    };
-    setStudents([created, ...students]);
-    setNewStudent({ ...newStudent, name: "", rollNo: "", parentName: "" });
+    });
   };
 
   const handleSaveAttendance = () => {
@@ -833,58 +918,142 @@ export default function APlusAcademyPortal() {
               )}
 
               {activeView === "students" && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border space-y-3">
-                    <h3 className="font-bold text-[#195685]">➕ പുതിയ കുട്ടിയെ ചേർക്കുക</h3>
-                    <input
-                      type="text"
-                      required
-                      placeholder="കുട്ടിയുടെ പേര് *"
-                      value={newStudent.name}
-                      onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    />
-                    <select
-                      value={newStudent.batchId}
-                      onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    >
-                      {batches.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      required
-                      placeholder="ആരാണ് ചേർത്തത്? (Added By)"
-                      value={newStudent.addedBy}
-                      onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
-                      className="w-full border rounded-lg px-3 py-2 text-sm"
-                    />
-                    <button type="submit" className="w-full bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm">
-                      Save Student
-                    </button>
-                  </form>
-                  <div className="lg:col-span-2 bg-white p-6 rounded-xl border">
-                    <h3 className="font-bold text-[#195685] mb-3">STUDENTS DIRECTORY</h3>
-                    {students.map((s) => (
-                      <div key={s.id} className="py-2.5 border-b flex justify-between items-center text-sm">
-                        <div>
-                          <p className="font-bold">{s.name}</p>
-                          <p className="text-xs text-slate-500">
-                            {s.batchName} • Added by: {s.addedBy}
-                          </p>
+                <div className="space-y-5">
+                  <div className="bg-gradient-to-r from-[#0f2942] via-[#195685] to-[#169bc2] text-white p-4 rounded-xl shadow flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold block">
+                        📄 STUDENT REPORT & FEE STATEMENT (PDF DOWNLOAD)
+                      </span>
+                      <h4 className="font-extrabold text-sm">
+                        ഓരോ കുട്ടിയുടെയും അക്കാദമിക് & ഫീ റിപ്പോർട്ട് PDF ഫോർമാറ്റിൽ ഡൗൺലോഡ് ചെയ്യാം
+                      </h4>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={reportStudentId}
+                        onChange={(e) => setReportStudentId(e.target.value)}
+                        className="bg-white text-slate-900 rounded-lg px-3 py-1.5 text-xs font-bold"
+                      >
+                        {students.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} ({s.rollNo})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetStu = students.find((x) => x.id === reportStudentId) || students[0];
+                          if (targetStu) handleDownloadStudentPDF(targetStu);
+                        }}
+                        className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-3.5 py-1.5 rounded-lg text-xs"
+                      >
+                        📄 കുട്ടിയുടെ PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border space-y-3">
+                      <h3 className="font-bold text-[#195685]">
+                        {editingStudentId ? "✏️ കുട്ടിയുടെ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുക" : "➕ പുതിയ കുട്ടിയെ ചേർക്കുക"}
+                      </h3>
+                      <input
+                        type="text"
+                        required
+                        placeholder="കുട്ടിയുടെ പേര് *"
+                        value={newStudent.name}
+                        onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                      <select
+                        value={newStudent.batchId}
+                        onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      >
+                        {batches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        required
+                        placeholder="ആരാണ് ചേർത്തത്? (Added By)"
+                        value={newStudent.addedBy}
+                        onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                      <div className="p-3 rounded-xl bg-sky-50 border border-[#169bc2]/40 space-y-2">
+                        <h4 className="font-bold text-xs text-[#195685]">💳 കുട്ടിയുടെ ഫീ രജിസ്ട്രേഷൻ (Fee Registration)</h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="text-[11px] font-bold block">ആകെ ഫീസ് (₹)</label>
+                            <input
+                              type="number"
+                              value={newStudent.totalFee}
+                              onChange={(e) => setNewStudent({ ...newStudent, totalFee: Number(e.target.value) })}
+                              className="w-full border rounded px-2 py-1 text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold text-[#2d7a47] block">അടച്ചത് (₹)</label>
+                            <input
+                              type="number"
+                              value={newStudent.paidFee}
+                              onChange={(e) => setNewStudent({ ...newStudent, paidFee: Number(e.target.value) })}
+                              className="w-full border rounded px-2 py-1 text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold block">ഡിസ്കൗണ്ട് (₹)</label>
+                            <input
+                              type="number"
+                              value={newStudent.discount}
+                              onChange={(e) => setNewStudent({ ...newStudent, discount: Number(e.target.value) })}
+                              className="w-full border rounded px-2 py-1 text-xs bg-white"
+                            />
+                          </div>
                         </div>
-                        <button
-                          onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
-                          className="text-xs text-rose-600 font-bold"
-                        >
-                          Remove
-                        </button>
                       </div>
-                    ))}
+                      <button type="submit" className="w-full bg-[#2d7a47] text-white font-bold py-2.5 rounded-lg text-sm">
+                        {editingStudentId ? "💾 മാറ്റങ്ങൾ സേവ് ചെയ്യുക" : "➕ കുട്ടിയെ ചേർക്കുക & ഫീ രജിസ്റ്റർ ചെയ്യുക"}
+                      </button>
+                    </form>
+                    <div className="lg:col-span-2 bg-white p-6 rounded-xl border">
+                      <h3 className="font-bold text-[#195685] mb-3">STUDENTS DIRECTORY</h3>
+                      {students.map((s) => (
+                        <div key={s.id} className="py-2.5 border-b flex justify-between items-center text-sm">
+                          <div>
+                            <p className="font-bold">{s.name}</p>
+                            <p className="text-xs text-slate-500">
+                              {s.batchName} • Added by: {s.addedBy} • Fee: ₹{s.paidFee}/₹{s.totalFee}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleDownloadStudentPDF(s)}
+                              className="px-2.5 py-1 bg-sky-50 text-[#195685] border border-sky-200 rounded text-xs font-bold"
+                            >
+                              📄 PDF
+                            </button>
+                            <button
+                              onClick={() => handleStartEditStudent(s)}
+                              className="px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded text-xs font-bold"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
+                              className="text-xs text-rose-600 font-bold"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

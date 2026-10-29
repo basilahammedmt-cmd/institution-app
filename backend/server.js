@@ -18,7 +18,7 @@ function sendJSON(res, status, payload) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   });
   res.end(JSON.stringify(payload));
@@ -79,14 +79,42 @@ const server = http.createServer(async (req, res) => {
       parentPhone: body.parentPhone || "",
       addedBy: body.addedBy || "Admin",
       joinedDate: new Date().toISOString().split("T")[0],
-      totalFee: Number(body.totalFee || 12000),
+      totalFee: Number(body.totalFee || 6000),
       paidFee: Number(body.paidFee || 0),
-      discount: 0,
+      discount: Number(body.discount || 0),
       feeHistory: [],
     };
     db.students.unshift(newStudent);
     writeDB(db);
     return sendJSON(res, 201, newStudent);
+  }
+
+  if (pathname.startsWith("/api/students/") && req.method === "PUT") {
+    const stuId = pathname.split("/").pop();
+    const body = await parseBody(req);
+    const db = readDB();
+    const batch = db.batches.find((b) => b.id === body.batchId) || db.batches[0];
+    db.students = db.students.map((stu) =>
+      stu.id === stuId
+        ? {
+            ...stu,
+            name: body.name ?? stu.name,
+            rollNo: body.rollNo ?? stu.rollNo,
+            grade: batch ? batch.grade : stu.grade,
+            batchId: batch ? batch.id : stu.batchId,
+            batchName: batch ? batch.name : stu.batchName,
+            schoolName: body.schoolName ?? stu.schoolName,
+            parentName: body.parentName ?? stu.parentName,
+            parentPhone: body.parentPhone ?? stu.parentPhone,
+            addedBy: body.addedBy ?? stu.addedBy,
+            totalFee: body.totalFee !== undefined ? Number(body.totalFee) : stu.totalFee,
+            paidFee: body.paidFee !== undefined ? Number(body.paidFee) : stu.paidFee,
+            discount: body.discount !== undefined ? Number(body.discount) : stu.discount,
+          }
+        : stu
+    );
+    writeDB(db);
+    return sendJSON(res, 200, { ok: true });
   }
 
   if (pathname === "/api/attendance" && req.method === "GET") {

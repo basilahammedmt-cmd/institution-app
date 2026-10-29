@@ -802,6 +802,7 @@
       const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
 
       // Forms State
+      const [editingStudentId, setEditingStudentId] = useState(null);
       const [newStudent, setNewStudent] = useState({
         name: "",
         rollNo: "",
@@ -812,6 +813,7 @@
         addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
         totalFee: 12000,
         paidFee: 2000,
+        discount: 0,
       });
 
       const [selectedAttBatchId, setSelectedAttBatchId] = useState("B10-A");
@@ -944,28 +946,234 @@
         e.preventDefault();
         if (!newStudent.name.trim()) return;
         const batchObj = batches.find((b) => b.id === newStudent.batchId) || batches[0];
-        const created = {
-          id: `STU-${100 + students.length + 1}`,
-          rollNo: newStudent.rollNo || `${batchObj.grade}A-0${students.length + 1}`,
-          name: newStudent.name,
-          grade: batchObj.grade,
-          batchId: batchObj.id,
-          batchName: batchObj.name,
-          schoolName: newStudent.schoolName,
-          parentName: newStudent.parentName,
-          parentPhone: newStudent.parentPhone,
-          addedBy: newStudent.addedBy,
-          joinedDate: "2026-10-21",
-          totalFee: Number(newStudent.totalFee),
-          paidFee: Number(newStudent.paidFee),
+
+        if (editingStudentId) {
+          setStudents(
+            students.map((s) =>
+              s.id === editingStudentId
+                ? {
+                    ...s,
+                    name: newStudent.name,
+                    rollNo: newStudent.rollNo || s.rollNo,
+                    grade: batchObj.grade,
+                    batchId: batchObj.id,
+                    batchName: batchObj.name,
+                    schoolName: newStudent.schoolName,
+                    parentName: newStudent.parentName,
+                    parentPhone: newStudent.parentPhone,
+                    addedBy: newStudent.addedBy,
+                    totalFee: Number(newStudent.totalFee),
+                    paidFee: Number(newStudent.paidFee),
+                    discount: Number(newStudent.discount || 0),
+                  }
+                : s
+            )
+          );
+          setEditingStudentId(null);
+        } else {
+          const created = {
+            id: `STU-${100 + students.length + 1}`,
+            rollNo: newStudent.rollNo || `${batchObj.grade}A-0${students.length + 1}`,
+            name: newStudent.name,
+            grade: batchObj.grade,
+            batchId: batchObj.id,
+            batchName: batchObj.name,
+            schoolName: newStudent.schoolName,
+            parentName: newStudent.parentName,
+            parentPhone: newStudent.parentPhone,
+            addedBy: newStudent.addedBy,
+            joinedDate: new Date().toISOString().split("T")[0],
+            totalFee: Number(newStudent.totalFee),
+            paidFee: Number(newStudent.paidFee),
+            discount: Number(newStudent.discount || 0),
+            feeHistory:
+              Number(newStudent.paidFee) > 0
+                ? [{ id: `FH-${Date.now()}`, date: new Date().toISOString().split("T")[0], amount: Number(newStudent.paidFee), mode: "UPI", receiptNo: "RCP-1105" }]
+                : [],
+          };
+          setStudents([created, ...students]);
+        }
+
+        setNewStudent({
+          name: "",
+          rollNo: "",
+          batchId: "B10-A",
+          schoolName: "Govt. HSS",
+          parentName: "",
+          parentPhone: "91",
+          addedBy: "അനിൽ കുമാർ മാസ്റ്റർ (Teacher)",
+          totalFee: 12000,
+          paidFee: 2000,
           discount: 0,
-          feeHistory:
-            Number(newStudent.paidFee) > 0
-              ? [{ id: `FH-${Date.now()}`, date: "2026-10-21", amount: Number(newStudent.paidFee), mode: "UPI", receiptNo: "RCP-1105" }]
-              : [],
-        };
-        setStudents([created, ...students]);
-        setNewStudent({ ...newStudent, name: "", rollNo: "", parentName: "" });
+        });
+      };
+
+      const handleStartEditStudent = (stu) => {
+        setEditingStudentId(stu.id);
+        setNewStudent({
+          name: stu.name,
+          rollNo: stu.rollNo,
+          batchId: stu.batchId,
+          schoolName: stu.schoolName,
+          parentName: stu.parentName,
+          parentPhone: stu.parentPhone,
+          addedBy: stu.addedBy,
+          totalFee: stu.totalFee,
+          paidFee: stu.paidFee,
+          discount: stu.discount || 0,
+        });
+        setActiveView("students");
+      };
+
+      const handleDownloadStudentPDF = (stu) => {
+        const netFee = stu.totalFee - (stu.discount || 0);
+        const balanceFee = netFee - stu.paidFee;
+        const stuExams = attempts.filter((a) => a.studentId === stu.id);
+        const avgScore =
+          stuExams.length > 0
+            ? Math.round(stuExams.reduce((sum, a) => sum + a.percentage, 0) / stuExams.length)
+            : 88;
+
+        const printWin = window.open("", "_blank", "width=850,height=900");
+        if (!printWin) {
+          window.print();
+          return;
+        }
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Student Report - ${stu.name}</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 32px; color: #0f172a; }
+              .header { border-bottom: 3px solid #195685; padding-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+              .title { font-size: 26px; font-weight: 900; color: #195685; letter-spacing: 1px; }
+              .sub { font-size: 12px; color: #475569; margin-top: 4px; }
+              .badge { background: #195685; color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+              .section { margin-top: 24px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 18px; }
+              .sec-title { font-size: 14px; font-weight: 800; color: #195685; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+              table { width: 100%; border-collapse: collapse; font-size: 13px; }
+              th, td { padding: 9px 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+              th { background: #f8fafc; color: #334155; font-weight: 700; }
+              .fee-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+              .fee-box { padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; }
+              .fee-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div>
+                <div class="title">A PLUS ACCADEMY</div>
+                <div class="sub">SCERT Kerala State Syllabus (Classes 8, 9 & 10) • Official Student Report Card</div>
+              </div>
+              <div class="badge">Roll No: ${stu.rollNo}</div>
+            </div>
+
+            <div class="section">
+              <div class="sec-title">1. വിദ്യാർത്ഥിയുടെ വിവരങ്ങൾ (Student Profile)</div>
+              <table>
+                <tr><th>കുട്ടിയുടെ പേര് (Name)</th><td><b>${stu.name}</b></td><th>ക്ലാസ് & ബാച്ച്</th><td>${stu.batchName}</td></tr>
+                <tr><th>സ്കൂൾ (School)</th><td>${stu.schoolName}</td><th>ചേർത്ത അധ്യാപകൻ (Added By)</th><td>${stu.addedBy}</td></tr>
+                <tr><th>രക്ഷിതാവ് (Parent)</th><td>${stu.parentName}</td><th>ഫോൺ (WhatsApp)</th><td>+${stu.parentPhone}</td></tr>
+              </table>
+            </div>
+
+            <div class="section">
+              <div class="sec-title">2. ഫീസ് ബാലൻസ് ഷീറ്റ് (Fee Registration & Balance Statement)</div>
+              <div class="fee-grid">
+                <div class="fee-box"><div>ആകെ ഫീസ് (Total Fee)</div><div class="fee-val">₹${netFee.toLocaleString("en-IN")}</div></div>
+                <div class="fee-box"><div>അടച്ച ഫീസ് (Paid Amount)</div><div class="fee-val" style="color:#059669">₹${stu.paidFee.toLocaleString("en-IN")}</div></div>
+                <div class="fee-box"><div>ബാക്കി തരാനുള്ളത് (Balance)</div><div class="fee-val" style="color:#e11d48">₹${balanceFee.toLocaleString("en-IN")}</div></div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="sec-title">3. പരീക്ഷാ നിലവാരം (Academic Exam Performance - Avg: ${avgScore}%)</div>
+              <table>
+                <thead><tr><th>പരീക്ഷ (Exam Title)</th><th>വിഷയം</th><th>തീയതി</th><th>മാർക്ക്</th><th>ശതമാനം</th></tr></thead>
+                <tbody>
+                  ${
+                    stuExams.length > 0
+                      ? stuExams
+                          .map(
+                            (e) =>
+                              `<tr><td>${e.examTitle}</td><td>${e.subject}</td><td>${e.date}</td><td>${e.score}/${e.totalMarks}</td><td><b>${e.percentage}%</b></td></tr>`
+                          )
+                          .join("")
+                      : `<tr><td colspan="5">ശരാശരി പഠന നിലവാരം: ${avgScore}% (A+ Grade Track)</td></tr>`
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <script>
+              window.onload = function() { window.print(); };
+            </script>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
+      };
+
+      const handleDownloadAllStudentsPDF = () => {
+        const printWin = window.open("", "_blank", "width=950,height=900");
+        if (!printWin) {
+          window.print();
+          return;
+        }
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>A PLUS ACCADEMY - Complete Students & Fee Register PDF</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 28px; color: #0f172a; }
+              h1 { color: #195685; margin: 0 0 6px 0; }
+              p { color: #475569; font-size: 13px; margin: 0 0 20px 0; }
+              table { width: 100%; border-collapse: collapse; font-size: 12px; }
+              th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+              th { background: #195685; color: #ffffff; }
+            </style>
+          </head>
+          <body>
+            <h1>A PLUS ACCADEMY — STUDENTS & FEE REPORT</h1>
+            <p>Total Students: ${students.length} | Generated Date: ${new Date().toISOString().split("T")[0]}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Student Name</th>
+                  <th>Batch</th>
+                  <th>Parent & Phone</th>
+                  <th>Added By</th>
+                  <th>Total Fee</th>
+                  <th>Paid Fee</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${students
+                  .map(
+                    (s) => `
+                  <tr>
+                    <td><b>${s.rollNo}</b></td>
+                    <td><b>${s.name}</b><br/><small>${s.schoolName}</small></td>
+                    <td>${s.batchName}</td>
+                    <td>${s.parentName}<br/>+${s.parentPhone}</td>
+                    <td>${s.addedBy}</td>
+                    <td>₹${s.totalFee - (s.discount || 0)}</td>
+                    <td style="color:#059669;font-weight:bold">₹${s.paidFee}</td>
+                    <td style="color:#e11d48;font-weight:bold">₹${s.totalFee - (s.discount || 0) - s.paidFee}</td>
+                  </tr>`
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+            <script>window.onload = function() { window.print(); };</script>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
       };
 
       const handleSaveAttendance = () => {
@@ -1429,11 +1637,27 @@
                             {stu.batchName} • {stu.schoolName}
                           </p>
                         </div>
-                        <div className="text-right">
-                          <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-bold">
-                            ചേർത്തത്: {stu.addedBy}
-                          </span>
-                          <p className="text-[11px] text-slate-400 mt-1">Roll: {stu.rollNo}</p>
+                        <div className="flex items-center gap-2">
+                          <div className="text-right">
+                            <span className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded font-bold">
+                              ചേർത്തത്: {stu.addedBy}
+                            </span>
+                            <p className="text-[11px] text-slate-400 mt-1">Roll: {stu.rollNo}</p>
+                          </div>
+                          <button
+                            onClick={() => handleDownloadStudentPDF(stu)}
+                            title="PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക"
+                            className="px-2 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded font-bold"
+                          >
+                            📄 PDF
+                          </button>
+                          <button
+                            onClick={() => handleStartEditStudent(stu)}
+                            title="കുട്ടിയുടെ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുക"
+                            className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded font-bold"
+                          >
+                            ✏️ Edit
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1464,11 +1688,23 @@
                               രക്ഷിതാവ്: {stu.parentName} ({stu.batchName})
                             </p>
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
                             <div className="text-right">
                               <span className="font-extrabold text-rose-600 text-sm">₹{bal}</span>
                               <p className="text-[10px] text-slate-400">Paid: ₹{stu.paidFee}</p>
                             </div>
+                            <button
+                              onClick={() => handleDownloadStudentPDF(stu)}
+                              className="px-2 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded font-bold"
+                            >
+                              📄 PDF
+                            </button>
+                            <button
+                              onClick={() => handleStartEditStudent(stu)}
+                              className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded font-bold"
+                            >
+                              ✏️ Edit
+                            </button>
                             <a
                               href={`https://wa.me/${stu.parentPhone}?text=${encodeURIComponent(
                                 `നമസ്കാരം ${stu.parentName}, A PLUS ACCADEMY-ൽ പഠിക്കുന്ന ${stu.name}-ന്റെ ട്യൂഷൻ ഫീസ് ബാക്കി ₹${bal} അടയ്ക്കാൻ ഓർമ്മിപ്പിക്കുന്നു.`
@@ -1491,111 +1727,297 @@
         }
 
         if (activeView === "students") {
+          const previewBalance = Math.max(0, (Number(newStudent.totalFee) || 0) - (Number(newStudent.discount) || 0) - (Number(newStudent.paidFee) || 0));
           return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border border-slate-200 space-y-3 shadow-sm">
-                <h3 className="font-bold text-[#195685]">➕ പുതിയ കുട്ടിയെ ചേർക്കുക (ADD STUDENT)</h3>
-                <input
-                  type="text"
-                  required
-                  placeholder="കുട്ടിയുടെ പേര് (Student Name) *"
-                  value={newStudent.name}
-                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
+            <div className="space-y-5">
+              {/* Top PDF Report Download Bar */}
+              <div className="bg-gradient-to-r from-[#0f2942] via-[#195685] to-[#169bc2] text-white p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-600">ഏത് ബാച്ചിലേക്കാണ് ചേരുന്നത്?</label>
+                  <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold block">
+                    📄 STUDENT REPORT & FEE STATEMENT (PDF DOWNLOAD)
+                  </span>
+                  <h4 className="font-extrabold text-base">
+                    ഓരോ കുട്ടിയുടെയും അക്കാദമിക് & ഫീ റിപ്പോർട്ട് PDF ഫോർമാറ്റിൽ ഡൗൺലോഡ് ചെയ്യാം
+                  </h4>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5">
                   <select
-                    value={newStudent.batchId}
-                    onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm mt-1"
+                    value={reportStudentId}
+                    onChange={(e) => setReportStudentId(e.target.value)}
+                    className="bg-white text-slate-900 rounded-lg px-3 py-2 text-xs font-bold border-2 border-amber-300"
                   >
-                    {batches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.rollNo})
                       </option>
                     ))}
                   </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetStu = students.find((x) => x.id === reportStudentId) || students[0];
+                      if (targetStu) handleDownloadStudentPDF(targetStu);
+                    }}
+                    className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold px-4 py-2 rounded-lg text-xs shadow flex items-center gap-1.5"
+                  >
+                    📄 കുട്ടിയുടെ PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadAllStudentsPDF}
+                    className="bg-white/15 hover:bg-white/25 text-white border border-white/30 font-bold px-3.5 py-2 rounded-lg text-xs flex items-center gap-1.5"
+                  >
+                    📑 മുഴുവൻ ലിസ്റ്റ് PDF
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  placeholder="പഠിക്കുന്ന ഗവൺമെന്റ് സ്കൂൾ"
-                  value={newStudent.schoolName}
-                  onChange={(e) => setNewStudent({ ...newStudent, schoolName: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-                <input
-                  type="text"
-                  required
-                  placeholder="രക്ഷിതാവിന്റെ പേര് *"
-                  value={newStudent.parentName}
-                  onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-                <input
-                  type="text"
-                  required
-                  placeholder="വാട്സാപ്പ് നമ്പർ (919847...)"
-                  value={newStudent.parentPhone}
-                  onChange={(e) => setNewStudent({ ...newStudent, parentPhone: e.target.value })}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-                <div>
-                  <label className="text-xs font-bold text-slate-600">ആരാണ് ചേർത്തത്? (Added By)</label>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <form onSubmit={handleAddStudent} className="bg-white p-6 rounded-xl border-2 border-slate-200 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between border-b pb-2.5">
+                    <h3 className="font-extrabold text-[#195685] text-sm">
+                      {editingStudentId
+                        ? "✏️ കുട്ടിയുടെ വിവരങ്ങളും ഫീസും എഡിറ്റ് ചെയ്യുക (EDIT STUDENT)"
+                        : "➕ പുതിയ കുട്ടിയെ ചേർക്കുക (ADD STUDENT)"}
+                    </h3>
+                    {editingStudentId && (
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[11px] font-bold">
+                        Editing Mode
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-600">കുട്ടിയുടെ പേര് (Student Name) *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="കുട്ടിയുടെ പേര് നൽകുക *"
+                      value={newStudent.name}
+                      onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm mt-1"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="text-xs font-bold text-slate-600">ഏത് ബാച്ചിലേക്കാണ്?</label>
+                      <select
+                        value={newStudent.batchId}
+                        onChange={(e) => setNewStudent({ ...newStudent, batchId: e.target.value })}
+                        className="w-full border rounded-lg px-2.5 py-2 text-xs font-semibold mt-1"
+                      >
+                        {batches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600">Roll No (Optional)</label>
+                      <input
+                        type="text"
+                        placeholder="Auto (e.g. 10A-05)"
+                        value={newStudent.rollNo || ""}
+                        onChange={(e) => setNewStudent({ ...newStudent, rollNo: e.target.value })}
+                        className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                      />
+                    </div>
+                  </div>
+
                   <input
                     type="text"
-                    required
-                    value={newStudent.addedBy}
-                    onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-emerald-50/50 mt-1"
+                    placeholder="പഠിക്കുന്ന ഗവൺമെന്റ് സ്കൂൾ"
+                    value={newStudent.schoolName}
+                    onChange={(e) => setNewStudent({ ...newStudent, schoolName: e.target.value })}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-[#2d7a47] hover:bg-[#236038] text-white font-bold py-2.5 rounded-lg text-sm"
-                >
-                  കുട്ടിയെ ബാച്ചിലേക്ക് ചേർക്കുക
-                </button>
-              </form>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <input
+                      type="text"
+                      required
+                      placeholder="രക്ഷിതാവിന്റെ പേര് *"
+                      value={newStudent.parentName}
+                      onChange={(e) => setNewStudent({ ...newStudent, parentName: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                    <input
+                      type="text"
+                      required
+                      placeholder="വാട്സാപ്പ് നമ്പർ *"
+                      value={newStudent.parentPhone}
+                      onChange={(e) => setNewStudent({ ...newStudent, parentPhone: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-600">ആരാണ് ചേർത്തത്? (Added By)</label>
+                    <input
+                      type="text"
+                      required
+                      value={newStudent.addedBy}
+                      onChange={(e) => setNewStudent({ ...newStudent, addedBy: e.target.value })}
+                      className="w-full border rounded-lg px-3 py-2 text-sm bg-emerald-50/50 mt-1"
+                    />
+                  </div>
 
-              <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
-                <h3 className="font-bold text-[#195685] mb-3">കുട്ടികളുടെ പട്ടിക (STUDENTS DATA - {students.length})</h3>
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-slate-50 text-xs uppercase border-b">
-                    <tr>
-                      <th className="p-3">പേര് & Roll</th>
-                      <th className="p-3">ബാച്ച് (Batch)</th>
-                      <th className="p-3">ആരാണ് ചേർത്തത് (Added By)</th>
-                      <th className="p-3">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {students.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50">
-                        <td className="p-3">
-                          <div className="font-bold">{s.name}</div>
-                          <div className="text-xs text-slate-500">
-                            {s.rollNo} • {s.schoolName}
-                          </div>
-                        </td>
-                        <td className="p-3 text-xs font-semibold">{s.batchName}</td>
-                        <td className="p-3">
-                          <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] border border-emerald-200 rounded text-xs font-bold">
-                            👤 {s.addedBy}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <button
-                            onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
-                            className="text-xs text-rose-600 font-bold hover:underline"
-                          >
-                            Remove
-                          </button>
-                        </td>
+                  {/* Fee Registration Box directly below Student details */}
+                  <div className="p-3.5 rounded-xl bg-sky-50/70 border-2 border-[#169bc2]/40 space-y-2.5 mt-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-xs text-[#195685] flex items-center gap-1.5">
+                        💳 കുട്ടിയുടെ ഫീ രജിസ്ട്രേഷൻ (FEE REGISTRATION)
+                      </h4>
+                      <span className="text-[11px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded">
+                        ബാക്കി: ₹{previewBalance}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-700 block">ആകെ ഫീസ് (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={newStudent.totalFee}
+                          onChange={(e) => setNewStudent({ ...newStudent, totalFee: Number(e.target.value) })}
+                          className="w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold bg-white mt-0.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-[#2d7a47] block">അടച്ച ഫീസ് (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={newStudent.paidFee}
+                          onChange={(e) => setNewStudent({ ...newStudent, paidFee: Number(e.target.value) })}
+                          className="w-full border border-emerald-300 rounded-lg px-2.5 py-1.5 text-xs font-bold bg-white text-[#2d7a47] mt-0.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block">ഡിസ്കൗണ്ട് (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={newStudent.discount}
+                          onChange={(e) => setNewStudent({ ...newStudent, discount: Number(e.target.value) })}
+                          className="w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold bg-white mt-0.5"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-[#2d7a47] hover:bg-[#236038] text-white font-bold py-2.5 rounded-lg text-sm shadow"
+                    >
+                      {editingStudentId
+                        ? "💾 മാറ്റങ്ങൾ സേവ് ചെയ്യുക (Save Changes)"
+                        : "➕ കുട്ടിയെ ചേർക്കുക & ഫീ രജിസ്റ്റർ ചെയ്യുക"}
+                    </button>
+                    {editingStudentId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingStudentId(null);
+                          setNewStudent({
+                            name: "",
+                            rollNo: "",
+                            batchId: "b10a",
+                            schoolName: "ഗവ. മോഡൽ എച്ച്.എസ്.എസ്",
+                            parentName: "",
+                            parentPhone: "91",
+                            addedBy: "അബ്ദുൾ റഹിമാൻ മാസ്റ്റർ",
+                            totalFee: 6000,
+                            paidFee: 2000,
+                            discount: 0,
+                          });
+                        }}
+                        className="px-3 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-lg text-xs"
+                      >
+                        റദ്ദാക്കുക
+                      </button>
+                    )}
+                  </div>
+                </form>
+
+                <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 overflow-x-auto shadow-sm">
+                  <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <h3 className="font-bold text-[#195685]">
+                      കുട്ടികളുടെ പട്ടിക (STUDENTS DATA - {students.length})
+                    </h3>
+                    <span className="text-xs text-slate-500">
+                      ഏത് കുട്ടിയുടെയും പേരും ഫീസും എഡിറ്റ് ചെയ്യാനും PDF റിപ്പോർട്ട് എടുക്കാനും താഴെയുള്ള ബട്ടണുകൾ ഉപയോഗിക്കുക
+                    </span>
+                  </div>
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50 text-xs uppercase border-b">
+                      <tr>
+                        <th className="p-3">പേര് & Roll</th>
+                        <th className="p-3">ബാച്ച് (Batch)</th>
+                        <th className="p-3">ഫീസ് വിവരങ്ങൾ (Fee)</th>
+                        <th className="p-3">ചേർത്തത് (Added By)</th>
+                        <th className="p-3 text-right">Actions (PDF / Edit)</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y">
+                      {students.map((s) => {
+                        const bal = s.totalFee - s.discount - s.paidFee;
+                        return (
+                          <tr key={s.id} className={`hover:bg-slate-50 ${editingStudentId === s.id ? "bg-amber-50/70" : ""}`}>
+                            <td className="p-3">
+                              <div className="font-bold text-slate-900">{s.name}</div>
+                              <div className="text-xs text-slate-500">
+                                {s.rollNo} • {s.schoolName}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                രക്ഷിതാവ്: {s.parentName} ({s.parentPhone})
+                              </div>
+                            </td>
+                            <td className="p-3 text-xs font-semibold">{s.batchName}</td>
+                            <td className="p-3 text-xs">
+                              <div className="font-bold text-slate-800">Total: ₹{s.totalFee}</div>
+                              <div className="text-[#2d7a47] font-bold">Paid: ₹{s.paidFee}</div>
+                              <div className={`font-extrabold ${bal > 0 ? "text-rose-600" : "text-emerald-700"}`}>
+                                {bal > 0 ? `ബാക്കി: ₹${bal}` : "✓ Fully Paid"}
+                              </div>
+                            </td>
+                            <td className="p-3">
+                              <span className="px-2.5 py-1 bg-emerald-50 text-[#2d7a47] border border-emerald-200 rounded text-xs font-bold inline-block">
+                                👤 {s.addedBy}
+                              </span>
+                            </td>
+                            <td className="p-3 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handleDownloadStudentPDF(s)}
+                                  className="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded text-xs font-bold"
+                                  title="കുട്ടിയുടെ PDF റിപ്പോർട്ട് ഡൗൺലോഡ് ചെയ്യുക"
+                                >
+                                  📄 PDF
+                                </button>
+                                <button
+                                  onClick={() => handleStartEditStudent(s)}
+                                  className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-xs font-bold"
+                                  title="കുട്ടിയുടെ പേരും വിവരങ്ങളും എഡിറ്റ് ചെയ്യുക"
+                                >
+                                  ✏️ Edit
+                                </button>
+                                <button
+                                  onClick={() => setStudents(students.filter((x) => x.id !== s.id))}
+                                  className="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded text-xs font-bold"
+                                  title="കുട്ടിയെ ഒഴിവാക്കുക"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           );
@@ -1647,7 +2069,7 @@
                             <p className="font-bold text-sm">{stu.name}</p>
                             <p className="text-xs text-slate-500">Roll: {stu.rollNo}</p>
                           </div>
-                          <div className="flex gap-1.5">
+                          <div className="flex items-center gap-1.5">
                             {["Present", "Absent", "Late"].map((val) => (
                               <button
                                 key={val}
@@ -1665,6 +2087,20 @@
                                 {val}
                               </button>
                             ))}
+                            <button
+                              onClick={() => handleDownloadStudentPDF(stu)}
+                              title="PDF റിപ്പോർട്ട്"
+                              className="px-2 py-1 rounded text-xs font-bold bg-sky-50 text-[#195685] border border-sky-200"
+                            >
+                              📄
+                            </button>
+                            <button
+                              onClick={() => handleStartEditStudent(stu)}
+                              title="കുട്ടിയെ എഡിറ്റ് ചെയ്യുക"
+                              className="px-2 py-1 rounded text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"
+                            >
+                              ✏️
+                            </button>
                           </div>
                         </div>
                       );
@@ -1791,19 +2227,37 @@
           return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-2">
                   <h3 className="font-bold text-[#195685]">📊 പരീക്ഷാ മാർക്കുകളുടെ ഗ്രാഫിക്കൽ റിപ്പോർട്ട്</h3>
-                  <select
-                    value={reportStudentId}
-                    onChange={(e) => setReportStudentId(e.target.value)}
-                    className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold"
-                  >
-                    {students.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={reportStudentId}
+                      onChange={(e) => setReportStudentId(e.target.value)}
+                      className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold"
+                    >
+                      {students.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedReportStudent && (
+                      <>
+                        <button
+                          onClick={() => handleDownloadStudentPDF(selectedReportStudent)}
+                          className="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded-lg text-xs font-bold"
+                        >
+                          📄 PDF റിപ്പോർട്ട്
+                        </button>
+                        <button
+                          onClick={() => handleStartEditStudent(selectedReportStudent)}
+                          className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold"
+                        >
+                          ✏️ Edit
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 {studentAttempts.map((att) => (
                   <div key={att.id} className="space-y-1">
@@ -1898,7 +2352,23 @@
                   const bal = s.totalFee - s.discount - s.paidFee;
                   return (
                     <>
-                      <h3 className="font-bold text-lg text-[#195685]">{s.name} — വ്യക്തിഗത ബാലൻസ് ഷീറ്റ്</h3>
+                      <div className="flex flex-wrap justify-between items-center gap-2">
+                        <h3 className="font-bold text-lg text-[#195685]">{s.name} — വ്യക്തിഗത ബാലൻസ് ഷീറ്റ്</h3>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleDownloadStudentPDF(s)}
+                            className="px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded-lg text-xs font-bold"
+                          >
+                            📄 PDF റിപ്പോർട്ട്
+                          </button>
+                          <button
+                            onClick={() => handleStartEditStudent(s)}
+                            className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold"
+                          >
+                            ✏️ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യുക
+                          </button>
+                        </div>
+                      </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="p-4 rounded-xl bg-slate-50 border">
                           <span className="text-xs text-slate-500">ആകെ ഫീസ് (Total)</span>
@@ -1928,9 +2398,17 @@
                 <h3 className="font-bold text-[#195685]">
                   📈 സ്ഥാപനത്തിലെ മുഴുവൻ ഫീ റിപ്പോർട്ട് (Fully Paid: {metrics.fullyPaidStudents.length} | Pending: {metrics.studentsWithBalance.length} കുട്ടികൾ)
                 </h3>
-                <span className="text-xs font-extrabold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
-                  ആകെ കിട്ടാനുള്ള ബാക്കി: ₹{metrics.totalFeePending.toLocaleString("en-IN")}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadAllStudentsPDF}
+                    className="px-3 py-1.5 bg-[#195685] hover:bg-[#134266] text-white rounded-lg text-xs font-bold"
+                  >
+                    📑 മുഴുവൻ ഫീ & സ്റ്റുഡന്റ് PDF ഡൗൺലോഡ്
+                  </button>
+                  <span className="text-xs font-extrabold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+                    ആകെ കിട്ടാനുള്ള ബാക്കി: ₹{metrics.totalFeePending.toLocaleString("en-IN")}
+                  </span>
+                </div>
               </div>
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 text-xs uppercase border-b">
@@ -1941,13 +2419,14 @@
                     <th className="p-3">അടച്ചത്</th>
                     <th className="p-3">ബാക്കി</th>
                     <th className="p-3">സ്റ്റാറ്റസ്</th>
+                    <th className="p-3 text-right">Action (PDF / Edit)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {students.map((s) => {
                     const bal = s.totalFee - s.discount - s.paidFee;
                     return (
-                      <tr key={s.id}>
+                      <tr key={s.id} className="hover:bg-slate-50">
                         <td className="p-3 font-bold">{s.name}</td>
                         <td className="p-3 text-xs">{s.batchName}</td>
                         <td className="p-3">₹{s.totalFee}</td>
@@ -1961,6 +2440,22 @@
                           >
                             {bal <= 0 ? "Fully Paid" : "Pending Balance"}
                           </span>
+                        </td>
+                        <td className="p-3 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => handleDownloadStudentPDF(s)}
+                              className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 rounded text-xs font-bold"
+                            >
+                              📄 PDF
+                            </button>
+                            <button
+                              onClick={() => handleStartEditStudent(s)}
+                              className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-xs font-bold"
+                            >
+                              ✏️ Edit
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
