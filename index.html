@@ -382,6 +382,7 @@
         hoursPerWeek: "12 Hours / Week",
         courseTitle: "SSLC Sure A+ Regular Tuition Course",
         classTeacher: "Anil Kumar Sir (Maths)",
+        portionsCovered: "Maths: Ch 1 Arithmetic Sequences, Ch 2 Circles | Revision & Model Papers",
         whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-a-kerala",
       },
       {
@@ -392,6 +393,7 @@
         hoursPerWeek: "12 Hours / Week",
         courseTitle: "SSLC Evening Intensive Batch",
         classTeacher: "Deepa Teacher (Physics)",
+        portionsCovered: "Physics: Ch 1 Effects of Electric Current, Ch 2 Magnetic Effect | Practical Numericals",
         whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-b-kerala",
       },
       {
@@ -402,6 +404,7 @@
         hoursPerWeek: "10 Hours / Week",
         courseTitle: "Standard 9 SCERT State Syllabus Tuition",
         classTeacher: "Shaji Sir (Chemistry)",
+        portionsCovered: "Chemistry: Ch 1 Structure of Atom, Ch 2 Chemical Bonding & Periodic Table",
         whatsappGroupLink: "https://chat.whatsapp.com/class9-batch-a-kerala",
       },
       {
@@ -412,6 +415,7 @@
         hoursPerWeek: "9 Hours / Week",
         courseTitle: "Standard 8 High School Foundation Course",
         classTeacher: "Remya Teacher (Biology)",
+        portionsCovered: "Biology: Ch 1 Cell Clusters & Organelles | Basic Science & Maths Foundation",
         whatsappGroupLink: "https://chat.whatsapp.com/class8-batch-a-kerala",
       },
     ];
@@ -847,6 +851,19 @@
         completedPortions: 1,
         totalPortions: 6,
         topicsInput: "",
+      });
+
+      // Schedule / Timetable & Teacher Batch Form State
+      const [editingBatchId, setEditingBatchId] = useState(null);
+      const [newBatchSchedule, setNewBatchSchedule] = useState({
+        grade: "10",
+        courseTitle: "",
+        name: "",
+        timing: "06:30 AM - 08:30 AM",
+        hoursPerWeek: "12 Hours / Week",
+        classTeacher: "",
+        portionsCovered: "",
+        whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-a-kerala",
       });
 
       const [selectedAttBatchId, setSelectedAttBatchId] = useState("B10-A");
@@ -1891,6 +1908,137 @@
         };
         setAttempts([att, ...attempts]);
         setSubmittedAttempt(att);
+      };
+
+      /* ==================== TIMETABLE / SCHEDULE & WHATSAPP GROUP HANDLERS ==================== */
+      const handleSaveBatchSchedule = (e) => {
+        e.preventDefault();
+        if (!newBatchSchedule.classTeacher.trim() && !newBatchSchedule.name.trim()) return;
+
+        const batchNameFinal =
+          newBatchSchedule.name.trim() ||
+          `Class ${newBatchSchedule.grade} - Regular Batch`;
+        const courseTitleFinal =
+          newBatchSchedule.courseTitle.trim() ||
+          `Standard ${newBatchSchedule.grade} Tuition Course`;
+
+        if (editingBatchId) {
+          setBatches(
+            batches.map((b) =>
+              b.id === editingBatchId
+                ? {
+                    ...b,
+                    grade: newBatchSchedule.grade,
+                    courseTitle: courseTitleFinal,
+                    name: batchNameFinal,
+                    timing: newBatchSchedule.timing,
+                    hoursPerWeek: newBatchSchedule.hoursPerWeek,
+                    classTeacher: newBatchSchedule.classTeacher,
+                    portionsCovered: newBatchSchedule.portionsCovered,
+                    whatsappGroupLink:
+                      newBatchSchedule.whatsappGroupLink ||
+                      "https://chat.whatsapp.com/sslc-batch-a-kerala",
+                  }
+                : b
+            )
+          );
+          setEditingBatchId(null);
+        } else {
+          const createdBatch = {
+            id: `B${newBatchSchedule.grade}-${Date.now().toString().slice(-3)}`,
+            grade: newBatchSchedule.grade,
+            courseTitle: courseTitleFinal,
+            name: batchNameFinal,
+            timing: newBatchSchedule.timing || "04:30 PM - 06:30 PM",
+            hoursPerWeek: newBatchSchedule.hoursPerWeek || "10 Hours / Week",
+            classTeacher: newBatchSchedule.classTeacher || "Faculty Member",
+            portionsCovered:
+              newBatchSchedule.portionsCovered ||
+              "SCERT Syllabus Portions & Revision",
+            whatsappGroupLink:
+              newBatchSchedule.whatsappGroupLink ||
+              "https://chat.whatsapp.com/sslc-batch-a-kerala",
+          };
+          setBatches([createdBatch, ...batches]);
+        }
+
+        setNewBatchSchedule({
+          grade: "10",
+          courseTitle: "",
+          name: "",
+          timing: "06:30 AM - 08:30 AM",
+          hoursPerWeek: "12 Hours / Week",
+          classTeacher: "",
+          portionsCovered: "",
+          whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-a-kerala",
+        });
+      };
+
+      const handleStartEditBatchSchedule = (b) => {
+        setEditingBatchId(b.id);
+        setNewBatchSchedule({
+          grade: b.grade || "10",
+          courseTitle: b.courseTitle || "",
+          name: b.name || "",
+          timing: b.timing || "",
+          hoursPerWeek: b.hoursPerWeek || "",
+          classTeacher: b.classTeacher || "",
+          portionsCovered: b.portionsCovered || "",
+          whatsappGroupLink: b.whatsappGroupLink || "",
+        });
+      };
+
+      const handleDeleteBatchSchedule = (id) => {
+        setBatches(batches.filter((b) => b.id !== id));
+        if (editingBatchId === id) {
+          setEditingBatchId(null);
+        }
+      };
+
+      const formatBatchTimetableMessage = (b) => {
+        return (
+          `🎓 *A PLUS ACCADEMY — CLASS TIMETABLE*\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📘 *Class:* Class ${b.grade}\n` +
+          `🏛️ *Course:* ${b.courseTitle}\n` +
+          `👥 *Batch:* ${b.name}\n` +
+          `⏰ *Schedule / Timing:* ${b.timing}\n` +
+          `⏳ *Total Hours:* ${b.hoursPerWeek}\n` +
+          `👨‍🏫 *Faculty-in-charge:* ${b.classTeacher}\n` +
+          `📖 *Portions / Topics Covered:* ${b.portionsCovered || "SCERT Syllabus Chapters"}\n` +
+          (b.whatsappGroupLink ? `🔗 *Batch WhatsApp Group:* ${b.whatsappGroupLink}\n` : "") +
+          `━━━━━━━━━━━━━━━━━━━━`
+        );
+      };
+
+      const handleSendBatchTimetableWhatsApp = (b) => {
+        const msg = formatBatchTimetableMessage(b);
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl, "_blank", "noopener,noreferrer");
+      };
+
+      const handleCopyBatchTimetable = (b) => {
+        const msg = formatBatchTimetableMessage(b);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(msg);
+          alert(`Timetable for "${b.name}" copied! You can now paste it directly into the WhatsApp Group.`);
+        }
+      };
+
+      const handleSendAllTimetablesWhatsApp = () => {
+        const header = `🎓 *A PLUS ACCADEMY — COMPLETE TIMETABLE (CLASSES 8, 9 & 10)*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+        const body = batches
+          .map(
+            (b, idx) =>
+              `${idx + 1}. *Class ${b.grade} — ${b.courseTitle}*\n` +
+              `   • Batch: ${b.name}\n` +
+              `   • Timing: ${b.timing} (${b.hoursPerWeek})\n` +
+              `   • Teacher: ${b.classTeacher}\n` +
+              `   • Portions: ${b.portionsCovered || "SCERT Syllabus"}`
+          )
+          .join("\n\n");
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(header + body)}`;
+        window.open(waUrl, "_blank", "noopener,noreferrer");
       };
 
       const handleRecordFeePayment = (e) => {
@@ -3989,23 +4137,300 @@
 
         // Left sidebar buttons: COURSES, SCHEDULE, CLASSES, HOURS
         return (
-          <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4 shadow-sm">
-            <h3 className="font-bold text-[#195685] uppercase text-lg">
-              {activeView} — A PLUS ACCADEMY (Classes 8, 9 & 10)
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {batches.map((b) => (
-                <div key={b.id} className="p-4 rounded-xl border border-cyan-500/40 bg-slate-50 space-y-1.5">
-                  <span className="px-2.5 py-0.5 bg-[#195685] text-white rounded text-xs font-bold">
-                    Class {b.grade}
-                  </span>
-                  <h4 className="font-bold text-base text-slate-900">{b.courseTitle}</h4>
-                  <p className="text-xs text-slate-700"><b>Batch:</b> {b.name}</p>
-                  <p className="text-xs text-slate-700"><b>Schedule / Timing:</b> {b.timing}</p>
-                  <p className="text-xs text-[#2d7a47] font-bold"><b>Total Hours:</b> {b.hoursPerWeek}</p>
-                  <p className="text-xs text-slate-600"><b>Faculty-in-charge:</b> {b.classTeacher}</p>
+          <div className="space-y-6">
+            {/* Top Banner with Send Full Timetable to WhatsApp */}
+            <div className="bg-gradient-to-r from-[#0f2942] via-[#195685] to-[#169bc2] text-white p-4 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] uppercase tracking-wider text-amber-300 font-bold block">
+                  📅 CLASS TIMETABLE, TEACHERS & PORTIONS MANAGER
+                </span>
+                <h3 className="font-extrabold text-base md:text-lg uppercase">
+                  {activeView} — A PLUS ACCADEMY (CLASSES 8, 9 & 10)
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSendAllTimetablesWhatsApp}
+                  className="bg-[#25D366] hover:bg-[#1ebe57] text-slate-950 font-extrabold px-4 py-2 rounded-lg text-xs shadow flex items-center gap-1.5 transition"
+                >
+                  📲 Send Full Timetable to WhatsApp Group
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column: Add / Edit Teacher, Schedule & Portions Form */}
+              <form
+                onSubmit={handleSaveBatchSchedule}
+                className="bg-white p-5 rounded-xl border-2 border-slate-200 space-y-3 shadow-sm h-fit"
+              >
+                <div className="flex items-center justify-between border-b pb-2.5">
+                  <h4 className="font-extrabold text-[#195685] text-sm">
+                    {editingBatchId
+                      ? "✏️ EDIT TEACHER, PORTIONS & TIMETABLE"
+                      : "➕ ADD TEACHER, PORTIONS & TIMETABLE"}
+                  </h4>
+                  {editingBatchId && (
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[11px] font-bold">
+                      Editing Mode
+                    </span>
+                  )}
                 </div>
-              ))}
+
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 block">Class *</label>
+                    <select
+                      value={newBatchSchedule.grade}
+                      onChange={(e) =>
+                        setNewBatchSchedule({ ...newBatchSchedule, grade: e.target.value })
+                      }
+                      className="w-full border rounded-lg px-2.5 py-2 text-xs font-bold bg-white mt-1"
+                    >
+                      <option value="10">Class 10</option>
+                      <option value="9">Class 9</option>
+                      <option value="8">Class 8</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-xs font-bold text-slate-600 block">
+                      Faculty / Teacher & Subject *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Anil Kumar Sir (Maths)"
+                      value={newBatchSchedule.classTeacher}
+                      onChange={(e) =>
+                        setNewBatchSchedule({ ...newBatchSchedule, classTeacher: e.target.value })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-600 block">Course Title *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. SSLC Sure A+ Regular Tuition Course"
+                    value={newBatchSchedule.courseTitle}
+                    onChange={(e) =>
+                      setNewBatchSchedule({ ...newBatchSchedule, courseTitle: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-600 block">Batch Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. SSLC (Class 10) - Batch A (Morning)"
+                    value={newBatchSchedule.name}
+                    onChange={(e) =>
+                      setNewBatchSchedule({ ...newBatchSchedule, name: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 block">
+                      Schedule / Timing *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 06:30 AM - 08:30 AM"
+                      value={newBatchSchedule.timing}
+                      onChange={(e) =>
+                        setNewBatchSchedule({ ...newBatchSchedule, timing: e.target.value })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 block">Total Hours *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 12 Hours / Week"
+                      value={newBatchSchedule.hoursPerWeek}
+                      onChange={(e) =>
+                        setNewBatchSchedule({ ...newBatchSchedule, hoursPerWeek: e.target.value })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-[#195685] block">
+                    Portions / Chapters Taken by Teacher *
+                  </label>
+                  <textarea
+                    rows={2}
+                    required
+                    placeholder="e.g. Maths: Ch 1 Arithmetic Sequences, Ch 2 Circles | Revision"
+                    value={newBatchSchedule.portionsCovered}
+                    onChange={(e) =>
+                      setNewBatchSchedule({
+                        ...newBatchSchedule,
+                        portionsCovered: e.target.value,
+                      })
+                    }
+                    className="w-full border border-sky-300 rounded-lg px-3 py-2 text-xs bg-sky-50/40 mt-1"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-600 block">
+                    Students WhatsApp Group Link
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://chat.whatsapp.com/..."
+                    value={newBatchSchedule.whatsappGroupLink}
+                    onChange={(e) =>
+                      setNewBatchSchedule({
+                        ...newBatchSchedule,
+                        whatsappGroupLink: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-xs mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#2d7a47] hover:bg-[#236038] text-white font-bold py-2.5 rounded-lg text-xs shadow"
+                  >
+                    {editingBatchId ? "💾 Save Timetable Changes" : "➕ Add Teacher & Timetable"}
+                  </button>
+                  {editingBatchId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingBatchId(null);
+                        setNewBatchSchedule({
+                          grade: "10",
+                          courseTitle: "",
+                          name: "",
+                          timing: "06:30 AM - 08:30 AM",
+                          hoursPerWeek: "12 Hours / Week",
+                          classTeacher: "",
+                          portionsCovered: "",
+                          whatsappGroupLink: "https://chat.whatsapp.com/sslc-batch-a-kerala",
+                        });
+                      }}
+                      className="px-3 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-lg text-xs"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* Right 2 Columns: Schedule / Timetable Cards */}
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-fit">
+                {batches.map((b) => (
+                  <div
+                    key={b.id}
+                    className={`p-5 rounded-xl border transition flex flex-col justify-between space-y-3 shadow-sm ${
+                      editingBatchId === b.id
+                        ? "border-2 border-amber-400 bg-amber-50/30"
+                        : "border-cyan-500/40 bg-slate-50/90"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="px-2.5 py-0.5 bg-[#195685] text-white rounded text-xs font-bold">
+                          Class {b.grade}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEditBatchSchedule(b)}
+                            className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold"
+                            title="Edit Teacher, Timing & Portions"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBatchSchedule(b.id)}
+                            className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold"
+                            title="Delete Schedule Card"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+
+                      <h4 className="font-extrabold text-base text-slate-900">{b.courseTitle}</h4>
+                      <p className="text-xs text-slate-700">
+                        <b>Batch:</b> {b.name}
+                      </p>
+                      <p className="text-xs text-slate-700">
+                        <b>Schedule / Timing:</b> {b.timing}
+                      </p>
+                      <p className="text-xs text-[#2d7a47] font-bold">
+                        <b>Total Hours:</b> {b.hoursPerWeek}
+                      </p>
+                      <p className="text-xs text-slate-800">
+                        <b>Faculty-in-charge:</b>{" "}
+                        <span className="font-bold text-[#195685]">{b.classTeacher}</span>
+                      </p>
+
+                      {/* Portions Taken by Teacher */}
+                      <div className="p-2.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-700">
+                        <span className="font-extrabold text-[#195685] block mb-0.5">
+                          📖 Portions / Topics Taken:
+                        </span>
+                        <span>{b.portionsCovered || "SCERT Syllabus Chapters & Revision"}</span>
+                      </div>
+                    </div>
+
+                    {/* WhatsApp Group Actions */}
+                    <div className="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleSendBatchTimetableWhatsApp(b)}
+                        className="flex-1 bg-[#2d7a47] hover:bg-[#236038] text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition"
+                        title="Send this timetable & portions to WhatsApp Group"
+                      >
+                        📲 Send Timetable to WhatsApp
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyBatchTimetable(b)}
+                        className="px-2.5 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-bold"
+                        title="Copy Timetable Message"
+                      >
+                        📋 Copy
+                      </button>
+                      {b.whatsappGroupLink && (
+                        <a
+                          href={b.whatsappGroupLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-[#2d7a47] border border-emerald-200 rounded-lg text-xs font-bold"
+                          title="Open Students WhatsApp Group"
+                        >
+                          💬 Group
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
