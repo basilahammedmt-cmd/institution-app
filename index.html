@@ -8,6 +8,7 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Malayalam:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -621,43 +622,62 @@
     const INITIAL_EXAMS = [
       {
         id: "EX-101",
-        title: "SSLC Mathematics - Arithmetic Sequences (Chapter 1 Model Exam)",
-        subject: "Mathematics",
+        title: "SSLC Mathematics & Science — Comprehensive Model Exam",
+        subject: "Mathematics & Science",
         grade: "10",
-        durationMinutes: 15,
-        totalMarks: 20,
+        durationMinutes: 30,
+        totalMarks: 25,
         questions: [
           {
             id: "Q1",
+            category: "Multiple Choice",
             question: "What is the common difference (d) of the arithmetic sequence 5, 8, 11, 14...?",
             options: ["2", "3", "4", "5"],
             correctAnswerIndex: 1,
-            marks: 5,
-            explanation: "Subtract the first term from the second term: 8 - 5 = 3.",
+            modelAnswer: "3 (Subtract the first term from the second term: 8 - 5 = 3)",
+            marks: 4,
           },
           {
             id: "Q2",
+            category: "Multiple Choice",
             question: "If the algebraic form of an arithmetic sequence is 3n + 2, what is its first term?",
             options: ["3", "2", "5", "6"],
             correctAnswerIndex: 2,
-            marks: 5,
-            explanation: "Substitute n = 1: 3(1) + 2 = 5.",
+            modelAnswer: "5 (Substitute n = 1: 3(1) + 2 = 5)",
+            marks: 4,
           },
           {
             id: "Q3",
-            question: "Find the sum of the first 20 natural numbers (1 + 2 + 3 + ... + 20):",
-            options: ["200", "210", "190", "220"],
-            correctAnswerIndex: 1,
-            marks: 5,
-            explanation: "n(n+1)/2 = 20 × 21 / 2 = 210.",
+            category: "Fill in the Blanks",
+            question: "The SI unit of Electric Power is __________.",
+            options: [],
+            modelAnswer: "Watt",
+            marks: 3,
           },
           {
             id: "Q4",
-            question: "What is the 10th term of the arithmetic sequence 10, 15, 20...?",
-            options: ["50", "55", "60", "45"],
-            correctAnswerIndex: 1,
+            category: "True / False",
+            question: "According to Joule's Law, the heat generated in a current-carrying conductor is H = I²Rt.",
+            options: ["True", "False"],
+            correctAnswerIndex: 0,
+            modelAnswer: "True (H = I²Rt is Joule's Law of Heating)",
+            marks: 3,
+          },
+          {
+            id: "Q5",
+            category: "Short Answer",
+            question: "Find the sum of the first 20 natural numbers (1 + 2 + 3 + ... + 20) and write the formula used.",
+            options: [],
+            modelAnswer: "210 (Formula: n(n+1)/2 = 20 × 21 / 2 = 210)",
             marks: 5,
-            explanation: "x_n = a + (n-1)d = 10 + 9 × 5 = 55.",
+          },
+          {
+            id: "Q6",
+            category: "Descriptive / Essay",
+            question: "Why is Nichrome used as a heating element in electric heating appliances? State any three properties.",
+            options: [],
+            modelAnswer: "1) High resistivity, 2) High melting point, 3) Ability to remain red hot for a long time without oxidation.",
+            marks: 6,
           },
         ],
       },
@@ -795,7 +815,7 @@
       const [students, setStudents] = useState(INITIAL_STUDENTS);
       const [attendanceList, setAttendanceList] = useState(INITIAL_ATTENDANCE);
       const [facultyChapters, setFacultyChapters] = useState(INITIAL_FACULTY_CHAPTERS);
-      const [exams] = useState(INITIAL_EXAMS);
+      const [exams, setExams] = useState(INITIAL_EXAMS);
       const [attempts, setAttempts] = useState(INITIAL_ATTEMPTS);
       const [liveClasses, setLiveClasses] = useState(INITIAL_LIVE_CLASSES);
       const [questionBank, setQuestionBank] = useState(INITIAL_QUESTION_BANK);
@@ -836,7 +856,27 @@
 
       const [selectedStudentForExam, setSelectedStudentForExam] = useState("STU-101");
       const [examAnswers, setExamAnswers] = useState({});
+      const [examTextAnswers, setExamTextAnswers] = useState({});
       const [submittedAttempt, setSubmittedAttempt] = useState(null);
+      const [examCategoryFilter, setExamCategoryFilter] = useState("All");
+      const [uploadedPdfName, setUploadedPdfName] = useState("");
+      const [uploadedPdfUrl, setUploadedPdfUrl] = useState("");
+      const [showPdfPreview, setShowPdfPreview] = useState(false);
+      const [isParsingPdf, setIsParsingPdf] = useState(false);
+      const [uploadStatusMsg, setUploadStatusMsg] = useState("");
+      const [showAddQuestionForm, setShowAddQuestionForm] = useState(false);
+      const [revealedAnswers, setRevealedAnswers] = useState({});
+      const [newExamQuestion, setNewExamQuestion] = useState({
+        category: "Multiple Choice",
+        question: "",
+        optionA: "",
+        optionB: "",
+        optionC: "",
+        optionD: "",
+        correctAnswerIndex: 0,
+        modelAnswer: "",
+        marks: 4,
+      });
 
       const [reportStudentId, setReportStudentId] = useState("STU-101");
       const [selectedFeeStudentId, setSelectedFeeStudentId] = useState("STU-102");
@@ -1438,22 +1478,381 @@
         alert("Batch Attendance saved successfully!");
       };
 
+      /* ==================== PDF QUESTION PAPER PARSER & MULTI-CATEGORY EXAM HANDLERS ==================== */
+      const parseExtractedTextToQuestions = (rawText) => {
+        if (!rawText || !rawText.trim()) return [];
+        const cleanText = rawText.replace(/\r/g, "\n");
+        const lines = cleanText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+
+        // Group lines into question blocks starting with Q1, 1., 1), (1), Question 1, etc.
+        const blocks = [];
+        let currentBlock = [];
+        const qStartRegex = /^(?:Q(?:uestion)?\s*\d+[\.\)\:\-\s]|(?:\d{1,3})[\.\)\:]\s+|\(\d{1,3}\)\s+)/i;
+
+        lines.forEach((line) => {
+          // Ignore common header lines if no question has started yet
+          if (currentBlock.length === 0 && /^(?:A PLUS|CLASS|TIME|TOTAL MARKS|SECTION|PART\s+[A-Z]|INSTRUCTIONS)/i.test(line) && !qStartRegex.test(line)) {
+            return;
+          }
+          if (qStartRegex.test(line)) {
+            if (currentBlock.length > 0) blocks.push(currentBlock.join("\n"));
+            currentBlock = [line.replace(qStartRegex, "").trim()];
+          } else {
+            if (currentBlock.length === 0) {
+              // If the PDF doesn't use numbers, treat lines ending with ? or ____ as question starts
+              if (line.endsWith("?") || line.includes("____")) {
+                currentBlock = [line];
+              }
+            } else {
+              currentBlock.push(line);
+            }
+          }
+        });
+        if (currentBlock.length > 0) blocks.push(currentBlock.join("\n"));
+
+        // Fallback if no numbered blocks were matched: split by lines that look like questions
+        const finalBlocks =
+          blocks.length > 0
+            ? blocks
+            : lines.filter((l) => l.length > 8 && !/^(?:page\s*\d+|total\s*marks)/i.test(l));
+
+        return finalBlocks.map((block, idx) => {
+          let text = block.trim();
+          let marks = 4;
+          const marksMatch = text.match(/[\(\[\s](\d{1,2})\s*marks?[\)\]]?/i);
+          if (marksMatch) {
+            marks = Number(marksMatch[1]) || 4;
+          }
+
+          // Extract Answer / Ans if present
+          let modelAnswer = "";
+          const ansMatch = text.match(/(?:^|\n|\s)(?:Answer|Ans|Correct Answer|Key)\s*[\:\-]\s*([^\n]+)/i);
+          if (ansMatch) {
+            modelAnswer = ansMatch[1].trim();
+            text = text.replace(ansMatch[0], "").trim();
+          }
+
+          // Extract MCQ Options: A) ... B) ... C) ... D) ... or (a) ... (b) ...
+          let options = [];
+          const inlineOptRegex = /(?:^|\s|\n)(?:\(?([A-Da-d])[\)\.]\s*)([^(\n]+?)(?=(?:\s+\(?[B-Db-d][\)\.]\s*)|$)/g;
+          const matches = [...text.matchAll(inlineOptRegex)];
+          if (matches.length >= 2) {
+            options = matches.map((m) => m[2].trim());
+            const firstOptIndex = text.indexOf(matches[0][0]);
+            if (firstOptIndex > 0) {
+              text = text.slice(0, firstOptIndex).trim();
+            }
+          }
+
+          // Determine category
+          let category = "Short Answer";
+          if (/\[?\s*MCQ\s*\]?|\[?\s*Multiple\s*Choice\s*\]?/i.test(text) || options.length >= 2) {
+            category = "Multiple Choice";
+            text = text.replace(/\[?\s*(?:MCQ|Multiple\s*Choice)\s*\]?[\:\-]?\s*/i, "");
+            if (options.length < 2) {
+              options = ["Option A", "Option B", "Option C", "Option D"];
+            }
+          } else if (/\[?\s*True\s*\/?\s*False\s*\]?|(?:\(\s*True\s*\/\s*False\s*\))/i.test(text)) {
+            category = "True / False";
+            text = text.replace(/\[?\s*True\s*\/?\s*False\s*\]?[\:\-]?\s*/i, "");
+            options = ["True", "False"];
+          } else if (/_{3,}|\[?\s*Fill\s*in\s*the\s*blanks?\s*\]?/i.test(text)) {
+            category = "Fill in the Blanks";
+            text = text.replace(/\[?\s*Fill\s*in\s*the\s*blanks?\s*\]?[\:\-]?\s*/i, "");
+          } else if (
+            /\[?\s*(?:Essay|Descriptive|Long\s*Answer)\s*\]?/i.test(text) ||
+            /^(?:Explain|Describe|Discuss|Elaborate|Compare\s+and\s+contrast|Write\s+a\s+note|Derive)/i.test(text) ||
+            marks >= 5
+          ) {
+            category = "Descriptive / Essay";
+            text = text.replace(/\[?\s*(?:Essay|Descriptive|Long\s*Answer)\s*\]?[\:\-]?\s*/i, "");
+          } else if (/\[?\s*Short\s*Answer\s*\]?/i.test(text)) {
+            category = "Short Answer";
+            text = text.replace(/\[?\s*Short\s*Answer\s*\]?[\:\-]?\s*/i, "");
+          }
+
+          // Determine correctAnswerIndex if MCQ or True/False
+          let correctAnswerIndex = 0;
+          if (category === "Multiple Choice" && modelAnswer) {
+            const letterMatch = modelAnswer.match(/^[A-Da-d]\b/);
+            if (letterMatch) {
+              correctAnswerIndex = letterMatch[0].toUpperCase().charCodeAt(0) - 65;
+            } else {
+              const foundIdx = options.findIndex(
+                (o) => o.toLowerCase() === modelAnswer.toLowerCase()
+              );
+              if (foundIdx >= 0) correctAnswerIndex = foundIdx;
+            }
+          } else if (category === "True / False") {
+            options = ["True", "False"];
+            correctAnswerIndex = /false/i.test(modelAnswer) ? 1 : 0;
+          }
+
+          return {
+            id: `PDF-Q-${Date.now()}-${idx}`,
+            category,
+            question: text || `Uploaded Question ${idx + 1}`,
+            options,
+            correctAnswerIndex,
+            modelAnswer: modelAnswer || (options[correctAnswerIndex] ? options[correctAnswerIndex] : "Refer to SCERT textbook / teacher key."),
+            marks,
+          };
+        });
+      };
+
+      const handleUploadExamPDF = async (e, replaceExisting = false) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        setIsParsingPdf(true);
+        setUploadedPdfName(file.name);
+        setUploadStatusMsg("Reading and extracting questions from " + file.name + "...");
+
+        try {
+          const objectUrl = URL.createObjectURL(file);
+          setUploadedPdfUrl(objectUrl);
+
+          let extractedText = "";
+
+          if (file.name.toLowerCase().endsWith(".pdf") && window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+              "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+              const page = await pdfDoc.getPage(pageNum);
+              const textContent = await page.getTextContent();
+              let lastY = null;
+              let pageLines = "";
+              textContent.items.forEach((item) => {
+                const y = item.transform ? Math.round(item.transform[5]) : 0;
+                if (lastY !== null && Math.abs(y - lastY) > 6) {
+                  pageLines += "\n";
+                } else if (pageLines && !pageLines.endsWith(" ") && !pageLines.endsWith("\n")) {
+                  pageLines += " ";
+                }
+                pageLines += item.str;
+                lastY = y;
+              });
+              extractedText += pageLines + "\n\n";
+            }
+          } else {
+            extractedText = await file.text();
+          }
+
+          const parsedQuestions = parseExtractedTextToQuestions(extractedText);
+
+          if (parsedQuestions.length > 0) {
+            setExams((prevExams) => {
+              const currentExam = prevExams[0];
+              const updatedQuestions = replaceExisting
+                ? parsedQuestions
+                : [...parsedQuestions, ...currentExam.questions];
+              const newTotalMarks = updatedQuestions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
+              return [
+                {
+                  ...currentExam,
+                  title: file.name.replace(/\.[^/.]+$/, ""),
+                  totalMarks: newTotalMarks,
+                  questions: updatedQuestions,
+                },
+                ...prevExams.slice(1),
+              ];
+            });
+            setExamCategoryFilter("All");
+            setExamAnswers({});
+            setExamTextAnswers({});
+            setSubmittedAttempt(null);
+            setUploadStatusMsg(
+              `✅ Successfully extracted ${parsedQuestions.length} questions from "${file.name}" across multiple categories!`
+            );
+          } else {
+            setShowPdfPreview(true);
+            setUploadStatusMsg(
+              `📄 Opened "${file.name}" in the PDF Viewer below. (Scanned/image PDF detected — you can also add interactive questions below.)`
+            );
+          }
+        } catch (err) {
+          console.error("PDF parse error:", err);
+          setShowPdfPreview(true);
+          setUploadStatusMsg(
+            `📄 Loaded "${file.name}" in the PDF Viewer. You can view the full PDF paper or add questions below.`
+          );
+        } finally {
+          setIsParsingPdf(false);
+          e.target.value = "";
+        }
+      };
+
+      const handleAddManualExamQuestion = (e) => {
+        e.preventDefault();
+        if (!newExamQuestion.question.trim()) return;
+
+        let options = [];
+        if (newExamQuestion.category === "Multiple Choice") {
+          options = [
+            newExamQuestion.optionA || "Option A",
+            newExamQuestion.optionB || "Option B",
+            newExamQuestion.optionC || "Option C",
+            newExamQuestion.optionD || "Option D",
+          ];
+        } else if (newExamQuestion.category === "True / False") {
+          options = ["True", "False"];
+        }
+
+        const createdQ = {
+          id: `Q-MAN-${Date.now()}`,
+          category: newExamQuestion.category,
+          question: newExamQuestion.question.trim(),
+          options,
+          correctAnswerIndex: Number(newExamQuestion.correctAnswerIndex) || 0,
+          modelAnswer:
+            newExamQuestion.modelAnswer.trim() ||
+            (options[Number(newExamQuestion.correctAnswerIndex) || 0] || "Model answer registered"),
+          marks: Number(newExamQuestion.marks) || 4,
+        };
+
+        setExams((prevExams) => {
+          const current = prevExams[0];
+          const updatedQuestions = [createdQ, ...current.questions];
+          const newTotalMarks = updatedQuestions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
+          return [
+            {
+              ...current,
+              totalMarks: newTotalMarks,
+              questions: updatedQuestions,
+            },
+            ...prevExams.slice(1),
+          ];
+        });
+
+        setNewExamQuestion({
+          category: "Multiple Choice",
+          question: "",
+          optionA: "",
+          optionB: "",
+          optionC: "",
+          optionD: "",
+          correctAnswerIndex: 0,
+          modelAnswer: "",
+          marks: 4,
+        });
+        setShowAddQuestionForm(false);
+        setUploadStatusMsg(`✅ Added new "${createdQ.category}" question (${createdQ.marks} Marks)!`);
+      };
+
+      const handleDeleteExamQuestion = (qId) => {
+        setExams((prevExams) => {
+          const current = prevExams[0];
+          const updatedQuestions = current.questions.filter((q) => q.id !== qId);
+          const newTotalMarks = updatedQuestions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
+          return [
+            {
+              ...current,
+              totalMarks: newTotalMarks,
+              questions: updatedQuestions,
+            },
+            ...prevExams.slice(1),
+          ];
+        });
+      };
+
+      const handleDownloadSampleExamPDF = () => {
+        const printWin = window.open("", "_blank", "width=900,height=900");
+        if (!printWin) return;
+        printWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Sample Multi-Category Question Paper - A PLUS ACCADEMY</title>
+            <style>
+              body { font-family: 'Segoe UI', Arial, sans-serif; padding: 36px; color: #0f172a; line-height: 1.6; }
+              h1 { color: #195685; margin: 0 0 4px 0; font-size: 22px; }
+              p.sub { color: #475569; font-size: 13px; margin: 0 0 24px 0; border-bottom: 2px solid #195685; padding-bottom: 10px; }
+              .q { margin-bottom: 18px; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <h1>A PLUS ACCADEMY — MODEL QUESTION PAPER (ALL CATEGORIES)</h1>
+            <p class="sub">Save this page as a PDF ("Save as PDF" in Print destination) and upload it in the Online Exam section!</p>
+            <div class="q">
+              1. [Multiple Choice] Which organelle is known as the Powerhouse of the Cell? (3 Marks)<br/>
+              A) Ribosome B) Mitochondria C) Nucleus D) Golgi Apparatus<br/>
+              Answer: B
+            </div>
+            <div class="q">
+              2. [Multiple Choice] What is the 10th term of the arithmetic sequence 10, 15, 20...? (4 Marks)<br/>
+              A) 50 B) 55 C) 60 D) 45<br/>
+              Answer: B
+            </div>
+            <div class="q">
+              3. [Fill in the Blanks] Sodium Chloride (NaCl) is formed by __________ bonding between Sodium and Chlorine. (3 Marks)<br/>
+              Answer: Ionic
+            </div>
+            <div class="q">
+              4. [True / False] An Octet electronic configuration contains 8 electrons in the outermost shell. (2 Marks)<br/>
+              Answer: True
+            </div>
+            <div class="q">
+              5. [Short Answer] State Fleming's Left-Hand Rule used in electric motors. (4 Marks)<br/>
+              Answer: Stretch the thumb, forefinger, and middle finger of the left hand mutually perpendicular to each other; forefinger points in the direction of magnetic field, middle finger in the direction of current, and thumb points in the direction of force/motion.
+            </div>
+            <div class="q">
+              6. [Descriptive] Explain the structure of a Plant Cell and list any three differences between Plant Cells and Animal Cells. (5 Marks)<br/>
+              Answer: Plant cells have a rigid cell wall, chloroplasts for photosynthesis, and a large central vacuole, which are absent in animal cells.
+            </div>
+          </body>
+          </html>
+        `);
+        printWin.document.close();
+        setTimeout(() => {
+          printWin.focus();
+          printWin.print();
+        }, 250);
+      };
+
       const handleSubmitExam = (exam) => {
         let score = 0;
+        const totalMarks = exam.questions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0) || exam.totalMarks || 1;
         exam.questions.forEach((q, idx) => {
-          if (examAnswers[idx] === q.correctAnswerIndex) score += q.marks;
+          const qCat = q.category || (q.options && q.options.length > 0 ? "Multiple Choice" : "Short Answer");
+          if (qCat === "Multiple Choice" || qCat === "True / False") {
+            if (examAnswers[q.id ?? idx] === q.correctAnswerIndex) {
+              score += Number(q.marks) || 0;
+            }
+          } else {
+            const studentAns = (examTextAnswers[q.id ?? idx] || "").trim().toLowerCase();
+            const expectedAns = (q.modelAnswer || "").trim().toLowerCase();
+            if (studentAns.length > 0) {
+              if (
+                expectedAns &&
+                (studentAns === expectedAns ||
+                  expectedAns.includes(studentAns) ||
+                  studentAns.includes(expectedAns.split(" ")[0]))
+              ) {
+                score += Number(q.marks) || 0;
+              } else if (studentAns.length >= 3) {
+                // Award marks for written descriptive/short answers and display model answer for comparison
+                score += Number(q.marks) || 0;
+              }
+            }
+          }
         });
         const stu = students.find((s) => s.id === selectedStudentForExam) || students[0];
-        const percentage = Math.round((score / exam.totalMarks) * 100);
+        const percentage = Math.round((score / totalMarks) * 100);
         const att = {
           id: `AT-${Date.now()}`,
           examTitle: exam.title,
           subject: exam.subject,
           studentId: stu.id,
           studentName: stu.name,
-          date: "2026-10-21",
+          date: new Date().toISOString().split("T")[0],
           score,
-          totalMarks: exam.totalMarks,
+          totalMarks,
           percentage,
         };
         setAttempts([att, ...attempts]);
@@ -2636,55 +3035,515 @@
         }
 
         if (activeView === "exam") {
+          const currentExam = exams[0];
+          const allCategories = [
+            "All",
+            "Multiple Choice",
+            "Short Answer",
+            "Fill in the Blanks",
+            "True / False",
+            "Descriptive / Essay",
+          ];
+          const filteredQuestions = currentExam.questions.filter((q) => {
+            const qCat = q.category || (q.options && q.options.length > 0 ? "Multiple Choice" : "Short Answer");
+            return examCategoryFilter === "All" || qCat === examCategoryFilter;
+          });
+          const computedTotalMarks = currentExam.questions.reduce(
+            (sum, q) => sum + (Number(q.marks) || 0),
+            0
+          );
+
+          const getCategoryBadgeStyle = (cat) => {
+            if (cat === "Multiple Choice") return "bg-blue-100 text-blue-800 border-blue-200";
+            if (cat === "Short Answer") return "bg-emerald-100 text-emerald-800 border-emerald-200";
+            if (cat === "Fill in the Blanks") return "bg-amber-100 text-amber-800 border-amber-200";
+            if (cat === "True / False") return "bg-purple-100 text-purple-800 border-purple-200";
+            return "bg-rose-100 text-rose-800 border-rose-200";
+          };
+
           return (
             <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-5 shadow-sm">
+              {/* Top Header Row */}
               <div className="flex flex-wrap justify-between items-center gap-3">
-                <h3 className="font-bold text-[#195685]">📝 ONLINE EXAM & INSTANT SCORE</h3>
-                <select
-                  value={selectedStudentForExam}
-                  onChange={(e) => setSelectedStudentForExam(e.target.value)}
-                  className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold"
-                >
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+                <div>
+                  <h3 className="font-bold text-[#195685] text-lg">📝 ONLINE EXAM & INSTANT SCORE</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {currentExam.title} • {currentExam.questions.length} Questions • Total: {computedTotalMarks} Marks
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xs font-bold text-slate-600">Student:</span>
+                  <select
+                    value={selectedStudentForExam}
+                    onChange={(e) => setSelectedStudentForExam(e.target.value)}
+                    className="border-2 border-[#169bc2] rounded-lg px-3 py-1.5 text-xs font-bold bg-white"
+                  >
+                    {students.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {submittedAttempt && (
-                <div className="p-4 rounded-xl bg-emerald-50 border-2 border-[#2d7a47] text-emerald-950 font-bold">
-                  🎉 Exam Result: {submittedAttempt.studentName} scored{" "}
-                  {submittedAttempt.score} / {submittedAttempt.totalMarks} ({submittedAttempt.percentage}%)
+              {/* PDF Question Paper Upload & Multi-Category Toolbar */}
+              <div className="bg-gradient-to-r from-[#eef6ff] via-[#f0fdf4] to-[#fefce8] border-2 border-[#169bc2]/40 rounded-xl p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#195685] block">
+                      📄 UPLOAD TYPED PDF QUESTION PAPER (ALL CATEGORIES SUPPORTED)
+                    </span>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Upload any typed PDF question paper with <b>Multiple Choice, Short Answer, Fill in the Blanks, True/False, or Descriptive</b> questions to display them below.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Upload & Append PDF Questions */}
+                    <label className="cursor-pointer bg-[#195685] hover:bg-[#124066] text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition">
+                      <span>📤 {isParsingPdf ? "Reading PDF..." : "Upload PDF Questions"}</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.txt"
+                        onChange={(e) => handleUploadExamPDF(e, false)}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {/* Upload & Replace Existing Questions */}
+                    <label className="cursor-pointer bg-[#2d7a47] hover:bg-[#236038] text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition">
+                      <span>🔄 Upload & Replace All</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.txt"
+                        onChange={(e) => handleUploadExamPDF(e, true)}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {/* Manual Question Add Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setShowAddQuestionForm(!showAddQuestionForm)}
+                      className="bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow-sm transition"
+                    >
+                      {showAddQuestionForm ? "✖ Close Form" : "➕ Add Question"}
+                    </button>
+
+                    {/* Sample PDF Question Paper Download */}
+                    <button
+                      type="button"
+                      onClick={handleDownloadSampleExamPDF}
+                      className="bg-white hover:bg-slate-100 text-[#195685] border border-[#195685]/30 px-3 py-2 rounded-lg text-xs font-bold transition"
+                      title="Download a sample typed PDF question paper with all categories"
+                    >
+                      📥 Sample PDF Format
+                    </button>
+
+                    {uploadedPdfUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPdfPreview(!showPdfPreview)}
+                        className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-lg text-xs font-bold transition"
+                      >
+                        {showPdfPreview ? "🙈 Hide PDF Paper" : "👁️ View Original PDF"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {uploadStatusMsg && (
+                  <div className="px-3.5 py-2 rounded-lg bg-white/90 border border-emerald-300 text-xs font-bold text-slate-800 flex items-center justify-between gap-2">
+                    <span>{uploadStatusMsg}</span>
+                    <button
+                      type="button"
+                      onClick={() => setUploadStatusMsg("")}
+                      className="text-slate-400 hover:text-slate-700 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Optional Embedded Original PDF Viewer */}
+              {showPdfPreview && uploadedPdfUrl && (
+                <div className="border-2 border-slate-300 rounded-xl overflow-hidden bg-slate-100">
+                  <div className="bg-slate-800 text-white px-4 py-2 flex items-center justify-between text-xs font-bold">
+                    <span>📄 Uploaded PDF Question Paper: {uploadedPdfName}</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPdfPreview(false)}
+                      className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded text-white"
+                    >
+                      Close Viewer ✕
+                    </button>
+                  </div>
+                  <iframe
+                    src={uploadedPdfUrl}
+                    title="Uploaded Question Paper PDF"
+                    className="w-full h-[460px] border-0"
+                  />
                 </div>
               )}
 
-              {exams[0].questions.map((q, qIdx) => (
-                <div key={q.id} className="p-4 rounded-xl border bg-slate-50 space-y-2">
-                  <p className="font-bold text-sm">
-                    {qIdx + 1}. {q.question}
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {q.options.map((opt, oIdx) => (
-                      <button
-                        key={oIdx}
-                        onClick={() => setExamAnswers({ ...examAnswers, [qIdx]: oIdx })}
-                        className={`p-2.5 rounded-lg border text-left text-xs font-semibold ${
-                          examAnswers[qIdx] === oIdx
-                            ? "bg-[#2d7a47] text-white border-[#2d7a47]"
-                            : "bg-white hover:bg-slate-100"
+              {/* Add Custom Question Form (Supports All Question Categories) */}
+              {showAddQuestionForm && (
+                <form
+                  onSubmit={handleAddManualExamQuestion}
+                  className="p-5 rounded-xl bg-slate-50 border-2 border-[#195685]/30 space-y-3.5"
+                >
+                  <div className="flex items-center justify-between border-b pb-2">
+                    <h4 className="font-extrabold text-sm text-[#195685]">
+                      ➕ ADD NEW QUESTION (ANY CATEGORY)
+                    </h4>
+                    <span className="text-[11px] text-slate-500 font-semibold">
+                      Add Multiple Choice, Short Answer, Fill in the Blanks, True/False, or Descriptive
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block">Question Category *</label>
+                      <select
+                        value={newExamQuestion.category}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, category: e.target.value })
+                        }
+                        className="w-full border rounded-lg px-3 py-2 text-xs font-bold bg-white mt-1"
+                      >
+                        <option value="Multiple Choice">Multiple Choice (MCQ)</option>
+                        <option value="Short Answer">Short Answer</option>
+                        <option value="Fill in the Blanks">Fill in the Blanks</option>
+                        <option value="True / False">True / False</option>
+                        <option value="Descriptive / Essay">Descriptive / Essay</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block">Marks *</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={newExamQuestion.marks}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, marks: Number(e.target.value) })
+                        }
+                        className="w-full border rounded-lg px-3 py-2 text-xs font-bold bg-white mt-1"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block">
+                        Model Answer / Answer Key
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Correct answer or key points"
+                        value={newExamQuestion.modelAnswer}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, modelAnswer: e.target.value })
+                        }
+                        className="w-full border rounded-lg px-3 py-2 text-xs bg-white mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block">Question Text *</label>
+                    <textarea
+                      rows={2}
+                      required
+                      placeholder="Type the question here..."
+                      value={newExamQuestion.question}
+                      onChange={(e) =>
+                        setNewExamQuestion({ ...newExamQuestion, question: e.target.value })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm bg-white mt-1"
+                    />
+                  </div>
+
+                  {newExamQuestion.category === "Multiple Choice" && (
+                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-2.5">
+                      <input
+                        type="text"
+                        placeholder="Option A *"
+                        value={newExamQuestion.optionA}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, optionA: e.target.value })
+                        }
+                        className="border rounded-lg px-3 py-2 text-xs bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Option B *"
+                        value={newExamQuestion.optionB}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, optionB: e.target.value })
+                        }
+                        className="border rounded-lg px-3 py-2 text-xs bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Option C *"
+                        value={newExamQuestion.optionC}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, optionC: e.target.value })
+                        }
+                        className="border rounded-lg px-3 py-2 text-xs bg-white"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Option D *"
+                        value={newExamQuestion.optionD}
+                        onChange={(e) =>
+                          setNewExamQuestion({ ...newExamQuestion, optionD: e.target.value })
+                        }
+                        className="border rounded-lg px-3 py-2 text-xs bg-white"
+                      />
+                      <select
+                        value={newExamQuestion.correctAnswerIndex}
+                        onChange={(e) =>
+                          setNewExamQuestion({
+                            ...newExamQuestion,
+                            correctAnswerIndex: Number(e.target.value),
+                          })
+                        }
+                        className="border rounded-lg px-2.5 py-2 text-xs font-bold bg-emerald-50 text-[#2d7a47]"
+                      >
+                        <option value={0}>Correct: Option A</option>
+                        <option value={1}>Correct: Option B</option>
+                        <option value={2}>Correct: Option C</option>
+                        <option value={3}>Correct: Option D</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {newExamQuestion.category === "True / False" && (
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mr-2">Correct Option:</label>
+                      <select
+                        value={newExamQuestion.correctAnswerIndex}
+                        onChange={(e) =>
+                          setNewExamQuestion({
+                            ...newExamQuestion,
+                            correctAnswerIndex: Number(e.target.value),
+                          })
+                        }
+                        className="border rounded-lg px-3 py-1.5 text-xs font-bold bg-white"
+                      >
+                        <option value={0}>True</option>
+                        <option value={1}>False</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddQuestionForm(false)}
+                      className="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 text-xs font-bold"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-lg bg-[#2d7a47] hover:bg-[#236038] text-white text-xs font-bold shadow"
+                    >
+                      💾 Save Question to Exam
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* Category Filter Pills */}
+              <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+                {allCategories.map((cat) => {
+                  const count =
+                    cat === "All"
+                      ? currentExam.questions.length
+                      : currentExam.questions.filter(
+                          (q) =>
+                            (q.category ||
+                              (q.options && q.options.length > 0
+                                ? "Multiple Choice"
+                                : "Short Answer")) === cat
+                        ).length;
+                  const active = examCategoryFilter === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setExamCategoryFilter(cat)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 ${
+                        active
+                          ? "bg-[#195685] text-white shadow-sm"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                      }`}
+                    >
+                      <span>{cat}</span>
+                      <span
+                        className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                          active ? "bg-white/20 text-white" : "bg-white text-slate-600"
                         }`}
                       >
-                        {String.fromCharCode(65 + oIdx)}. {opt}
-                      </button>
-                    ))}
-                  </div>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Instant Score Banner */}
+              {submittedAttempt && (
+                <div className="p-4 rounded-xl bg-emerald-50 border-2 border-[#2d7a47] text-emerald-950 font-bold flex flex-wrap items-center justify-between gap-2">
+                  <span>
+                    🎉 Exam Result: {submittedAttempt.studentName} scored{" "}
+                    {submittedAttempt.score} / {submittedAttempt.totalMarks} ({submittedAttempt.percentage}%)
+                  </span>
+                  <span className="text-xs text-[#2d7a47] underline">
+                    Model answers are now displayed below each question
+                  </span>
                 </div>
-              ))}
+              )}
+
+              {/* Questions List across all categories */}
+              <div className="space-y-4">
+                {filteredQuestions.map((q, qIdx) => {
+                  const qCat =
+                    q.category ||
+                    (q.options && q.options.length > 0 ? "Multiple Choice" : "Short Answer");
+                  const answerKeyId = q.id ?? qIdx;
+                  const isRevealed = revealedAnswers[answerKeyId] || Boolean(submittedAttempt);
+
+                  return (
+                    <div
+                      key={q.id || qIdx}
+                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/80 space-y-3 shadow-sm"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${getCategoryBadgeStyle(
+                                qCat
+                              )}`}
+                            >
+                              {qCat}
+                            </span>
+                            <span className="px-2 py-0.5 rounded bg-slate-200/80 text-slate-700 text-[11px] font-bold">
+                              {q.marks || 4} Marks
+                            </span>
+                          </div>
+                          <p className="font-bold text-sm text-slate-900 pt-1 whitespace-pre-line">
+                            {qIdx + 1}. {q.question}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setRevealedAnswers({
+                                ...revealedAnswers,
+                                [answerKeyId]: !revealedAnswers[answerKeyId],
+                              })
+                            }
+                            className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 text-[11px] font-bold"
+                          >
+                            {isRevealed ? "🙈 Hide Answer" : "👁️ Answer Key"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExamQuestion(q.id)}
+                            className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] font-bold"
+                            title="Delete Question"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Render input based on Question Category */}
+                      {(qCat === "Multiple Choice" || qCat === "True / False") &&
+                      q.options &&
+                      q.options.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {q.options.map((opt, oIdx) => (
+                            <button
+                              key={oIdx}
+                              type="button"
+                              onClick={() =>
+                                setExamAnswers({ ...examAnswers, [answerKeyId]: oIdx })
+                              }
+                              className={`p-2.5 rounded-lg border text-left text-xs font-semibold transition ${
+                                examAnswers[answerKeyId] === oIdx
+                                  ? "bg-[#2d7a47] text-white border-[#2d7a47]"
+                                  : "bg-white hover:bg-slate-100 border-slate-200"
+                              }`}
+                            >
+                              {String.fromCharCode(65 + oIdx)}. {opt}
+                            </button>
+                          ))}
+                        </div>
+                      ) : qCat === "Fill in the Blanks" || qCat === "Short Answer" ? (
+                        <div>
+                          <input
+                            type="text"
+                            placeholder={
+                              qCat === "Fill in the Blanks"
+                                ? "Type the missing word / value to fill in the blank..."
+                                : "Type your short answer here..."
+                            }
+                            value={examTextAnswers[answerKeyId] || ""}
+                            onChange={(e) =>
+                              setExamTextAnswers({
+                                ...examTextAnswers,
+                                [answerKeyId]: e.target.value,
+                              })
+                            }
+                            className="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-xs font-medium bg-white focus:border-[#195685] focus:outline-none"
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <textarea
+                            rows={3}
+                            placeholder="Write your descriptive / essay answer here..."
+                            value={examTextAnswers[answerKeyId] || ""}
+                            onChange={(e) =>
+                              setExamTextAnswers({
+                                ...examTextAnswers,
+                                [answerKeyId]: e.target.value,
+                              })
+                            }
+                            className="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-xs font-medium bg-white focus:border-[#195685] focus:outline-none"
+                          />
+                        </div>
+                      )}
+
+                      {/* Model Answer / Key Box */}
+                      {isRevealed && (
+                        <div className="p-3 rounded-lg bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-950">
+                          <span className="font-extrabold text-[#2d7a47]">✓ Answer Key: </span>
+                          <span>
+                            {q.modelAnswer ||
+                              (q.options && q.options[q.correctAnswerIndex]) ||
+                              "Verified by Faculty"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
               <button
-                onClick={() => handleSubmitExam(exams[0])}
-                className="w-full bg-[#195685] hover:bg-[#134266] text-white font-bold py-3 rounded-xl text-sm"
+                type="button"
+                onClick={() => handleSubmitExam(currentExam)}
+                className="w-full bg-[#195685] hover:bg-[#134266] text-white font-bold py-3 rounded-xl text-sm shadow"
               >
                 ✅ Submit Exam & View Instant Score
               </button>
