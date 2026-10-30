@@ -62,7 +62,19 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useMemo } = React;
+    const { useState, useMemo, useEffect } = React;
+
+    const STORAGE_KEY_PREFIX = "aplus_accademy_v1_";
+    const loadSavedState = (key, fallback) => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_PREFIX + key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return fallback;
+    };
 
     /* ==================== PROFESSIONAL MULTI-TONE VECTOR ICONS ==================== */
     const AcademyLogoSVG = () => (
@@ -815,15 +827,77 @@
       const [activeView, setActiveView] = useState("dashboard");
       const [deviceMode, setDeviceMode] = useState("web"); // "web" | "classic_grid" | "mobile"
 
-      const [batches, setBatches] = useState(INITIAL_BATCHES);
-      const [students, setStudents] = useState(INITIAL_STUDENTS);
-      const [attendanceList, setAttendanceList] = useState(INITIAL_ATTENDANCE);
-      const [facultyChapters, setFacultyChapters] = useState(INITIAL_FACULTY_CHAPTERS);
-      const [exams, setExams] = useState(INITIAL_EXAMS);
-      const [attempts, setAttempts] = useState(INITIAL_ATTEMPTS);
-      const [liveClasses, setLiveClasses] = useState(INITIAL_LIVE_CLASSES);
-      const [questionBank, setQuestionBank] = useState(INITIAL_QUESTION_BANK);
-      const [accounts, setAccounts] = useState(INITIAL_ACCOUNTS);
+      const [batches, setBatches] = useState(() => loadSavedState("batches", INITIAL_BATCHES));
+      const [students, setStudents] = useState(() => loadSavedState("students", INITIAL_STUDENTS));
+      const [attendanceList, setAttendanceList] = useState(() => loadSavedState("attendance", INITIAL_ATTENDANCE));
+      const [facultyChapters, setFacultyChapters] = useState(() => loadSavedState("faculties", INITIAL_FACULTY_CHAPTERS));
+      const [exams, setExams] = useState(() => loadSavedState("exams", INITIAL_EXAMS));
+      const [attempts, setAttempts] = useState(() => loadSavedState("attempts", INITIAL_ATTEMPTS));
+      const [liveClasses, setLiveClasses] = useState(() => loadSavedState("liveClasses", INITIAL_LIVE_CLASSES));
+      const [questionBank, setQuestionBank] = useState(() => loadSavedState("questionBank", INITIAL_QUESTION_BANK));
+      const [accounts, setAccounts] = useState(() => loadSavedState("accounts", INITIAL_ACCOUNTS));
+
+      // Automatically persist all data changes in browser storage (100% Free, works offline & on GitHub Pages)
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY_PREFIX + "batches", JSON.stringify(batches));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "students", JSON.stringify(students));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "attendance", JSON.stringify(attendanceList));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "faculties", JSON.stringify(facultyChapters));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "exams", JSON.stringify(exams));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "attempts", JSON.stringify(attempts));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "liveClasses", JSON.stringify(liveClasses));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "questionBank", JSON.stringify(questionBank));
+          localStorage.setItem(STORAGE_KEY_PREFIX + "accounts", JSON.stringify(accounts));
+        } catch (e) {}
+      }, [batches, students, attendanceList, facultyChapters, exams, attempts, liveClasses, questionBank, accounts]);
+
+      const handleExportDatabaseBackup = () => {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          batches,
+          students,
+          attendanceList,
+          facultyChapters,
+          exams,
+          attempts,
+          liveClasses,
+          questionBank,
+          accounts,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `APlus_Accademy_Backup_${new Date().toISOString().split("T")[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      const handleImportDatabaseBackup = async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (Array.isArray(data.batches)) setBatches(data.batches);
+          if (Array.isArray(data.students)) setStudents(data.students);
+          if (Array.isArray(data.attendanceList)) setAttendanceList(data.attendanceList);
+          if (Array.isArray(data.facultyChapters)) setFacultyChapters(data.facultyChapters);
+          if (Array.isArray(data.exams)) setExams(data.exams);
+          if (Array.isArray(data.attempts)) setAttempts(data.attempts);
+          if (Array.isArray(data.liveClasses)) setLiveClasses(data.liveClasses);
+          if (Array.isArray(data.questionBank)) setQuestionBank(data.questionBank);
+          if (Array.isArray(data.accounts)) setAccounts(data.accounts);
+          alert("✅ Backup data restored successfully!");
+        } catch (err) {
+          alert("Invalid backup JSON file.");
+        } finally {
+          e.target.value = "";
+        }
+      };
 
       // Student Form State
       const [editingStudentId, setEditingStudentId] = useState(null);
@@ -4876,7 +4950,33 @@
                       {currentSectionTitle}
                     </h2>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-[#2d7a47] text-[11px] font-extrabold border border-emerald-200">
+                        ✓ Auto-Saved (100% Free)
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={handleExportDatabaseBackup}
+                        className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-[#2d7a47] text-xs font-bold border border-emerald-200 transition"
+                        title="Download Full Data Backup (Free)"
+                      >
+                        💾 Backup
+                      </button>
+
+                      <label
+                        className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200 transition cursor-pointer"
+                        title="Restore Data Backup File"
+                      >
+                        <span>📂 Restore</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleImportDatabaseBackup}
+                          className="hidden"
+                        />
+                      </label>
+
                       <button
                         onClick={handleDownloadAllStudentsPDF}
                         className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#eef6ff] hover:bg-[#dcebff] text-[#1967d2] text-xs font-bold border border-[#d0e4ff] transition"
