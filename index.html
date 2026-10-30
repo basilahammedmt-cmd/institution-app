@@ -1761,6 +1761,40 @@
         });
       };
 
+      const handleDeleteQuestionPaper = () => {
+        if (uploadedPdfUrl) {
+          try {
+            URL.revokeObjectURL(uploadedPdfUrl);
+          } catch (e) {}
+        }
+        setUploadedPdfUrl("");
+        setUploadedPdfName("");
+        setShowPdfPreview(false);
+        setExamAnswers({});
+        setExamTextAnswers({});
+        setSubmittedAttempt(null);
+        setRevealedAnswers({});
+        setExams((prevExams) => [
+          {
+            ...prevExams[0],
+            title: "No Question Paper Loaded (Upload a PDF or Add Questions)",
+            totalMarks: 0,
+            questions: [],
+          },
+          ...prevExams.slice(1),
+        ]);
+        setUploadStatusMsg("🗑️ Uploaded Question Paper and all questions have been deleted.");
+      };
+
+      const handleRestoreDefaultExamPaper = () => {
+        setExams(INITIAL_EXAMS);
+        setExamCategoryFilter("All");
+        setExamAnswers({});
+        setExamTextAnswers({});
+        setSubmittedAttempt(null);
+        setUploadStatusMsg("↩️ Restored default multi-category model question paper.");
+      };
+
       const handleDownloadSampleExamPDF = () => {
         const printWin = window.open("", "_blank", "width=900,height=900");
         if (!printWin) return;
@@ -3122,6 +3156,16 @@
                       />
                     </label>
 
+                    {/* Delete Uploaded Question Paper Button */}
+                    <button
+                      type="button"
+                      onClick={handleDeleteQuestionPaper}
+                      className="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition"
+                      title="Delete the uploaded question paper and clear all questions"
+                    >
+                      🗑️ Delete Question Paper
+                    </button>
+
                     {/* Manual Question Add Toggle */}
                     <button
                       type="button"
@@ -3145,7 +3189,7 @@
                       <button
                         type="button"
                         onClick={() => setShowPdfPreview(!showPdfPreview)}
-                        className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-lg text-xs font-bold transition"
+                        className="bg-sky-50 hover:bg-sky-100 text-[#195685] border border-sky-200 px-3 py-2 rounded-lg text-xs font-bold transition"
                       >
                         {showPdfPreview ? "🙈 Hide PDF Paper" : "👁️ View Original PDF"}
                       </button>
@@ -3172,13 +3216,22 @@
                 <div className="border-2 border-slate-300 rounded-xl overflow-hidden bg-slate-100">
                   <div className="bg-slate-800 text-white px-4 py-2 flex items-center justify-between text-xs font-bold">
                     <span>📄 Uploaded PDF Question Paper: {uploadedPdfName}</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowPdfPreview(false)}
-                      className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded text-white"
-                    >
-                      Close Viewer ✕
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDeleteQuestionPaper}
+                        className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 rounded text-white"
+                      >
+                        🗑️ Delete PDF Paper
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowPdfPreview(false)}
+                        className="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded text-white"
+                      >
+                        Close Viewer ✕
+                      </button>
+                    </div>
                   </div>
                   <iframe
                     src={uploadedPdfUrl}
@@ -3411,6 +3464,25 @@
 
               {/* Questions List across all categories */}
               <div className="space-y-4">
+                {filteredQuestions.length === 0 && (
+                  <div className="p-8 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-center space-y-3">
+                    <p className="text-sm font-bold text-slate-700">
+                      No questions currently in this question paper.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Upload a new typed PDF question paper above, add questions manually, or restore the default sample paper.
+                    </p>
+                    <div className="flex justify-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleRestoreDefaultExamPaper}
+                        className="px-4 py-2 rounded-lg bg-[#195685] hover:bg-[#124066] text-white text-xs font-bold shadow-sm"
+                      >
+                        ↩️ Restore Default Model Paper
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {filteredQuestions.map((q, qIdx) => {
                   const qCat =
                     q.category ||
